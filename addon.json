@@ -1,0 +1,4 @@
+{
+    "package-name": "djangocms-internalsearch",
+    "installed-apps": ["djangocms_internalsearch", "adminsortable2"]
+}
