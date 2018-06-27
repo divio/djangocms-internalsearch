@@ -5,7 +5,8 @@ from django.utils.encoding import python_2_unicode_compatible
 @python_2_unicode_compatible
 class InternalSearch(models.Model):
     query = models.CharField(
-        default='*',
+        default='',
+        blank=False,
         max_length=255
         )
 
