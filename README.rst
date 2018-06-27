@@ -1,6 +1,6 @@
-*********************
+*************************
 django CMS Internalsearch
-*********************
+*************************
 
 ============
 Installation
@@ -9,7 +9,7 @@ Installation
 Requirements
 ============
 
-django CMS Internalsearch requires that you have a django CMS 3.4.3 (or higher) project already running and set up.
+django CMS Internalsearch requires that you have a django CMS 3.5.0 (or higher) project already running and set up.
 
 
 To install
@@ -17,7 +17,7 @@ To install
 
 Run::
 
-    pip install git+git://github.com/divio/djangocms-internalsearch@develop#egg=djangocms-internalsearch
+    pip install git+git://github.com/divio/djangocms-internalsearch@master#egg=djangocms-internalsearch
 
 Add the following to your project's ``INSTALLED_APPS``:
 
