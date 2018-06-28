@@ -6,6 +6,6 @@ from cms.toolbar_base import CMSToolbar
 @toolbar_pool.register
 class InternalSearchToolbar(CMSToolbar):
 
+    #TODO: make url dynamic
     def populate(self):
-        #TODO: make url dynamic
         menu = self.toolbar.add_button('Internal search', '/admin/djangocms_internalsearch')
