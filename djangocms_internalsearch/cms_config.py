@@ -12,7 +12,7 @@ class InternalSearchCMSExtension(CMSAppExtension):
         """
         get activated internalsearch models
         """
-        app_name = cms_config.app_config.name
+        app_name = cms_config.app_config.label
 
         if hasattr(cms_config, 'internalsearch_models'):
             app_models = getattr(cms_config, 'internalsearch_models')
