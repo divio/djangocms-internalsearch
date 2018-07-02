@@ -16,8 +16,13 @@ class InternalSearchCMSExtension(CMSAppExtension):
 
         if hasattr(cms_config, 'internalsearch_models'):
             app_models = getattr(cms_config, 'internalsearch_models')
-            # import pdb; pdb.set_trace()
-            self._activate_signal(app_name, app_models)
+            if isinstance(app_models, (list, tuple)):
+                self._activate_signal(app_name, app_models)
+            else:
+                raise ImproperlyConfigured(
+                    "internalsearch_models must be define in cms_config.py"
+                )
+
         else:
             raise ImproperlyConfigured(
                 "internalsearch_models must be define in cms_config.py"

@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 
 import djangocms_internalsearch
-from djangocms_internalsearch.test_utils import app_with_cms_config
+from djangocms_internalsearch.test_utils import app_with_search_cms_config
 
 
 INSTALL_REQUIREMENTS = [
