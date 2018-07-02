@@ -16,6 +16,7 @@ class InternalSearchCMSExtension(CMSAppExtension):
 
         if hasattr(cms_config, 'internalsearch_models'):
             app_models = getattr(cms_config, 'internalsearch_models')
+            # import pdb; pdb.set_trace()
             self._activate_signal(app_name, app_models)
         else:
             raise ImproperlyConfigured(
@@ -31,7 +32,8 @@ class InternalSearchCMSExtension(CMSAppExtension):
 
             @receiver(post_save, sender=model)
             def create_data(model, instance, created, **kwargs):
-                # TODO: data massage and create/update object in elastic search via haystack
+                # TODO: data massage and create/update object in elastic search
+                #       via haystack
                 pass
 
             @receiver(post_delete, sender=model)
