@@ -1,1 +1,0 @@
-default_app_config = 'djangocms_internalsearch.test_utils.app_with_search_missing_config.apps.CMSConfigMissingConfig'

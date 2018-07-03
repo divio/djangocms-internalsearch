@@ -5,10 +5,12 @@ from django.core.exceptions import ImproperlyConfigured
 
 from cms.app_base import CMSAppExtension
 
+from .signals import create_data, delete_data
+
 
 class InternalSearchCMSExtension(CMSAppExtension):
 
-    def get_configure_models(self, cms_config):
+    def get_models_from_config(self, cms_config):
         """
         Method to fetch configure models from app
         """
@@ -18,35 +20,25 @@ class InternalSearchCMSExtension(CMSAppExtension):
                 return app_models
             else:
                 raise ImproperlyConfigured(
-                    "internalsearch_models must be list or tuple object")
+                    "internalsearch_models must be a list or tuple object")
 
         else:
             raise ImproperlyConfigured(
-                "internalsearch_models must be define in cms_config.py")
+                "internalsearch_models must be defined in cms_config.py")
 
     def configure_app(self, cms_config):
         """
-        Activate internalsearch models
+        Register model classes defined in config for internal search
         """
         app_name = cms_config.app_config.label
-        app_models = self.get_configure_models(cms_config)
-        if app_name and app_models:
-            self._activate_signal(app_name, app_models)
+        app_models = self.get_models_from_config(cms_config)
+        self._register_models(app_name, app_models)
 
-    def _activate_signal(self, app_name, app_models):
+    def _register_models(self, app_name, app_models):
         """
-        Factory method to generate signal receiver function for each model
+        Register models with haystack
         """
         for model in app_models:
             model = apps.get_model(app_name, model)
-
-            @receiver(post_save, sender=model)
-            def create_data(model, instance, created, **kwargs):
-                # TODO: data massage and create/update object in elastic search
-                #       via haystack
-                pass
-
-            @receiver(post_delete, sender=model)
-            def delete_data(model, instance, created, **kwargs):
-                # TODO: delete the object from es
-                pass
+            post_save.connect(create_data, sender=model)
+            post_delete.connect(delete_data, sender=model)
