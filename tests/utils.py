@@ -1,4 +1,6 @@
+from django.contrib.auth.models import User
 from django.test import TestCase
+
 from cms.api import create_page
 
 
@@ -11,7 +13,6 @@ class BaseTestCase(TestCase):
         # create users, groups and roles
         cls.user = User.objects.create_superuser(
             username='test', email='test@test.com', password='test',)
-        cls.role1 = Role.objects.create(name='Role 1', user=cls.user,)
 
 
 class BaseViewTestCase(BaseTestCase):
