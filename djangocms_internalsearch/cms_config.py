@@ -20,7 +20,7 @@ class InternalSearchCMSExtension(CMSAppExtension):
                 self._activate_signal(app_name, app_models)
             else:
                 raise ImproperlyConfigured(
-                    "internalsearch_models must be define in cms_config.py"
+                    "internalsearch_models must be list or tuple object"
                 )
 
         else:

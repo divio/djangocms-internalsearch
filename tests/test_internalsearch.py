@@ -10,7 +10,7 @@ from django.apps import apps, AppConfig
 
 
 class CMSConfigUnitTestCase(CMSTestCase):
-    """unit testing for missing cms_config flag
+    """Unit testing for missing cms_config flag
     should raise improperly configured exception """
 
     def test_missing_cms_config_flag(self):
