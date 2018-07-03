@@ -1,4 +1,5 @@
 from mock import Mock, MagicMock
+from mock import patch
 
 from django.core.exceptions import ImproperlyConfigured
 from django.test import override_settings
@@ -41,31 +42,37 @@ class CMSConfigUnitTestCase(CMSTestCase):
             extensions.get_models_from_config(cms_config),
             ['TestModel'])
 
+    def test_invalid__cms_config_parameter(self):
+        """
+        improperly cms config flag case
+        """
+        extensions = InternalSearchCMSExtension()
+
+        cms_config = Mock(
+            djangocms_internalsearch_enabled=True,
+            internalsearch_models='TestModel',
+            app_config=Mock(label='blah_cms_config'))
+
+        with self.assertRaises(ImproperlyConfigured):
+            extensions.configure_app(cms_config)
+
 
 class CMSConfigIntegrationTestCase(CMSTestCase):
     """
-    Integration test with another app
+    Integration test with two apps
     """
-    post_save.connect = MagicMock(name='create_data')
-    post_delete.connect = MagicMock(name='delete_data')
+    def setUp(self):
+        app_registration.get_cms_extension_apps.cache_clear()
+        app_registration.get_cms_config_apps.cache_clear()
 
     @override_settings(INSTALLED_APPS=[
         'djangocms_internalsearch',
         'djangocms_internalsearch.test_utils.app_with_search_cms_config',
         'djangocms_internalsearch.test_utils.another_app_with_search_cms_config',
     ])
-    def test_cms_config(self):
+    @patch.object(post_save, 'connect')
+    @patch.object(post_delete, 'connect')
+    def test_integration_with_other_apps(self, mock_post_delete, mock_post_save):
         setup_cms_apps()
-        extensions = InternalSearchCMSExtension()
-        app1 = apps.get_app_config('app_with_search_cms_config')
-        app2 = apps.get_app_config('another_app_with_search_cms_config')
-
-        self.assertTrue(hasattr(app1.cms_config, 'internalsearch_models'))
-        extensions._register_models(app1.label, app1.cms_config.internalsearch_models)
-
-        self.assertTrue(hasattr(app2.cms_config, 'internalsearch_models'))
-        extensions._register_models(app2.label, app2.cms_config.internalsearch_models)
-
-        self.assertEqual(len(post_save.connect.mock_calls), 4)
-        self.assertEqual(len(post_delete.connect.mock_calls), 4)
-    
+        self.assertEqual(mock_post_delete.call_count, 4)
+        self.assertEqual(mock_post_save.call_count, 4)
