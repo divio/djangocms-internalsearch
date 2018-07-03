@@ -1,9 +1,6 @@
-from mock import Mock, MagicMock
-from mock import patch
-
+from mock import patch, Mock
 from django.core.exceptions import ImproperlyConfigured
 from django.test import override_settings
-from django.apps import apps
 from django.db.models.signals import post_save, post_delete
 
 from djangocms_internalsearch.cms_config import InternalSearchCMSExtension
