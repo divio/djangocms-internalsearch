@@ -28,7 +28,7 @@ class InternalSearchCMSExtension(CMSAppExtension):
 
     def configure_app(self, cms_config):
         """
-        Activated internalsearch models
+        Activate internalsearch models
         """
         app_name = cms_config.app_config.label
         app_models = self.get_configure_models(cms_config)
