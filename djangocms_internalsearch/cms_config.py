@@ -8,19 +8,17 @@ from cms.app_base import CMSAppExtension
 
 class InternalSearchCMSExtension(CMSAppExtension):
 
-    def configure_app(self, cms_config):
+    def get_configure_models(self, cms_config):
         """
-        get activated internalsearch models
+        Method to fetch configure models from app
         """
-        app_name = cms_config.app_config.label
-
         if hasattr(cms_config, 'internalsearch_models'):
             app_models = getattr(cms_config, 'internalsearch_models')
             if isinstance(app_models, (list, tuple)):
-                self._activate_signal(app_name, app_models)
+                return app_models
             else:
                 raise ImproperlyConfigured(
-                    "internalsearch_models must be list or tuple object"
+                    "internalsearch_models must be list or tuple objecgit pt"
                 )
 
         else:
@@ -28,9 +26,18 @@ class InternalSearchCMSExtension(CMSAppExtension):
                 "internalsearch_models must be define in cms_config.py"
             )
 
+    def configure_app(self, cms_config):
+        """
+        Activated internalsearch models
+        """
+        app_name = cms_config.app_config.label
+        app_models = self.get_configure_models(cms_config)
+        if app_name and app_models:
+            self._activate_signal(app_name, app_models)
+
     def _activate_signal(self, app_name, app_models):
         """
-        factory method to generate signal receiver function for each model
+        Factory method to generate signal receiver function for each model
         """
         for model in app_models:
             model = apps.get_model(app_name, model)
