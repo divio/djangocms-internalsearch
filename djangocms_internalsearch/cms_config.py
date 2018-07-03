@@ -18,13 +18,11 @@ class InternalSearchCMSExtension(CMSAppExtension):
                 return app_models
             else:
                 raise ImproperlyConfigured(
-                    "internalsearch_models must be list or tuple objecgit pt"
-                )
+                    "internalsearch_models must be list or tuple object")
 
         else:
             raise ImproperlyConfigured(
-                "internalsearch_models must be define in cms_config.py"
-            )
+                "internalsearch_models must be define in cms_config.py")
 
     def configure_app(self, cms_config):
         """

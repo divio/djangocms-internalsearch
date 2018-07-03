@@ -24,8 +24,7 @@ class CMSConfigUnitTestCase(CMSTestCase):
 
         cms_config = Mock(
             djangocms_internalsearch_enabled=True,
-            app_config=Mock(label='blah_cms_config')
-            )
+            app_config=Mock(label='blah_cms_config'))
 
         with self.assertRaises(ImproperlyConfigured):
             extensions.configure_app(cms_config)
@@ -39,13 +38,11 @@ class CMSConfigUnitTestCase(CMSTestCase):
         cms_config = Mock(
             djangocms_internalsearch_enabled=True,
             internalsearch_models=['TestModel', ],
-            app_config=Mock(label='another_blah_cms_config')
-        )
+            app_config=Mock(label='another_blah_cms_config'))
 
         self.assertIsInstance(
             extensions.get_configure_models(cms_config),
-            Iterable
-        )
+            Iterable)
 
 
 class CMSConfigIntegrationTestCase(CMSTestCase):
