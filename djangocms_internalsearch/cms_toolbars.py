@@ -1,10 +1,11 @@
-from django.utils.translation import ugettext_lazy as _
-from cms.toolbar_pool import toolbar_pool
 from cms.toolbar_base import CMSToolbar
+from cms.toolbar_pool import toolbar_pool
+
+
 try:
     from django.urls import reverse
 except ImportError:
-    from django.core.urlresolvers import reverse
+    from django.core.urlresolvers import reverse  # noqa: F401
 
 
 @toolbar_pool.register
@@ -14,6 +15,5 @@ class InternalSearchToolbar(CMSToolbar):
     """
 
     def populate(self):
-        #TODO: make url dynamic 
-        menu = self.toolbar.add_button('Internal search',
-                                       '/admin/djangocms_internalsearch')
+        # TODO: make url dynamic
+        self.toolbar.add_button('Internal search', '/admin/djangocms_internalsearch')
