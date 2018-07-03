@@ -68,5 +68,4 @@ class CMSConfigIntegrationTestCase(CMSTestCase):
 
         self.assertEqual(len(post_save.connect.mock_calls), 4)
         self.assertEqual(len(post_delete.connect.mock_calls), 4)
-        # with self.assertRaises(ImproperlyConfigured):
-        #     extensions.configure_app(app.cms_config)
+    
