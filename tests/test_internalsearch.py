@@ -13,7 +13,7 @@ class CMSConfigUnitTestCase(CMSTestCase):
 
     def test_missing_cms_config(self):
         """
-        Missing cms config parameter case
+        Missing cms config
         """
         extensions = InternalSearchCMSExtension()
 
@@ -26,7 +26,7 @@ class CMSConfigUnitTestCase(CMSTestCase):
 
     def test_valid_cms_config(self):
         """
-        Valid cms config parameter case
+        Valid cms config
         """
         extensions = InternalSearchCMSExtension()
 
@@ -41,7 +41,7 @@ class CMSConfigUnitTestCase(CMSTestCase):
 
     def test_invalid__cms_config_parameter(self):
         """
-        improperly cms config parameter case
+        improperly cms config
         """
         extensions = InternalSearchCMSExtension()
 
