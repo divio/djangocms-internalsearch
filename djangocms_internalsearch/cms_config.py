@@ -1,6 +1,5 @@
-from django.db.models.signals import post_save, post_delete
 from django.apps import apps
-from django.dispatch import receiver
+from django.db.models.signals import post_save, post_delete
 from django.core.exceptions import ImproperlyConfigured
 
 from cms.app_base import CMSAppExtension
