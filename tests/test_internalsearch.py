@@ -64,11 +64,16 @@ class CMSConfigIntegrationTestCase(CMSTestCase):
     def test_integration_with_other_apps(self, mock_post_delete, mock_post_save):
         setup_cms_apps()
 
+        # check of howmany mock methods has been call
+        # Test utils has two apps with two models so expecting
+        # method to call four times.
         self.assertEqual(mock_post_delete.call_count, 4)
         self.assertEqual(mock_post_save.call_count, 4)
 
-        # call_args_list contains all call records so test here to check create_data
-        # been called with all expected four models.
+        # call_args_list contains all call records so test here to check
+        # create_data been called with all expected four models. Order of
+        # model(TestModel3, TestModel4 etc...) varies depand on
+        # order of app appears on INSTALLED_APPS
         self.assertEqual(mock_post_save.call_args_list[0][0][0],  create_data)
         self.assertEqual(mock_post_save.call_args_list[0][1]['sender'], TestModel3)
         self.assertEqual(mock_post_save.call_args_list[1][0][0],  create_data)
@@ -78,8 +83,10 @@ class CMSConfigIntegrationTestCase(CMSTestCase):
         self.assertEqual(mock_post_save.call_args_list[3][0][0],  create_data)
         self.assertEqual(mock_post_save.call_args_list[3][1]['sender'], TestModel2)
 
-        # call_args_list contains all call records so test here to check delete_data
-        # been called with all expected four models.
+        # call_args_list contains all call records so test here to check
+        # delete_data been called with all expected four models. Order of
+        # model(TestModel3, TestModel4 etc...) varies depand on
+        # order of app appears on INSTALLED_APPS
         self.assertEqual(mock_post_delete.call_args_list[0][0][0],  delete_data)
         self.assertEqual(mock_post_delete.call_args_list[0][1]['sender'], TestModel3)
         self.assertEqual(mock_post_delete.call_args_list[1][0][0],  delete_data)
