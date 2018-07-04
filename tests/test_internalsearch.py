@@ -71,7 +71,7 @@ class CMSConfigIntegrationTestCase(CMSTestCase):
         self.assertEqual(mock_post_save.call_count, 4)
 
         # call_args_list contains all call records so test here to check
-        # create_data been called with all expected four models. Order of
+        # create_data have been called with expected four models. Order of
         # model(TestModel3, TestModel4 etc...) varies depand on
         # order of app appears on INSTALLED_APPS
         self.assertEqual(mock_post_save.call_args_list[0][0][0],  create_data)
@@ -84,7 +84,7 @@ class CMSConfigIntegrationTestCase(CMSTestCase):
         self.assertEqual(mock_post_save.call_args_list[3][1]['sender'], TestModel2)
 
         # call_args_list contains all call records so test here to check
-        # delete_data been called with all expected four models. Order of
+        # delete_data have been called with expected four models. Order of
         # model(TestModel3, TestModel4 etc...) varies depand on
         # order of app appears on INSTALLED_APPS
         self.assertEqual(mock_post_delete.call_args_list[0][0][0],  delete_data)
