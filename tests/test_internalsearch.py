@@ -12,13 +12,13 @@ from cms.utils.setup import setup_cms_apps
 
 from djangocms_internalsearch.cms_config import InternalSearchCMSExtension
 from djangocms_internalsearch.signals import create_data, delete_data
+from djangocms_internalsearch.test_utils.another_app_with_search_cms_config.models import (
+TestModel1,
+TestModel2,
+)
 from djangocms_internalsearch.test_utils.app_with_search_cms_config.models import (
     TestModel3,
     TestModel4,
-)
-from djangocms_internalsearch.test_utils.another_app_with_search_cms_config.models import (
-    TestModel1,
-    TestModel2,
 )
 
 
