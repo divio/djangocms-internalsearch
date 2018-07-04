@@ -1,20 +1,19 @@
 from mock import patch, Mock
+
 from django.core.exceptions import ImproperlyConfigured
 from django.test import override_settings
 from django.db.models.signals import post_save, post_delete
 
-from djangocms_internalsearch.cms_config import InternalSearchCMSExtension
 from cms import app_registration
 from cms.test_utils.testcases import CMSTestCase
 from cms.utils.setup import setup_cms_apps
 
+from djangocms_internalsearch.cms_config import InternalSearchCMSExtension
 
 class CMSConfigUnitTestCase(CMSTestCase):
 
     def test_missing_cms_config(self):
-        """
-        Missing cms config
-        """
+
         extensions = InternalSearchCMSExtension()
 
         cms_config = Mock(
@@ -25,9 +24,7 @@ class CMSConfigUnitTestCase(CMSTestCase):
             extensions.configure_app(cms_config)
 
     def test_valid_cms_config(self):
-        """
-        Valid cms config
-        """
+
         extensions = InternalSearchCMSExtension()
 
         cms_config = Mock(
@@ -39,10 +36,8 @@ class CMSConfigUnitTestCase(CMSTestCase):
             extensions.get_models_from_config(cms_config),
             ['TestModel'])
 
-    def test_invalid__cms_config_parameter(self):
-        """
-        improperly cms config
-        """
+    def test_invalid_cms_config_parameter(self):
+
         extensions = InternalSearchCMSExtension()
 
         cms_config = Mock(
@@ -55,9 +50,7 @@ class CMSConfigUnitTestCase(CMSTestCase):
 
 
 class CMSConfigIntegrationTestCase(CMSTestCase):
-    """
-    Integration test with two apps
-    """
+
     def setUp(self):
         app_registration.get_cms_extension_apps.cache_clear()
         app_registration.get_cms_config_apps.cache_clear()
@@ -71,5 +64,14 @@ class CMSConfigIntegrationTestCase(CMSTestCase):
     @patch.object(post_delete, 'connect')
     def test_integration_with_other_apps(self, mock_post_delete, mock_post_save):
         setup_cms_apps()
+        expected_models = ['TestModel1', 'TestModel2', 'TestModel3', 'TestModel4']
         self.assertEqual(mock_post_delete.call_count, 4)
         self.assertEqual(mock_post_save.call_count, 4)
+
+        for call in mock_post_save.call_args_list:
+            args, kwargs = call
+            self.assertTrue(kwargs['sender'].__name__ in expected_models)
+
+        for call in mock_post_delete.call_args_list:
+            args, kwargs = call
+            self.assertTrue(kwargs['sender'].__name__ in expected_models)
