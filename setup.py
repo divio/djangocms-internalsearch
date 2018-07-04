@@ -6,8 +6,8 @@ from djangocms_internalsearch.test_utils import app_with_search_cms_config
 
 INSTALL_REQUIREMENTS = [
     'Django>=1.11,<2.0',
-    'django-cms>=3.5.0'
-    ]
+    'django-cms>=3.5.0',
+]
 
 
 setup(
