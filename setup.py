@@ -4,9 +4,8 @@ import djangocms_internalsearch
 
 
 INSTALL_REQUIREMENTS = [
-    'Django>=1.8,<2.0',
-    'django-cms>=3.4.2',
-    'django-sekizai>=0.7',
+    'Django>=1.11,<2.0',
+    'django-cms>=3.5.0',
 ]
 
 
