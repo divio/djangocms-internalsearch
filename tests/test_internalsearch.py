@@ -9,6 +9,7 @@ from cms.test_utils.testcases import CMSTestCase
 from cms.utils.setup import setup_cms_apps
 
 from djangocms_internalsearch.cms_config import InternalSearchCMSExtension
+from djangocms_internalsearch.signals import create_data, delete_data
 
 class CMSConfigUnitTestCase(CMSTestCase):
 
@@ -64,14 +65,16 @@ class CMSConfigIntegrationTestCase(CMSTestCase):
     @patch.object(post_delete, 'connect')
     def test_integration_with_other_apps(self, mock_post_delete, mock_post_save):
         setup_cms_apps()
-        expected_models = ['TestModel1', 'TestModel2', 'TestModel3', 'TestModel4']
+
         self.assertEqual(mock_post_delete.call_count, 4)
         self.assertEqual(mock_post_save.call_count, 4)
 
-        for call in mock_post_save.call_args_list:
-            args, kwargs = call
-            self.assertTrue(kwargs['sender'].__name__ in expected_models)
+        mock_post_save.call_args_list[0].assert_any_call(create_data, 'TestModel1')
+        mock_post_save.call_args_list[0].assert_any_call(create_data, 'TestModel2')
+        mock_post_save.call_args_list[0].assert_any_call(create_data, 'TestModel3')
+        mock_post_save.call_args_list[0].assert_any_call(create_data, 'TestModel4')
 
-        for call in mock_post_delete.call_args_list:
-            args, kwargs = call
-            self.assertTrue(kwargs['sender'].__name__ in expected_models)
+        mock_post_delete.call_args_list[0].assert_any_call(delete_data, 'TestModel1')
+        mock_post_delete.call_args_list[0].assert_any_call(delete_data, 'TestModel2')
+        mock_post_delete.call_args_list[0].assert_any_call(delete_data, 'TestModel3')
+        mock_post_delete.call_args_list[0].assert_any_call(delete_data, 'TestModel4')
