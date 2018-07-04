@@ -4,21 +4,21 @@ except ImportError:
     from unittest.mock import patch, Mock
 
 from django.core.exceptions import ImproperlyConfigured
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_delete, post_save
 
 from cms import app_registration
-from cms.utils.setup import setup_cms_apps
 from cms.test_utils.testcases import CMSTestCase
+from cms.utils.setup import setup_cms_apps
 
 from djangocms_internalsearch.cms_config import InternalSearchCMSExtension
 from djangocms_internalsearch.signals import create_data, delete_data
 from djangocms_internalsearch.test_utils.app_with_search_cms_config.models import (
     TestModel3,
-    TestModel4
+    TestModel4,
 )
 from djangocms_internalsearch.test_utils.another_app_with_search_cms_config.models import (
     TestModel1,
-    TestModel2
+    TestModel2,
 )
 
 class CMSConfigUnitTestCase(CMSTestCase):
