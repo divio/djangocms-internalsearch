@@ -21,6 +21,7 @@ from djangocms_internalsearch.test_utils.another_app_with_search_cms_config.mode
     TestModel2,
 )
 
+
 class CMSConfigUnitTestCase(CMSTestCase):
 
     def test_missing_cms_config(self):
