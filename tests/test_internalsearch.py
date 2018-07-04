@@ -11,9 +11,9 @@ from cms.utils.setup import setup_cms_apps
 
 class CMSConfigUnitTestCase(CMSTestCase):
 
-    def test_missing_cms_config_flag(self):
+    def test_missing_cms_config(self):
         """
-        Missing cms config flag case
+        Missing cms config parameter case
         """
         extensions = InternalSearchCMSExtension()
 
@@ -24,9 +24,9 @@ class CMSConfigUnitTestCase(CMSTestCase):
         with self.assertRaises(ImproperlyConfigured):
             extensions.configure_app(cms_config)
 
-    def test_cms_config_flag(self):
+    def test_valid_cms_config(self):
         """
-        Valid cms config flag case
+        Valid cms config parameter case
         """
         extensions = InternalSearchCMSExtension()
 
@@ -41,7 +41,7 @@ class CMSConfigUnitTestCase(CMSTestCase):
 
     def test_invalid__cms_config_parameter(self):
         """
-        improperly cms config flag case
+        improperly cms config parameter case
         """
         extensions = InternalSearchCMSExtension()
 
