@@ -3,6 +3,7 @@ def create_data(model, instance, created, **kwargs):
     #       via haystack
     pass
 
+
 def delete_data(model, instance, created, **kwargs):
     # TODO: delete the object from es
     pass
