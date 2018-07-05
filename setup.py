@@ -1,12 +1,13 @@
 from setuptools import find_packages, setup
 
 import djangocms_internalsearch
-from djangocms_internalsearch.test_utils import app_with_search_cms_config
 
 
 INSTALL_REQUIREMENTS = [
     'Django>=1.11,<2.0',
     'django-cms>=3.5.0',
+    'django-haystack>=2.7.0',
+    'elasticsearch>=2.0.0,<3.0.0'
 ]
 
 
