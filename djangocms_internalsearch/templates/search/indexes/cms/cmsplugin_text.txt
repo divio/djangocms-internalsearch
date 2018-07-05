@@ -1,0 +1,1 @@
+{{ object.plugin_type }}
