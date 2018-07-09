@@ -19,8 +19,8 @@
 
             {% for result in page.object_list %}
                 <p>
-
-                   <a href="{{ result.object.get_absolute_url }}"> {{ result.objects.plugin_type }} </a>
+                    <!--<a href="{{ result.object.get_absolute_url }}"> {{ result.object.plugin_type }} </a>-->
+                    {{ result.object.plugin_type }}
                 </p>
             {% empty %}
                 <p>No results found.</p>
