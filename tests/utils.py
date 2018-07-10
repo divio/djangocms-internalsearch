@@ -1,3 +1,6 @@
+import unittest
+from contextlib import contextmanager
+
 from django.contrib.auth.models import User
 from django.test import TestCase
 
@@ -19,3 +22,13 @@ class BaseViewTestCase(BaseTestCase):
 
     def setUp(self):
         self.client.force_login(self.user)
+
+
+class TestCase(unittest.TestCase):
+
+    @contextmanager
+    def assertNotRaises(self, exc_type):
+        try:
+            yield None
+        except exc_type:
+            raise self.failureException('{} raised'.format(exc_type.__name__))
