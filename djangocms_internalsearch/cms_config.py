@@ -3,6 +3,7 @@ from collections import Iterable
 from django.core.exceptions import ImproperlyConfigured
 
 from cms.app_base import CMSAppExtension
+from .search_util import class_factory
 
 
 class InternalSearchCMSExtension(CMSAppExtension):
@@ -23,3 +24,5 @@ class InternalSearchCMSExtension(CMSAppExtension):
         else:
             raise ImproperlyConfigured(
                 "internalsearch expect models configuration defined in cms_config.py")
+
+        class_factory('CMSPluginSearchIndex')

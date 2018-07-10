@@ -1,6 +1,7 @@
 #import datetime
 from haystack import indexes
 from cms.models import CMSPlugin
+from cms.models.fields import PlaceholderField
 #from django.contrib.auth.models import User
 #from django.db import models
 #from haystack import signals
