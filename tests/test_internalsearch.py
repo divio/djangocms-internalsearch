@@ -27,7 +27,6 @@ from .utils import TestCase
 class InternalSearchUnitTestCase(CMSTestCase, TestCase):
 
     def test_missing_cms_config(self):
-
         extensions = InternalSearchCMSExtension()
         cms_config = Mock(
             djangocms_internalsearch_enabled=True,
@@ -38,7 +37,6 @@ class InternalSearchUnitTestCase(CMSTestCase, TestCase):
             extensions.configure_app(cms_config)
 
     def test_invalid_cms_config_parameter(self):
-
         extensions = InternalSearchCMSExtension()
         cms_config = Mock(
             djangocms_internalsearch_enabled=True,
@@ -50,7 +48,6 @@ class InternalSearchUnitTestCase(CMSTestCase, TestCase):
             extensions.configure_app(cms_config)
 
     def test_valid_cms_config_parameter(self):
-
         extensions = InternalSearchCMSExtension()
         cms_config = Mock(
             djangocms_internalsearch_enabled=True,
@@ -73,7 +70,6 @@ class InternalSearchIntegrationTestCase(CMSTestCase):
         app_registration.get_cms_config_apps.cache_clear()
 
     def test_config_with_two_apps(self):
-
         setup_cms_apps()
         internalsearch_config = apps.get_app_config('djangocms_internalsearch')
         registered_model = internalsearch_config.cms_extension.internalsearch_models
