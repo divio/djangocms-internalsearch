@@ -1,12 +1,15 @@
 from __future__ import generators
 import sys
 from functools import partial
-from haystack import indexes
+from haystack import indexes, connections
+from haystack.constants import DEFAULT_ALIAS
+
 from django.core.exceptions import ImproperlyConfigured
 
 from djangocms_internalsearch import cms_config
 from cms.models import CMSPlugin, Page
 from cms.models import pluginmodel
+
 
 
 def create_search_index_for_haystack(model_list):
@@ -30,11 +33,14 @@ def create_search_index_for_haystack(model_list):
 
     #model = model_list_local[0]
     class_created = class_factory('PageSearchIndex')
+    import pdb; pdb.set_trace()
     instance_of_factory_class = class_created()
     instance_of_factory_class.text = indexes.CharField(document=True)
 
     class_created.get_model = partial(get_model('Page'), class_created)
     model_obj = class_created.get_model()
+    #connections[DEFAULT_ALIAS]._index = None
+
 
 
     #---working---
@@ -48,8 +54,10 @@ def create_search_index_for_haystack(model_list):
     #print('list of fields %s' % model_fields_list)
     #model_field_type = model_obj._meta.get_field(model_fields_list[-1]).get_internal_type()
     #print('model field type %s' % model_field_type)
-    #class_created.publisher_is_draft = indexes.CharField(model_attr='publisher_is_draft')
+    #class_created.text = indexes.CharField(document=True)
     #class_created.
+
+    return class_created
 
 
 class BaseClass(indexes.SearchIndex, indexes.Indexable):
