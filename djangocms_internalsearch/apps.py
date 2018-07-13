@@ -6,7 +6,6 @@ from django.utils.translation import ugettext_lazy as _
 from .handlers import do_search_action
 
 
-
 class InternalsearchConfig(AppConfig):
     name = 'djangocms_internalsearch'
     verbose_name = _('django CMS Internal Search')
@@ -19,6 +18,10 @@ class InternalsearchConfig(AppConfig):
 
         post_obj_operation.connect(do_search_action)
         post_placeholder_operation.connect(do_search_action)
-
-        from .search_util import create_search_index_for_haystack
-        #create_search_index_for_haystack([])
+        '''
+        We call the generate class function here to 
+        generate the model search indexes for haystack.
+        '''
+        from .search_indexes import gen_classes
+        from cms.models import CMSPlugin
+        gen_classes(CMSPlugin)

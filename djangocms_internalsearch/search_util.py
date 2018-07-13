@@ -14,19 +14,19 @@ from cms.models import pluginmodel
 
 def create_search_index_for_haystack(model_list):
 
-    '''
-    #model_list = cms_config.InternalSearchCMSExtension().internalsearch_models
 
-    if not model_list:
-        raise ImproperlyConfigured(
-            "internal search expect models, got none")
-    else:
-        for model in model_list:
-            attr_list = [f.name for f in model._meta.get_fields()]
-            print('attr_list %s' % attÎr_list)
-            class_created = class_factory(model + 'SearchIndex')
-            class_created.get_class_model = partial(get_class_model(model), class_created)
-    '''
+    # #model_list = cms_config.InternalSearchCMSExtension().internalsearch_models
+    #
+    # if not model_list:
+    #     raise ImproperlyConfigured(
+    #         "internal search expect models, got none")
+    # else:
+    #     for model in model_list:
+    #         attr_list = [f.name for f in model._meta.get_fields()]
+    #         print('attr_list %s' % attÎr_list)
+    #         class_created = class_factory(model + 'SearchIndex')
+    #         class_created.get_class_model = partial(get_class_model(model), class_created)
+
     #model_list_local = ['CMSPlugin']
 
     #the_module = __import__('cms.models', globals(), locals(), [model_list_local[0]])
