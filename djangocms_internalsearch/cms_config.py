@@ -15,7 +15,7 @@ class InternalSearchCMSExtension(CMSAppExtension):
             app_config_list = getattr(cms_config, 'internalsearch_config_list')
             if isinstance(app_config_list, Iterable):
                 self.internalsearch_models.extend(
-                    [app_config.model for app_config in app_config_list]
+                    app_config.model for app_config in app_config_list
                 )
             else:
                 raise ImproperlyConfigured(
