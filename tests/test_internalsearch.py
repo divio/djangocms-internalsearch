@@ -16,13 +16,13 @@ from djangocms_internalsearch.test_utils.app_1.cms_config import (
     TestModel3Config,
     TestModel4Config,
 )
-from djangocms_internalsearch.test_utils.app_2.cms_config import (
-    TestModel1Config,
-    TestModel2Config,
-)
 from djangocms_internalsearch.test_utils.app_1.models import (
     TestModel3,
     TestModel4,
+)
+from djangocms_internalsearch.test_utils.app_2.cms_config import (
+    TestModel1Config,
+    TestModel2Config,
 )
 from djangocms_internalsearch.test_utils.app_2.models import (
     TestModel1,
