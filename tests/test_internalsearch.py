@@ -12,9 +12,17 @@ from cms.test_utils.testcases import CMSTestCase
 from cms.utils.setup import setup_cms_apps
 
 from djangocms_internalsearch.cms_config import InternalSearchCMSExtension
+from djangocms_internalsearch.test_utils.app_1.cms_config import (
+    TestModel3Config,
+    TestModel4Config,
+)
 from djangocms_internalsearch.test_utils.app_1.models import (
     TestModel3,
     TestModel4,
+)
+from djangocms_internalsearch.test_utils.app_2.cms_config import (
+    TestModel1Config,
+    TestModel2Config,
 )
 from djangocms_internalsearch.test_utils.app_2.models import (
     TestModel1,
@@ -40,7 +48,7 @@ class InternalSearchUnitTestCase(CMSTestCase, TestCase):
         extensions = InternalSearchCMSExtension()
         cms_config = Mock(
             djangocms_internalsearch_enabled=True,
-            search_models=23234,
+            internalsearch_config_list=23234,
             app_config=Mock(label='blah_cms_config')
         )
 
@@ -51,7 +59,12 @@ class InternalSearchUnitTestCase(CMSTestCase, TestCase):
         extensions = InternalSearchCMSExtension()
         cms_config = Mock(
             djangocms_internalsearch_enabled=True,
-            search_models=[TestModel1, TestModel2, TestModel3, TestModel4],
+            internalsearch_config_list=[
+                TestModel1Config,
+                TestModel2Config,
+                TestModel3Config,
+                TestModel4Config
+            ],
             app_config=Mock(label='blah_cms_config')
         )
 
