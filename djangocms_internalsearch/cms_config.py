@@ -44,7 +44,7 @@ class PageModelConfig:
     ]
 
     list_display = ('page_title', 'language',)
-    list_filter = ('language', 'site_id', 'changed_by')
+    list_filter = ('language', 'site_id', 'changed_by',)
 
 
 class CoreCMSAppConfig(CMSAppConfig):
