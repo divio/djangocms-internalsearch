@@ -28,6 +28,8 @@ def create_indexes(model_list):
 def class_factory(name, model):
     text = indexes.CharField(document=True)
 
+    # TODO; need to add custom fields for models
+
     def get_model(self):
         return model
 
