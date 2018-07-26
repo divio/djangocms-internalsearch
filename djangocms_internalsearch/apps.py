@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from django.apps import AppConfig
+from django.apps import AppConfig, apps
 from django.utils.translation import ugettext_lazy as _
 
 from .handlers import update_index
@@ -18,3 +18,9 @@ class InternalsearchConfig(AppConfig):
 
         post_obj_operation.connect(update_index)
         post_placeholder_operation.connect(update_index)
+
+        # calling the class factory generate search indexes
+        from .search_indexes import create_indexes
+        internalsearch_config = apps.get_app_config('djangocms_internalsearch')
+        model_list = internalsearch_config.cms_extension.internalsearch_models
+        create_indexes(model_list)
