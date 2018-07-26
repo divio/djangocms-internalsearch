@@ -27,35 +27,24 @@ class InternalSearchCMSExtension(CMSAppExtension):
 
 
 class PageModelConfig:
+    """
+    Prepare fields from:
+    page_title > cms_title
+    slug > cms_title
+    site_id > cms_treenode__site_id
+    cmsplugin_type_array > cms_cmsplugin
+    text > cms_plugin rendered source in single string
+    html_source > html source of whole page
+    """
     model = Page
     fields = [
-        # cms_title
-        # prepare
-        'page_title',
-        # cms_title
-        'placehoders_id',
-        # cms_title
-        # prepare
-        'slug',
-        # cms_treenode
-        'node_id__site_id',
-        'language',
-        # cms_cmsplugin
-        # prepare
-        'cmsplugin_type_array',
-        # cms_cmsplugin
-        # prepare
-        'cmsplugin_rendered_source',
-        # versioning enable
-        # prepare
-        'version_status',
-        'created_by',
-        'changed_by',
-        'creation_date',
-        'changed_date',
-        # prepare from rendered code
+        'page_title', 'slug', 'site_id', 'language', 'cmsplugin_type_array',
+        'text', 'created_by', 'changed_by', 'creation_date', 'changed_date',
         'html_source',
     ]
+
+    list_display = ('page_title', 'language',)
+    list_filter = ('language', 'site_id', 'changed_by')
 
 
 class CoreCMSAppConfig(CMSAppConfig):
