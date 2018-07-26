@@ -86,6 +86,9 @@ class InternalSearchIntegrationTestCase(CMSTestCase):
         setup_cms_apps()
         internalsearch_config = apps.get_app_config('djangocms_internalsearch')
         registered_model = internalsearch_config.cms_extension.internalsearch_models
-        self.assertEqual(len(registered_model), 4)
+        self.assertTrue(TestModel1 in registered_model)
+        self.assertTrue(TestModel2 in registered_model)
+        self.assertTrue(TestModel3 in registered_model)
+        self.assertTrue(TestModel4 in registered_model)
 
     # TODO: Add more intregration test
