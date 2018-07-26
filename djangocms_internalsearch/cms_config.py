@@ -2,7 +2,8 @@ from collections import Iterable
 
 from django.core.exceptions import ImproperlyConfigured
 
-from cms.app_base import CMSAppExtension
+from cms.app_base import CMSAppConfig, CMSAppExtension
+from cms.models.pagemodel import Page
 
 
 class InternalSearchCMSExtension(CMSAppExtension):
@@ -23,3 +24,40 @@ class InternalSearchCMSExtension(CMSAppExtension):
         else:
             raise ImproperlyConfigured(
                 "cms_config.py must have internalsearch_config_list attribute")
+
+
+class PageModelConfig:
+    model = Page
+    fields = [
+        # cms_title
+        # prepare
+        'page_title',
+        # cms_title
+        'placehoders_id',
+        # cms_title
+        # prepare
+        'slug',
+        # cms_treenode
+        'node_id__site_id',
+        'language',
+        # cms_cmsplugin
+        # prepare
+        'cmsplugin_type_array',
+        # cms_cmsplugin
+        # prepare
+        'cmsplugin_rendered_source',
+        # versioning enable
+        # prepare
+        'version_status',
+        'created_by',
+        'changed_by',
+        'creation_date',
+        'changed_date',
+        # prepare from rendered code
+        'html_source',
+    ]
+
+
+class CoreCMSAppConfig(CMSAppConfig):
+    djangocms_internalsearch_enabled = True
+    internalsearch_config_list = [PageModelConfig, ]
