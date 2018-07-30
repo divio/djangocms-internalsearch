@@ -12,16 +12,6 @@ from .utils import TestCase
 
 class ClassFactoryUnitTestCase(TestCase):
 
-    def test_passing_just_string(self):
-        test_str = 'CMSPlugin'
-        with self.assertRaises(TypeError):
-            create_indexes(test_str)
-
-    def test_passing_string_list(self):
-        test_str_list = ['CMSPlugin', 'Page']
-        with self.assertRaises(TypeError):
-            create_indexes(test_str_list)
-
     def test_passing_classes(self):
         test_class_list = [TestModel1Config.model, TestModel2Config.model]
         create_indexes(test_class_list)
