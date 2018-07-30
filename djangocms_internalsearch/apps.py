@@ -19,8 +19,9 @@ class InternalsearchConfig(AppConfig):
         post_obj_operation.connect(update_index)
         post_placeholder_operation.connect(update_index)
 
-        # calling the class factory generate search indexes
-        from .search_indexes import create_indexes
+        from .helpers import create_indexes
+        from .engine import InternalSearchEngine
+        internalsearch_indexes = InternalSearchEngine()
         internalsearch_config = apps.get_app_config('djangocms_internalsearch')
         model_list = internalsearch_config.cms_extension.internalsearch_models
-        create_indexes(model_list)
+        create_indexes(model_list, internalsearch_indexes)
