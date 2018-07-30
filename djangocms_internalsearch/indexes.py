@@ -1,10 +1,10 @@
 from haystack.indexes import (
-    SearchIndex,
     CharField,
     DateTimeField,
-    MultiValueField,
-    IntegerField,
     Indexable,
+    IntegerField,
+    MultiValueField,
+    SearchIndex,
 )
 
 
@@ -23,19 +23,19 @@ class PageIndex(SearchIndex, Indexable):
     changed_date = DateTimeField(model_attr='changed_date')
 
     def prepare_page_title(self, obj):
-        # TODO: prepare title field to save
+        # TODO: prepare title (cms_title) field to save
         pass
 
     def prepare_slug(self, obj):
-        # TODO: prepare slug/url to save
+        # TODO: prepare slug/url (cms_title) to save
         pass
 
     def prepare_site_name(self, obj):
-        # TODO: prepare sitename to save
+        # TODO: prepare sitename (cms_treenode) to save
         pass
 
     def prepare_plugin_type_array(self, obj):
-        # TODO: preapare list of cms plugin used for specific page
+        # TODO: preapare list of cms plugin (cms_plugin) used for specific page
         pass
 
     def prepare_text(self, obj):

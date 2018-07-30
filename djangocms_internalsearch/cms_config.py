@@ -6,6 +6,7 @@ from cms.app_base import CMSAppConfig, CMSAppExtension
 from cms.models.pagemodel import Page
 
 from djangocms_internalsearch import BaseConfig
+
 from .indexes import PageIndex
 
 
