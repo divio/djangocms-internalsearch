@@ -11,10 +11,10 @@ class InternalSearchCMSExtension(CMSAppExtension):
         self.internalsearch_apps_config = []
 
     def configure_app(self, cms_config):
-        if hasattr(cms_config, 'internalsearch_app_config'):
-            app_config = getattr(cms_config, 'internalsearch_app_config')
-            if isinstance(app_config, Iterable):
-                self.internalsearch_apps_config.extend(app_config)
+        if hasattr(cms_config, 'internalsearch_config_list'):
+            internalsearch_config_list = getattr(cms_config, 'internalsearch_config_list')
+            if isinstance(internalsearch_config_list, Iterable):
+                self.internalsearch_apps_config.extend(internalsearch_config_list)
             else:
                 raise ImproperlyConfigured(
                     "InternalSearch configuration must be a Iterable object")

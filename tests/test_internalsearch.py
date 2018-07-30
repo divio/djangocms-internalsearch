@@ -48,7 +48,7 @@ class InternalSearchUnitTestCase(CMSTestCase, TestCase):
         extensions = InternalSearchCMSExtension()
         cms_config = Mock(
             djangocms_internalsearch_enabled=True,
-            internalsearch_app_config=23234,
+            internalsearch_config_list=23234,
             app_config=Mock(label='blah_cms_config')
         )
 
@@ -59,7 +59,7 @@ class InternalSearchUnitTestCase(CMSTestCase, TestCase):
         extensions = InternalSearchCMSExtension()
         cms_config = Mock(
             djangocms_internalsearch_enabled=True,
-            internalsearch_app_config=[
+            internalsearch_config_list=[
                 TestModel1Config,
                 TestModel2Config,
                 TestModel3Config,

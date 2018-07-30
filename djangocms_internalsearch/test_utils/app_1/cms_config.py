@@ -15,4 +15,4 @@ class TestModel4Config:
 
 class CMSApp1Config(CMSAppConfig):
     djangocms_internalsearch_enabled = True
-    internalsearch_app_config = [TestModel3Config, TestModel4Config]
+    internalsearch_config_list = [TestModel3Config, TestModel4Config]
