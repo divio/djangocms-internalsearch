@@ -1,14 +1,16 @@
 from cms.app_base import CMSAppConfig
 
+from djangocms_internalsearch import BaseConfig
+
 from .models import TestModel3, TestModel4
 
 
-class TestModel3Config:
+class TestModel3Config(BaseConfig):
     model = TestModel3
     fields = ['field1', 'field2']
 
 
-class TestModel4Config:
+class TestModel4Config(BaseConfig):
     model = TestModel4
     fields = ['field1', 'field2']
 

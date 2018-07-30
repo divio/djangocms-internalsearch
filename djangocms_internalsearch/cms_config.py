@@ -30,15 +30,13 @@ class InternalSearchCMSExtension(CMSAppExtension):
                 "cms_config.py must have internalsearch_config_list attribute")
 
 
-class PageModelConfig(BaseConfig):
+class PageConfig(BaseConfig):
     model = Page
-    # do we need this if we providing index
     fields = [
         'page_title', 'slug', 'site_id', 'site_name', 'language',
         'cmsplugin_type_array', 'text', 'created_by', 'changed_by',
         'version_status', 'creation_date', 'changed_date', 'html_source',
     ]
-
     list_display = ('page_title', 'language', 'version_status', 'changed_by')
     list_filter = ('language', 'site_name', 'changed_by',)
     index = PageIndex
@@ -46,4 +44,4 @@ class PageModelConfig(BaseConfig):
 
 class CoreCMSAppConfig(CMSAppConfig):
     djangocms_internalsearch_enabled = True
-    internalsearch_config_list = [PageModelConfig, ]
+    internalsearch_config_list = [PageConfig, ]
