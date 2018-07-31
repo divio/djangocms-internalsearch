@@ -6,10 +6,9 @@ class InternalSearchEngine(BaseEngine):
 
     backend = elasticsearch_backend.ElasticsearchSearchBackend
     query = elasticsearch_backend.ElasticsearchSearchQuery
-    unified_index = UnifiedIndex()
+
+    def __init__(self, excluded_indexes=None):
+        self._indexes = {}
 
     def get_unified_index(self):
-        if self._index is None:
-            self._index = self.unified_index(self.options.get('EXCLUDED_INDEXES', []))
-
-        return self._index
+        return self._indexes

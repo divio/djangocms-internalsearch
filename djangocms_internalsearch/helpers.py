@@ -13,7 +13,7 @@ def create_indexes(model_list, internalsearch_indexes):
     for model in model_list:
         class_name = model.__name__ + 'Index'
         search_index_class = class_factory(class_name, model)
-        internalsearch_indexes.unified_index._indexes[model] = search_index_class
+        internalsearch_indexes._indexes[model] = search_index_class
 
 
 def class_factory(name, model):
