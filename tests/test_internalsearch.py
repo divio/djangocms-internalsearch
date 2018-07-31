@@ -70,10 +70,14 @@ class InternalSearchUnitTestCase(CMSTestCase, TestCase):
 
         with self.assertNotRaises(ImproperlyConfigured):
             extensions.configure_app(cms_config)
-            self.assertTrue(TestModel1 in extensions.internalsearch_models)
-            self.assertTrue(TestModel2 in extensions.internalsearch_models)
-            self.assertTrue(TestModel3 in extensions.internalsearch_models)
-            self.assertTrue(TestModel4 in extensions.internalsearch_models)
+            register_model = []
+            for app_config in extensions.internalsearch_apps_config:
+                register_model.append(app_config.model)
+
+            self.assertTrue(TestModel1 in register_model)
+            self.assertTrue(TestModel2 in register_model)
+            self.assertTrue(TestModel3 in register_model)
+            self.assertTrue(TestModel4 in register_model)
 
 
 class InternalSearchIntegrationTestCase(CMSTestCase):
@@ -85,7 +89,15 @@ class InternalSearchIntegrationTestCase(CMSTestCase):
     def test_config_with_two_apps(self):
         setup_cms_apps()
         internalsearch_config = apps.get_app_config('djangocms_internalsearch')
-        registered_model = internalsearch_config.cms_extension.internalsearch_models
-        self.assertEqual(len(registered_model), 4)
+        apps_config = internalsearch_config.cms_extension.internalsearch_apps_config
+        register_model = []
+
+        for app_config in apps_config:
+            register_model.append(app_config.model)
+
+        self.assertTrue(TestModel1 in register_model)
+        self.assertTrue(TestModel2 in register_model)
+        self.assertTrue(TestModel3 in register_model)
+        self.assertTrue(TestModel4 in register_model)
 
     # TODO: Add more intregration test
