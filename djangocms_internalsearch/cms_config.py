@@ -10,15 +10,13 @@ from djangocms_internalsearch.contrib.cms.isearch_config import PageConfig
 class InternalSearchCMSExtension(CMSAppExtension):
 
     def __init__(self):
-        self.internalsearch_models = []
+        self.internalsearch_apps_config = []
 
     def configure_app(self, cms_config):
         if hasattr(cms_config, 'internalsearch_config_list'):
-            app_config_list = getattr(cms_config, 'internalsearch_config_list')
-            if isinstance(app_config_list, Iterable):
-                self.internalsearch_models.extend(
-                    app_config.model for app_config in app_config_list
-                )
+            internalsearch_config_list = getattr(cms_config, 'internalsearch_config_list')
+            if isinstance(internalsearch_config_list, Iterable):
+                self.internalsearch_apps_config.extend(internalsearch_config_list)
             else:
                 raise ImproperlyConfigured(
                     "InternalSearch configuration must be a Iterable object")
