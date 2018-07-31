@@ -90,8 +90,9 @@ class InternalSearchIntegrationTestCase(CMSTestCase):
     def test_config_with_two_apps(self):
         setup_cms_apps()
         internalsearch_config = apps.get_app_config('djangocms_internalsearch')
-        registered_models =
-        config.model for config in internalsearch_config.cms_extension.internalsearch_apps_config
+        registered_models = list(
+            config.model for config in internalsearch_config.cms_extension.internalsearch_apps_config
+        )
         expected_models = [
             TestModel1,
             TestModel2,
