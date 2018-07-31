@@ -1,6 +1,6 @@
 from cms.app_base import CMSAppConfig
 
-from djangocms_internalsearch import BaseConfig
+from djangocms_internalsearch.base import BaseConfig
 
 from .models import TestModel1, TestModel2
 
