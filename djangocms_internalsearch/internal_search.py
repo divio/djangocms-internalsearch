@@ -1,6 +1,6 @@
-from haystack import indexes
-
 from cms.models import Page
+
+from haystack import indexes
 
 from .base import ISearchBaseConfig
 
