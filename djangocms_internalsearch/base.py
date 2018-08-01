@@ -30,5 +30,5 @@ class ISearchBaseConfig(indexes.SearchIndex, indexes.Indexable):
         raise NotImplementedError("Config class must provide prepare_text method for index")
 
     @abstractmethod
-    def prepare_content_type(self):
+    def prepare_content_type(self, obj):
         raise NotImplementedError("Config class must provide prepare_text method for index")

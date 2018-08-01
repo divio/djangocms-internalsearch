@@ -5,12 +5,12 @@ from djangocms_internalsearch.base import ISearchBaseConfig
 from .models import TestModel3, TestModel4
 
 
-class TestModel3Config():
+class TestModel3Config(ISearchBaseConfig):
     model = TestModel3
     fields = ['field1', 'field2']
 
 
-class TestModel4Config():
+class TestModel4Config(ISearchBaseConfig):
     model = TestModel4
     fields = ['field1', 'field2']
 
