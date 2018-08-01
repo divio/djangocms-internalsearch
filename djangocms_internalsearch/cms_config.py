@@ -4,7 +4,7 @@ from django.core.exceptions import ImproperlyConfigured
 
 from cms.app_base import CMSAppConfig, CMSAppExtension
 
-from djangocms_internalsearch.contrib.cms.isearch_config import PageConfig
+from djangocms_internalsearch.internal_search import PageContentConfig
 
 
 class InternalSearchCMSExtension(CMSAppExtension):
@@ -27,4 +27,4 @@ class InternalSearchCMSExtension(CMSAppExtension):
 
 class CoreCMSAppConfig(CMSAppConfig):
     djangocms_internalsearch_enabled = True
-    internalsearch_config_list = [PageConfig, ]
+    internalsearch_config_list = [PageContentConfig, ]
