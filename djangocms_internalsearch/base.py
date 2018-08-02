@@ -6,7 +6,6 @@ class BaseSearchConfig(indexes.SearchIndex, indexes.Indexable):
     Base config class to provide list of attributes that sub class must provide
     """
     text = indexes.NgramField(document=True, use_template=False)
-    content_type = indexes.CharField()
 
     @property
     def model(self):
@@ -21,6 +20,3 @@ class BaseSearchConfig(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_text(self, obj):
         raise NotImplementedError("Config class must provide prepare_text method for index")
-
-    def prepare_content_type(self, obj):
-        raise NotImplementedError("Config class must provide content_type method for index")
