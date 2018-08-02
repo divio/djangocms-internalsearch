@@ -12,9 +12,6 @@ class TestModel1Config(BaseSearchConfig):
     def prepare_text(self, obj):
         return "Lorem ipsum..."
 
-    def prepare_content_type(self, obj):
-        return ['dummy1', 'dummy2']
-
 
 class TestModel2Config(BaseSearchConfig):
     model = TestModel2
@@ -23,11 +20,7 @@ class TestModel2Config(BaseSearchConfig):
     def prepare_text(self, obj):
         return "Lorem ipsum..."
 
-    def prepare_content_type(self, obj):
-        return ['dummy1', 'dummy2']
-
 
 class CMSApp2Config(CMSAppConfig):
-    test = TestModel1Config()
     djangocms_internalsearch_enabled = True
     internalsearch_config_list = [TestModel1Config, TestModel2Config]
