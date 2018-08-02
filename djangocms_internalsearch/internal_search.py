@@ -16,7 +16,7 @@ class PageContentConfig(BaseSearchConfig):
     site_name = indexes.CharField()
     language = indexes.CharField(model_attr='language')
     plugin_types = indexes.MultiValueField()
-    created_by = indexes.CharField(model_attr='created_by')
+    created_by = indexes.CharField()
     version_status = indexes.CharField()
     creation_date = indexes.DateTimeField(model_attr='creation_date')
 
