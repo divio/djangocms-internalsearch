@@ -9,9 +9,9 @@ class InternalSearchUnifiedIndex(UnifiedIndex):
     def collect_indexes(self):
         indexes = []
         internalsearch_config = apps.get_app_config('djangocms_internalsearch')
-        config_list = internalsearch_config.cms_extension.internalsearch_apps_config
+        apps_config = internalsearch_config.cms_extension.internalsearch_apps_config
 
-        for item in config_list:
+        for item in apps_config:
             item_name = item.__name__
             if getattr(item, 'haystack_use_for_indexing', False) and getattr(item, 'get_model', None):
                 class_path = "%s.internal_search.%s" % ('django', item_name)
