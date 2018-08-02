@@ -1,18 +1,14 @@
-try:
-    from unittest.mock import Mock
-except ImportError:
-    raise "InternalSearch app requires Python 3.3 or above"
+from unittest.mock import Mock
 
 from django.apps import apps
 
 from cms import app_registration
-from cms.test_utils.testcases import CMSTestCase
 from cms.utils.setup import setup_cms_apps
 
 from .utils import TestCase
 
 
-class InternalSearchConfigTestCase(CMSTestCase, TestCase):
+class InternalSearchConfigTestCase(TestCase):
 
     def setUp(self):
         app_registration.get_cms_extension_apps.cache_clear()
