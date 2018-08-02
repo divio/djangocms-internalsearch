@@ -10,10 +10,10 @@ class TestModel3Config(BaseSearchConfig):
     list_display = ['field1', 'field2']
 
     def prepare_text(self, obj):
-        pass
+        return "Lorem ipsum..."
 
     def prepare_content_type(self, obj):
-        pass
+        return ['dummy1', 'dummy2']
 
 
 class TestModel4Config(BaseSearchConfig):
@@ -21,10 +21,10 @@ class TestModel4Config(BaseSearchConfig):
     list_display = ['field1', 'field2']
 
     def prepare_text(self, obj):
-        pass
+        return "Lorem ipsum..."
 
     def prepare_content_type(self, obj):
-        pass
+        return ['dummy1', 'dummy2']
 
 
 class CMSApp1Config(CMSAppConfig):

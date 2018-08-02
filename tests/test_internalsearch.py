@@ -1,15 +1,10 @@
-try:
-    from unittest.mock import Mock
-except ImportError:
-    raise "InternalSearch app requires Python 3.3 or above"
-
+from unittest.mock import Mock
 
 from django.apps import apps
 from django.core.exceptions import ImproperlyConfigured
 
 from cms import app_registration
-from cms.models import Page
-from cms.test_utils.testcases import CMSTestCase
+from cms.models.titlemodels import Title
 from cms.utils.setup import setup_cms_apps
 
 from djangocms_internalsearch.cms_config import InternalSearchCMSExtension
@@ -33,7 +28,7 @@ from djangocms_internalsearch.test_utils.app_2.models import (
 from .utils import TestCase
 
 
-class InternalSearchUnitTestCase(CMSTestCase, TestCase):
+class InternalSearchUnitTestCase(TestCase):
 
     def test_missing_cms_config(self):
         extensions = InternalSearchCMSExtension()
@@ -81,7 +76,7 @@ class InternalSearchUnitTestCase(CMSTestCase, TestCase):
             self.assertTrue(TestModel4 in register_model)
 
 
-class InternalSearchIntegrationTestCase(CMSTestCase, TestCase):
+class InternalSearchIntegrationTestCase(TestCase):
 
     def setUp(self):
         app_registration.get_cms_extension_apps.cache_clear()
@@ -98,6 +93,6 @@ class InternalSearchIntegrationTestCase(CMSTestCase, TestCase):
             TestModel2,
             TestModel3,
             TestModel4,
-            Page,
+            Title,
         ]
         self.assertCountEqual(registered_models, expected_models)
