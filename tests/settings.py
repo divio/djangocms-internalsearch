@@ -3,8 +3,12 @@ HELPER_SETTINGS = {
         'djangocms_internalsearch',
         'djangocms_internalsearch.test_utils.app_1',
         'djangocms_internalsearch.test_utils.app_2',
-
     ],
+    'HAYSTACK_CONNECTIONS': {
+        'default': {
+            'ENGINE': 'haystack.backends.simple_backend.SimpleEngine',
+        },
+    }
 }
 
 
