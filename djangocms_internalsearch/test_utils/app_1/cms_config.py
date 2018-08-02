@@ -1,16 +1,30 @@
 from cms.app_base import CMSAppConfig
 
+from djangocms_internalsearch.base import BaseSearchConfig
+
 from .models import TestModel3, TestModel4
 
 
-class TestModel3Config:
+class TestModel3Config(BaseSearchConfig):
     model = TestModel3
-    fields = ['field1', 'field2']
+    list_display = ['field1', 'field2']
+
+    def prepare_text(self, obj):
+        pass
+
+    def prepare_content_type(self, obj):
+        pass
 
 
-class TestModel4Config:
+class TestModel4Config(BaseSearchConfig):
     model = TestModel4
-    fields = ['field1', 'field2']
+    list_display = ['field1', 'field2']
+
+    def prepare_text(self, obj):
+        pass
+
+    def prepare_content_type(self, obj):
+        pass
 
 
 class CMSApp1Config(CMSAppConfig):

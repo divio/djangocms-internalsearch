@@ -8,6 +8,7 @@ from django.apps import apps
 from django.core.exceptions import ImproperlyConfigured
 
 from cms import app_registration
+from cms.models import Page
 from cms.test_utils.testcases import CMSTestCase
 from cms.utils.setup import setup_cms_apps
 
@@ -80,7 +81,7 @@ class InternalSearchUnitTestCase(CMSTestCase, TestCase):
             self.assertTrue(TestModel4 in register_model)
 
 
-class InternalSearchIntegrationTestCase(CMSTestCase):
+class InternalSearchIntegrationTestCase(CMSTestCase, TestCase):
 
     def setUp(self):
         app_registration.get_cms_extension_apps.cache_clear()
@@ -89,15 +90,14 @@ class InternalSearchIntegrationTestCase(CMSTestCase):
     def test_config_with_two_apps(self):
         setup_cms_apps()
         internalsearch_config = apps.get_app_config('djangocms_internalsearch')
-        apps_config = internalsearch_config.cms_extension.internalsearch_apps_config
-        register_model = []
-
-        for app_config in apps_config:
-            register_model.append(app_config.model)
-
-        self.assertTrue(TestModel1 in register_model)
-        self.assertTrue(TestModel2 in register_model)
-        self.assertTrue(TestModel3 in register_model)
-        self.assertTrue(TestModel4 in register_model)
-
-    # TODO: Add more intregration test
+        registered_models = [
+            config.model for config in internalsearch_config.cms_extension.internalsearch_apps_config
+        ]
+        expected_models = [
+            TestModel1,
+            TestModel2,
+            TestModel3,
+            TestModel4,
+            Page,
+        ]
+        self.assertCountEqual(registered_models, expected_models)

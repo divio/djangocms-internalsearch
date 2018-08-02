@@ -10,22 +10,18 @@ class InternalSearchUnifiedIndex(UnifiedIndex):
         indexes = []
         internalsearch_config = apps.get_app_config('djangocms_internalsearch')
         config_list = internalsearch_config.cms_extension.internalsearch_apps_config
-        import ipdb
-        ipdb.set_trace()
+
         for item in config_list:
-            import ipdb
-            ipdb.set_trace()
-
+            item_name = item.__name__
             if getattr(item, 'haystack_use_for_indexing', False) and getattr(item, 'get_model', None):
-
-                class_path = "%s.internal_search.%s" % ('djangocms_internalsearch', item.__name__)
+                class_path = "%s.internal_search.%s" % ('django', item_name)
 
                 if class_path in self.excluded_indexes or self.excluded_indexes_ids.get(item_name) == id(item):
-                    index_name = item.model.__name__ + 'Index'
-                    self.excluded_indexes_ids[str(index_name)] = id(item)
+                    self.excluded_indexes_ids[str(item_name)] = id(item)
                     continue
 
                 indexes.append(item())
+
         return indexes
 
 
