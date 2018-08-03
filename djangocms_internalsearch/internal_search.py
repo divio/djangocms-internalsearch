@@ -47,3 +47,7 @@ class PageContentConfig(BaseSearchConfig):
     def prepare_version_status(self, obj):
         # TODO: prepare from djangocms_versioning apps
         pass
+
+    def prepare_created_by(self, obj):
+        # TODO: prepare from page model
+        pass
