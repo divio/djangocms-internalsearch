@@ -2,7 +2,9 @@ from collections import Iterable
 
 from django.core.exceptions import ImproperlyConfigured
 
-from cms.app_base import CMSAppExtension
+from cms.app_base import CMSAppConfig, CMSAppExtension
+
+from djangocms_internalsearch.internal_search import PageContentConfig
 
 
 class InternalSearchCMSExtension(CMSAppExtension):
@@ -20,4 +22,9 @@ class InternalSearchCMSExtension(CMSAppExtension):
                     "InternalSearch configuration must be a Iterable object")
         else:
             raise ImproperlyConfigured(
-                "cms_config.py must have internalsearch_app_config attribute")
+                "cms_config.py must have internalsearch_config_list attribute")
+
+
+class CoreCMSAppConfig(CMSAppConfig):
+    djangocms_internalsearch_enabled = True
+    internalsearch_config_list = [PageContentConfig, ]
