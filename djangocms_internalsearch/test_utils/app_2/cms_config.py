@@ -12,9 +12,6 @@ class TestModel1Config(BaseSearchConfig):
     def prepare_text(self, obj):
         return "Lorem ipsum..."
 
-    def prepare_content_type(self, obj):
-        return ['dummy1', 'dummy2']
-
 
 class TestModel2Config(BaseSearchConfig):
     model = TestModel2
@@ -22,9 +19,6 @@ class TestModel2Config(BaseSearchConfig):
 
     def prepare_text(self, obj):
         return "Lorem ipsum..."
-
-    def prepare_content_type(self, obj):
-        return ['dummy1', 'dummy2']
 
 
 class CMSApp2Config(CMSAppConfig):

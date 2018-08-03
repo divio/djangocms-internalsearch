@@ -16,11 +16,9 @@ class PageContentConfig(BaseSearchConfig):
     site_name = indexes.CharField()
     language = indexes.CharField(model_attr='language')
     plugin_types = indexes.MultiValueField()
-    created_by = indexes.CharField(model_attr='created_by')
-    changed_by = indexes.CharField(model_attr='changed_by')
+    created_by = indexes.CharField()
     version_status = indexes.CharField()
     creation_date = indexes.DateTimeField(model_attr='creation_date')
-    changed_date = indexes.DateTimeField(model_attr='changed_date')
 
     # model class attribute
     model = Title
@@ -28,6 +26,10 @@ class PageContentConfig(BaseSearchConfig):
     # admin setting
     list_display = ('page_title', 'language', 'version_status', 'changed_by')
     list_filter = ('language', 'site_name', 'changed_by',)
+
+    def prepare_site_id(self, obj):
+        # TODO: prepare site_ud (cms_treenode) to save
+        pass
 
     def prepare_site_name(self, obj):
         # TODO: prepare sitename (cms_treenode) to save
@@ -37,12 +39,11 @@ class PageContentConfig(BaseSearchConfig):
         # TODO: preapare list of cms plugin (cms_plugin) used for specific page
         pass
 
-    def prepare_content_type(self, obj):
+    def prepare_text(self, obj):
         # TODO: perpare text as string to get rendered data of all cms plugin for
         # specific page
         pass
 
-    def prepare_text(self, obj):
-        # TODO: perpare text as string to get rendered data of all cms plugin for
-        # specific page
+    def prepare_version_status(self, obj):
+        # TODO: prepare from djangocms_versioning apps
         pass
