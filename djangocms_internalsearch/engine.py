@@ -13,7 +13,7 @@ class InternalSearchUnifiedIndex(UnifiedIndex):
 
         for item in apps_config:
             item_name = item.__name__
-            if item.haystack_use_for_indexing and item.get_model(self):
+            if item.haystack_use_for_indexing and item.get_model(item):
                 class_path = ".".join([item.__module__, item_name])
 
                 if class_path in self.excluded_indexes or self.excluded_indexes_ids.get(item_name) == id(item):

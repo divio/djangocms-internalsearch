@@ -3,7 +3,7 @@ from django.test import TestCase
 from haystack.utils import loading
 
 from djangocms_internalsearch.base import BaseSearchConfig
-from djangocms_internalsearch.engine import InternalSearchUnifiedIndex
+from djangocms_internalsearch.engine import InternalSearchESEngine
 from djangocms_internalsearch.internal_search import PageContentConfig
 from djangocms_internalsearch.test_utils.app_1.cms_config import (
     TestModel3Config,
@@ -28,8 +28,8 @@ class LoadInternalSearchBackendTestCase(TestCase):
 class SearchIndexTestCase(TestCase):
 
     def setUp(self):
-        self.ui = InternalSearchUnifiedIndex()
-        self.indexes = self.ui.collect_indexes()
+        self.unified_index = InternalSearchESEngine.unified_index()
+        self.indexes = self.unified_index.collect_indexes()
 
     def test_model_indexes(self):
 
