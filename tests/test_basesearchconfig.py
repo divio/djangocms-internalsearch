@@ -10,7 +10,7 @@ from djangocms_internalsearch.base import BaseSearchConfig
 from .utils import TestCase
 
 
-class TestConfig(BaseSearchConfig):
+class TestModelConfig(BaseSearchConfig):
     pass
 
 
@@ -18,15 +18,15 @@ class InternalSearchInvalidConfigTestCase(TestCase):
 
     def test_missing_prepare_text(self):
         with self.assertRaises(NotImplementedError):
-            TestConfig.prepare_text(self, Mock())
+            TestModelConfig.prepare_text(self, Mock())
 
     def test_missing_model(self):
         with self.assertRaises(NotImplementedError):
-            TestConfig().model
+            TestModelConfig().model
 
     def test_missing_list_display(self):
         with self.assertRaises(NotImplementedError):
-            TestConfig().list_display
+            TestModelConfig().list_display
 
 
 class InternalSearchValidConfigTestCase(TestCase):
