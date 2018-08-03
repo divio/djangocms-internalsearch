@@ -1,13 +1,8 @@
-# encoding: utf-8
-
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-import warnings
-
 from django.test import TestCase
 
 from haystack.utils import loading
 
+from djangocms_internalsearch.base import BaseSearchConfig
 from djangocms_internalsearch.engine import InternalSearchUnifiedIndex
 from djangocms_internalsearch.internal_search import PageContentConfig
 from djangocms_internalsearch.test_utils.app_1.cms_config import (
@@ -19,19 +14,10 @@ from djangocms_internalsearch.test_utils.app_2.cms_config import (
     TestModel2Config,
 )
 
-from djangocms_internalsearch.base import BaseSearchConfig
-
 
 class LoadInternalSearchBackendTestCase(TestCase):
 
     def test_load_internalsearch_elasticsearch(self):
-        try:
-            import elasticsearch
-        except ImportError:
-            warnings.warn(
-                "elasticsearch-py doesn't appear to be installed. Unable to test loading the ElasticSearch backend."
-            )
-            return
 
         backend = loading.load_backend(
             "djangocms_internalsearch.engine.InternalSearchESEngine"
