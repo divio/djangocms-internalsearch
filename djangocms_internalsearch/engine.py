@@ -13,15 +13,14 @@ class InternalSearchUnifiedIndex(UnifiedIndex):
 
         for item in apps_config:
             item_name = item.__name__
-            if getattr(item, 'haystack_use_for_indexing', False) and getattr(item, 'get_model', None):
-                class_path = "%s.internal_search.%s" % ('django', item_name)
+            if item.haystack_use_for_indexing and item.get_model(self):
+                class_path = ".".join([item.__module__, item_name])
 
                 if class_path in self.excluded_indexes or self.excluded_indexes_ids.get(item_name) == id(item):
                     self.excluded_indexes_ids[str(item_name)] = id(item)
                     continue
 
                 indexes.append(item())
-
         return indexes
 
 
