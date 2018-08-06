@@ -18,7 +18,6 @@ from djangocms_internalsearch.test_utils.app_2.cms_config import (
 class LoadInternalSearchBackendTestCase(TestCase):
 
     def test_load_internalsearch_elasticsearch(self):
-
         backend = loading.load_backend(
             "djangocms_internalsearch.engine.InternalSearchESEngine"
         )
@@ -32,7 +31,6 @@ class SearchIndexTestCase(TestCase):
         self.indexes = self.unified_index.collect_indexes()
 
     def test_model_indexes(self):
-
         expected_indexes = [
             TestModel1Config,
             TestModel2Config,
@@ -43,5 +41,4 @@ class SearchIndexTestCase(TestCase):
         for config_obj in self.indexes:
             self.assertIsInstance(config_obj, BaseSearchConfig)
             self.assertTrue(type(config_obj) in expected_indexes)
-
         self.assertTrue(len(self.indexes), len(expected_indexes))
