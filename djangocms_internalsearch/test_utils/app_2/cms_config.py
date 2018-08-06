@@ -1,16 +1,24 @@
 from cms.app_base import CMSAppConfig
 
+from djangocms_internalsearch.base import BaseSearchConfig
+
 from .models import TestModel1, TestModel2
 
 
-class TestModel1Config:
+class TestModel1Config(BaseSearchConfig):
     model = TestModel1
-    fields = ['field1', 'field2']
+    list_display = ['field1', 'field2']
+
+    def prepare_text(self, obj):
+        return "Lorem ipsum..."
 
 
-class TestModel2Config:
+class TestModel2Config(BaseSearchConfig):
     model = TestModel2
-    fields = ['field1', 'field2']
+    list_display = ['field1', 'field2']
+
+    def prepare_text(self, obj):
+        return "Lorem ipsum..."
 
 
 class CMSApp2Config(CMSAppConfig):
