@@ -15,7 +15,6 @@ class InternalSearchUnifiedIndex(UnifiedIndex):
             item_name = item.__name__
             if item.haystack_use_for_indexing:
                 class_path = "{}.{}".format(item.__module__, item_name)
-
                 if class_path in self.excluded_indexes or self.excluded_indexes_ids.get(item_name) == id(item):
                     self.excluded_indexes_ids[str(item_name)] = id(item)
                     continue
