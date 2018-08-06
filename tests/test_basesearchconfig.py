@@ -40,11 +40,10 @@ class InternalSearchValidConfigTestCase(TestCase):
         internalsearch_config = apps.get_app_config('djangocms_internalsearch')
         registered_configs = internalsearch_config.cms_extension.internalsearch_apps_config
         expected_method = ['prepare_text', ]
-        obj = Mock()
         with self.assertNotRaises(NotImplementedError):
             for config in registered_configs:
                 for attr in expected_method:
-                    getattr(config, attr)(self, obj)
+                    self.assertTrue(attr in config.__dict__)
 
     def test_search_config_with_expected_attributes(self):
         setup_cms_apps()

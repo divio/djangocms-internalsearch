@@ -1,15 +1,25 @@
-from cms.models.titlemodels import Title
+import random
+
+from django.conf import settings
+from django.contrib.auth.models import AnonymousUser
+from django.contrib.sites.models import Site
+from django.template import RequestContext
+from django.test import RequestFactory
+
+from cms.models import CMSPlugin, Placeholder, Title
+from cms.toolbar.toolbar import CMSToolbar
 
 from haystack import indexes
 
 from .base import BaseSearchConfig
+from .helpers import render_plugin
 
 
 class PageContentConfig(BaseSearchConfig):
     """
     Page config and index definition
     """
-    page = indexes.IntegerField(model_attr='page')
+    page = indexes.IntegerField(model_attr='page__id')
     title = indexes.CharField(model_attr='title')
     slug = indexes.CharField(model_attr='slug')
     site_id = indexes.IntegerField()
@@ -28,26 +38,57 @@ class PageContentConfig(BaseSearchConfig):
     list_filter = ('language', 'site_name', 'changed_by',)
 
     def prepare_site_id(self, obj):
-        # TODO: prepare site_ud (cms_treenode) to save
-        pass
+        return obj.page.node.site_id
 
     def prepare_site_name(self, obj):
-        # TODO: prepare sitename (cms_treenode) to save
-        pass
+        site_id = obj.page.node.site_id
+        return Site.objects.filter(pk=site_id).first().domain
 
     def prepare_plugin_types(self, obj):
-        # TODO: preapare list of cms plugin (cms_plugin) used for specific page
-        pass
+        placeholder_ids = (
+            placeholder.pk for placeholder in Placeholder.objects.filter(title=obj.id)
+        )
+        plugin_types = [
+            plugin.plugin_type for plugin in
+            CMSPlugin.objects.filter(placeholder__in=placeholder_ids)
+        ]
+        # Returning unique CMS Plugin types
+        return set(plugin_types)
 
     def prepare_text(self, obj):
-        # TODO: perpare text as string to get rendered data of all cms plugin for
-        # specific page
-        pass
+        rendered_text = []
+        language = obj.language
+        placeholder_ids = (
+            placeholder.pk for placeholder in Placeholder.objects.filter(title=obj.id)
+        )
+        plugins = CMSPlugin.objects.filter(placeholder__in=placeholder_ids, language=language)
+        request = get_request(language)
+        context = RequestContext(request)
+        renderer = request.toolbar.content_renderer
+        for base_plugin in plugins:
+            rendered_text.append(render_plugin(base_plugin, context, renderer))
+
+        return rendered_text
 
     def prepare_version_status(self, obj):
         # TODO: prepare from djangocms_versioning apps
-        pass
+        # Creating random for time being for UI Filter
+        return random.choice(['Draft', 'Published', 'Unpublished', 'Archived', 'Locked'])
 
     def prepare_created_by(self, obj):
-        # TODO: prepare from page model
-        pass
+        return obj.page.changed_by
+
+
+def get_request(language=None):
+    """
+    Returns a Request instance populated with cms specific attributes.
+    """
+    request_factory = RequestFactory(HTTP_HOST=settings.ALLOWED_HOSTS[0])
+    request = request_factory.get("/")
+    request.session = {}
+    request.LANGUAGE_CODE = language or settings.LANGUAGE_CODE
+    # Needed for plugin rendering.
+    request.current_page = None
+    request.user = AnonymousUser()
+    request.toolbar = CMSToolbar(request)
+    return request
