@@ -18,3 +18,6 @@ class InternalsearchConfig(AppConfig):
 
         post_obj_operation.connect(update_index)
         post_placeholder_operation.connect(update_index)
+
+        from .search_test_data import create_search_test_data
+        create_search_test_data()
