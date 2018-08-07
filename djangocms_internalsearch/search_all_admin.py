@@ -92,6 +92,17 @@ class SearchChangeList(ChangeList):
         model._internal_search_model_name = result.model._meta.model_name
         return model
 
+    def get_queryset(self, request):
+        """
+        Return a QuerySet of all model instances that can be edited by the
+        admin site. This is used by changelist_view.
+        """
+        qs = SearchQuerySetInternalSearch(self.haystack_connection).all()
+        # TODO: this should be handled by some parameter to the ChangeList.
+        ordering = self.get_ordering(request, qs)
+        if ordering:
+            qs = qs.order_by(*ordering)
+        return qs
 
 class SearchQuerySetInternalSearch(SearchQuerySet):
     def __init__(self, using=None, query=None):

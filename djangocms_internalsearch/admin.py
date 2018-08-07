@@ -1,11 +1,9 @@
 from django.contrib import admin
-
-# from haystack.admin import SearchModelAdmin
 from .search_all_admin import SearchModelAdmin
 
 from .models import (
     Query,
-    AllIndex
+    QueryProxy
 )
 
 
@@ -16,9 +14,16 @@ class AllAdmin(SearchModelAdmin):
     #list_filter = ('achar', 'aint')
     list_display = ('achar', 'aint')
 
+
     def has_add_permission(self, request):
         return False
 
+    def achar(self, obj):
+        return obj.achar
+
+    def aint(self, obj):
+        return obj.aint
+
 
 admin.site.register(Query)
-admin.site.register(AllIndex, AllAdmin)
+admin.site.register(QueryProxy, AllAdmin)

@@ -7,6 +7,10 @@ class Query(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
 
+class QueryProxy(Query):
+    class Meta:
+        proxy = True
+
 class AllIndex(models.Model):
     achar = models.TextField()
     adatetime = models.DateTimeField()
