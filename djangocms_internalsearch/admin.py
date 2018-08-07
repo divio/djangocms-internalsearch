@@ -13,7 +13,7 @@ from .models import (
 
 class AllAdmin(SearchModelAdmin):
     search_fields = ('achar',)
-    list_filter = ('achar', 'aint')
+    #list_filter = ('achar', 'aint')
     list_display = ('achar', 'aint')
 
     def has_add_permission(self, request):

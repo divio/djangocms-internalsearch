@@ -33,6 +33,7 @@ def list_max_show_all(changelist):
 class SearchChangeList(ChangeList):
     def __init__(self, **kwargs):
         self.haystack_connection = kwargs.pop('haystack_connection', 'default')
+        kwargs.pop('sortable_by', None)
         super(SearchChangeList, self).__init__(**kwargs)
 
     def get_results(self, request):
@@ -70,6 +71,17 @@ class SearchChangeList(ChangeList):
         self.can_show_all = can_show_all
         self.multi_page = multi_page
         self.paginator = paginator
+
+class SearchQuerySetInternalSearch(SearchQuerySet):
+    def __init__(self, using=None, query=None):
+        super().__init__(using, query)
+        self.query.select_related = False
+
+    def _clone(self, klass=None):
+        clone = super()._clone(klass)
+        clone.query.select_related = False
+        return clone
+
 
 
 class SearchModelAdminMixin(object):
@@ -166,13 +178,12 @@ class SearchModelAdminMixin(object):
         Return a QuerySet of all model instances that can be edited by the
         admin site. This is used by changelist_view.
         """
-        qs = SearchQuerySet(self.haystack_connection)
+        qs = SearchQuerySetInternalSearch(self.haystack_connection).all()
         # TODO: this should be handled by some parameter to the ChangeList.
         ordering = self.get_ordering(request)
         if ordering:
             qs = qs.order_by(*ordering)
         return qs
-
 
 class SearchModelAdmin(SearchModelAdminMixin, ModelAdmin):
     pass
