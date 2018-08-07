@@ -4,9 +4,11 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from django.contrib.admin.options import ModelAdmin, csrf_protect_m
 from django.contrib.admin.views.main import SEARCH_VAR, ChangeList
+from django.contrib.admin.utils import quote
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import InvalidPage, Paginator
 from django.shortcuts import render
+from django.urls import reverse
 from django.utils.encoding import force_text
 from django.utils.translation import ungettext
 
@@ -61,7 +63,7 @@ class SearchChangeList(ChangeList):
             # expecting.
 
             # result_list = [result.object for result in result_list]
-            result_list = [AllIndex(achar=result.achar, aint=result.aint) for result in result_list]
+            result_list = [SearchChangeList._make_model(result) for result in result_list]
 
         except InvalidPage:
             result_list = ()
@@ -75,6 +77,22 @@ class SearchChangeList(ChangeList):
 
     def get_ordering(self, request, queryset):
         return ['-id']
+
+    def url_for_result(self, result):
+        pk = getattr(result, self.pk_attname)
+        url = reverse('admin:%s_%s_change' % (result.internal_search_app_label,
+                                               result._internal_search_model_name),
+                       args=(quote(pk),),
+                       current_app=self.model_admin.admin_site.name)
+        return url
+
+    @staticmethod
+    def _make_model(result):
+        model = AllIndex(pk=result.pk,achar=result.achar, aint=result.aint)
+        model.internal_search_app_label = result.model._meta.app_label
+        model._internal_search_model_name = result.model._meta.model_name
+        return model
+
 
 class SearchQuerySetInternalSearch(SearchQuerySet):
     def __init__(self, using=None, query=None):
