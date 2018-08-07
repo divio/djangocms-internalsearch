@@ -6,13 +6,12 @@ from django.contrib.sites.models import Site
 from django.template import RequestContext
 from django.test import RequestFactory
 
-from cms.models import CMSPlugin, Placeholder, Title
+from cms.models import CMSPlugin, Title
 from cms.toolbar.toolbar import CMSToolbar
 
 from haystack import indexes
 
 from .base import BaseSearchConfig
-from .helpers import render_plugin
 
 
 class PageContentConfig(BaseSearchConfig):
@@ -45,30 +44,30 @@ class PageContentConfig(BaseSearchConfig):
         return Site.objects.filter(pk=site_id).first().domain
 
     def prepare_plugin_types(self, obj):
-        placeholder_ids = (
-            placeholder.pk for placeholder in Placeholder.objects.filter(title=obj.id)
-        )
-        plugin_types = [
-            plugin.plugin_type for plugin in
-            CMSPlugin.objects.filter(placeholder__in=placeholder_ids)
-        ]
-        # Returning unique CMS Plugin types
-        return set(plugin_types)
+        # distinct doesnt work without order_by BUG: https://code.djangoproject.com/ticket/16058
+        plugin_types = CMSPlugin.objects \
+            .filter(placeholder__title=obj.id, language=obj.language) \
+            .order_by() \
+            .values_list('plugin_type', flat=True) \
+            .distinct()
+        return [plugin_type for plugin_type in plugin_types]
 
     def prepare_text(self, obj):
-        rendered_text = []
+        rendered_text_list = []
         language = obj.language
-        placeholder_ids = (
-            placeholder.pk for placeholder in Placeholder.objects.filter(title=obj.id)
-        )
-        plugins = CMSPlugin.objects.filter(placeholder__in=placeholder_ids, language=language)
+        plugins = CMSPlugin.objects \
+            .filter(placeholder__title=obj.id, language=obj.language)
         request = get_request(language)
         context = RequestContext(request)
         renderer = request.toolbar.content_renderer
-        for base_plugin in plugins:
-            rendered_text.append(render_plugin(base_plugin, context, renderer))
 
-        return rendered_text
+        for base_plugin in plugins:
+            rendered_text_list.append(renderer.render_plugin(
+                instance=base_plugin,
+                context=context,
+                editable=False,)
+            )
+        return ' '.join(rendered_text_list)
 
     def prepare_version_status(self, obj):
         # TODO: prepare from djangocms_versioning apps
