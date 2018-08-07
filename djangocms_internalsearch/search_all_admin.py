@@ -35,7 +35,6 @@ def list_max_show_all(changelist):
 class SearchChangeList(ChangeList):
     def __init__(self, **kwargs):
         self.haystack_connection = kwargs.pop('haystack_connection', 'default')
-        kwargs.pop('sortable_by', None)
         super(SearchChangeList, self).__init__(**kwargs)
 
     def get_results(self, request):
@@ -143,7 +142,7 @@ class SearchModelAdminMixin(object):
             'list_per_page': self.list_per_page,
             'list_editable': self.list_editable,
             'model_admin': self,
-            'sortable_by': None,
+            #'sortable_by': None, This might be needed in the next version of django
         }
 
         # Django 1.4 compatibility.
