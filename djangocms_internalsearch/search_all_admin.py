@@ -37,13 +37,14 @@ class SearchChangeList(ChangeList):
         super(SearchChangeList, self).__init__(**kwargs)
 
     def get_results(self, request):
-        if not SEARCH_VAR in request.GET:
-            return super(SearchChangeList, self).get_results(request)
+        # if not SEARCH_VAR in request.GET:
+        #     return super(SearchChangeList, self).get_results(request)
 
         # Note that pagination is 0-based, not 1-based.
         # sqs = SearchQuerySet(self.haystack_connection).models(self.model).auto_query(request.GET[SEARCH_VAR]).load_all()
         sqs = self.root_queryset
-        sqs = sqs.auto_query(request.GET[SEARCH_VAR]).load_all()
+        if SEARCH_VAR in request.GET:
+            sqs = sqs.auto_query(request.GET[SEARCH_VAR]).load_all()
 
         paginator = Paginator(sqs, self.list_per_page)
         # Get the number of objects, with admin filters applied.
@@ -72,6 +73,9 @@ class SearchChangeList(ChangeList):
         self.multi_page = multi_page
         self.paginator = paginator
 
+    def get_ordering(self, request, queryset):
+        return ['-id']
+
 class SearchQuerySetInternalSearch(SearchQuerySet):
     def __init__(self, using=None, query=None):
         super().__init__(using, query)
@@ -93,9 +97,9 @@ class SearchModelAdminMixin(object):
         if not self.has_change_permission(request, None):
             raise PermissionDenied
 
-        if not SEARCH_VAR in request.GET:
-            # Do the usual song and dance.
-            return super(SearchModelAdminMixin, self).changelist_view(request, extra_context)
+        # if not SEARCH_VAR in request.GET:
+        #     # Do the usual song and dance.
+        #     return super(SearchModelAdminMixin, self).changelist_view(request, extra_context)
 
         # # Do a search of just this model and populate a Changelist with the
         # # returned bits.
