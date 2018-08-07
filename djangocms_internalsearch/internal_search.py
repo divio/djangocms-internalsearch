@@ -41,33 +41,37 @@ class PageContentConfig(BaseSearchConfig):
 
     def prepare_site_name(self, obj):
         site_id = obj.page.node.site_id
-        return Site.objects.filter(pk=site_id).first().domain
+        return Site.objects.filter(pk=site_id).values_list('domain', flat=True)[0]
 
     def prepare_plugin_types(self, obj):
-        # distinct doesnt work without order_by BUG: https://code.djangoproject.com/ticket/16058
-        plugin_types = CMSPlugin.objects \
-            .filter(placeholder__title=obj.id, language=obj.language) \
-            .order_by() \
-            .values_list('plugin_type', flat=True) \
+        plugin_types = (
+            CMSPlugin
+            .objects
+            .filter(placeholder__title=obj.pk, language=obj.language)
+            .order_by() # Needed for distinct() with values_list https://code.djangoproject.com/ticket/16058
+            .values_list('plugin_type', flat=True)
             .distinct()
-        return [plugin_type for plugin_type in plugin_types]
+        )
+        return list(plugin_types)
 
     def prepare_text(self, obj):
-        rendered_text_list = []
-        language = obj.language
-        plugins = CMSPlugin.objects \
-            .filter(placeholder__title=obj.id, language=obj.language)
-        request = get_request(language)
+        plugins = CMSPlugin.objects.filter(
+            language=obj.language,
+            placeholder__title=obj.id,
+        )
+        request = get_request(obj.language)
         context = RequestContext(request)
         renderer = request.toolbar.content_renderer
+        rendered_plugins = []
 
         for base_plugin in plugins:
-            rendered_text_list.append(renderer.render_plugin(
+            plugin_content = renderer.render_plugin(
                 instance=base_plugin,
                 context=context,
-                editable=False,)
+                editable=False,
             )
-        return ' '.join(rendered_text_list)
+            rendered_plugins.append(plugin_content)
+        return ' '.join(rendered_plugins)
 
     def prepare_version_status(self, obj):
         # TODO: prepare from djangocms_versioning apps
