@@ -3,7 +3,8 @@ from __future__ import unicode_literals
 from django.apps import AppConfig
 from django.utils.translation import ugettext_lazy as _
 
-from .handlers import update_index
+
+#from .handlers import update_index
 
 
 class InternalsearchConfig(AppConfig):
@@ -11,13 +12,13 @@ class InternalsearchConfig(AppConfig):
     verbose_name = _('django CMS Internal Search')
 
     def ready(self):
-        from cms.signals import (
-            post_obj_operation,
-            post_placeholder_operation
-        )
+        import djangocms_internalsearch.receivers
+        import djangocms_internalsearch.signals # noqa: F401
 
-        post_obj_operation.connect(update_index)
-        post_placeholder_operation.connect(update_index)
-
-        from .search_test_data import create_search_test_data
-        create_search_test_data()
+        # from cms.signals import (
+        #     post_obj_operation,
+        #     post_placeholder_operation
+        # )
+        #
+        # post_obj_operation.connect(update_index)
+        # post_placeholder_operation.connect(update_index)

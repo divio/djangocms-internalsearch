@@ -5,7 +5,7 @@ class BaseSearchConfig(indexes.SearchIndex, indexes.Indexable):
     """
     Base config class to provide list of attributes that sub class must provide
     """
-    text = indexes.NgramField(document=True, use_template=False)
+    text = indexes.EdgeNgramField(document=True, use_template=False)
 
     @property
     def model(self):

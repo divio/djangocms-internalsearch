@@ -1,4 +1,5 @@
 from cms.models.titlemodels import Title
+from djangocms_text_ckeditor.models import Text
 
 from haystack import indexes
 
@@ -9,10 +10,10 @@ class PageContentConfig(BaseSearchConfig):
     """
     Page config and index definition
     """
-    page = indexes.IntegerField(model_attr='page')
+    #page = indexes.IntegerField(model_attr='page')
     title = indexes.CharField(model_attr='title')
     slug = indexes.CharField(model_attr='slug')
-    site_id = indexes.IntegerField()
+    #site_id = indexes.IntegerField()
     site_name = indexes.CharField()
     language = indexes.CharField(model_attr='language')
     plugin_types = indexes.MultiValueField()
@@ -27,9 +28,9 @@ class PageContentConfig(BaseSearchConfig):
     list_display = ('page_title', 'language', 'version_status', 'changed_by')
     list_filter = ('language', 'site_name', 'changed_by',)
 
-    def prepare_site_id(self, obj):
-        # TODO: prepare site_ud (cms_treenode) to save
-        pass
+    # def prepare_site_id(self, obj):
+    #     # TODO: prepare site_ud (cms_treenode) to save
+    #     pass
 
     def prepare_site_name(self, obj):
         # TODO: prepare sitename (cms_treenode) to save
@@ -50,4 +51,18 @@ class PageContentConfig(BaseSearchConfig):
 
     def prepare_created_by(self, obj):
         # TODO: prepare from page model
+        pass
+
+
+class TextContentConfig(BaseSearchConfig):
+    body = indexes.CharField(model_attr='body')
+
+    model = Text
+
+    list_display = ('body', )
+    list_filter = ('body', )
+
+    def prepare_text(self, obj):
+        # TODO: perpare text as string to get rendered data of all cms plugin for
+        # specific page
         pass
