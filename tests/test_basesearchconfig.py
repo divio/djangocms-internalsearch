@@ -43,7 +43,7 @@ class InternalSearchValidConfigTestCase(TestCase):
         with self.assertNotRaises(NotImplementedError):
             for config in registered_configs:
                 for attr in expected_method:
-                    self.assertTrue(attr in config.__dict__)
+                    self.assertTrue(hasattr(config, attr))
 
     def test_search_config_with_expected_attributes(self):
         setup_cms_apps()
@@ -53,4 +53,4 @@ class InternalSearchValidConfigTestCase(TestCase):
         with self.assertNotRaises(NotImplementedError):
             for config in registered_configs:
                 for attr in expected_attributes:
-                    self.assertTrue(attr in config.__dict__)
+                    self.assertTrue(hasattr(config, attr))
