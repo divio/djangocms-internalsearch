@@ -34,7 +34,6 @@ class DemoBoolFilter(admin.SimpleListFilter):
         provided in the query string and retrievable via
         `self.value()`.
         """
-        print('all {}'.format(queryset.count()))
         if self.value() == 'abooltrue':
             return queryset.filter(abool=1)
         if self.value() == 'aboolfalse':
