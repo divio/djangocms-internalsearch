@@ -34,14 +34,10 @@ class DemoBoolFilter(admin.SimpleListFilter):
         provided in the query string and retrievable via
         `self.value()`.
         """
-        # Compare the requested value (either '80s' or '90s')
-        # to decide how to filter the queryset.
         print('all {}'.format(queryset.count()))
         if self.value() == 'abooltrue':
-            print('filter true {}'.format(queryset.filter(abool=1).count()))
             return queryset.filter(abool=1)
         if self.value() == 'aboolfalse':
-            print('filter true {}'.format(queryset.filter(abool=0).count()))
             return queryset.filter(abool=0)
 
 
@@ -56,10 +52,10 @@ class AllAdmin(SearchModelAdmin):
         return False
 
     def achar(self, obj):
-        return obj.achar
+        return obj.internal_search_result.achar
 
     def aint(self, obj):
-        return obj.aint
+        return obj.internal_search_result.aint
 
 
 admin.site.register(Query)

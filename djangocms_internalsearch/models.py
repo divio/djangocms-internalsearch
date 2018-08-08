@@ -10,10 +10,3 @@ class Query(models.Model):
 class QueryProxy(Query):
     class Meta:
         proxy = True
-
-class AllIndex(models.Model):
-    achar = models.TextField()
-    adatetime = models.DateTimeField()
-    aint = models.IntegerField()
-    aurl = models.URLField()
-    abool = models.BooleanField()

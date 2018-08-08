@@ -1,7 +1,6 @@
 # encoding: utf-8
 
 from __future__ import absolute_import, division, print_function, unicode_literals
-import operator
 from django.contrib.admin.options import ModelAdmin, csrf_protect_m
 from django.contrib.admin.views.main import SEARCH_VAR, ChangeList
 from django.contrib.admin.utils import quote
@@ -11,12 +10,9 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.utils.encoding import force_text
 from django.utils.translation import ungettext
-from django.db import models
-from functools import reduce
-from haystack import connections
 from haystack.query import SearchQuerySet
 from haystack.utils import get_model_ct_tuple
-from .models import AllIndex
+from .models import QueryProxy
 
 
 def list_max_show_all(changelist):
@@ -39,11 +35,6 @@ class SearchChangeList(ChangeList):
         super(SearchChangeList, self).__init__(**kwargs)
 
     def get_results(self, request):
-        # if not SEARCH_VAR in request.GET:
-        #     return super(SearchChangeList, self).get_results(request)
-
-        # Note that pagination is 0-based, not 1-based.
-        # sqs = SearchQuerySet(self.haystack_connection).models(self.model).auto_query(request.GET[SEARCH_VAR]).load_all()
         sqs = self.queryset
         if SEARCH_VAR in request.GET:
             sqs = sqs.auto_query(request.GET[SEARCH_VAR]).load_all()
@@ -51,6 +42,7 @@ class SearchChangeList(ChangeList):
         paginator = Paginator(sqs, self.list_per_page)
         # Get the number of objects, with admin filters applied.
         result_count = paginator.count
+        # TODO DL Here be dragons: I don't understand how the line below is working. It must be looked at.
         full_result_count = SearchQuerySet(self.haystack_connection).models(self.model).all().count()
 
         can_show_all = result_count <= list_max_show_all(self)
@@ -59,12 +51,7 @@ class SearchChangeList(ChangeList):
         # Get the list of objects to display on this page.
         try:
             result_list = paginator.page(self.page_num + 1).object_list
-            # Grab just the Django models, since that's what everything else is
-            # expecting.
-
-            # result_list = [result.object for result in result_list]
             result_list = [SearchChangeList._make_model(result) for result in result_list]
-
         except InvalidPage:
             result_list = ()
 
@@ -80,30 +67,19 @@ class SearchChangeList(ChangeList):
 
     def url_for_result(self, result):
         pk = getattr(result, self.pk_attname)
-        url = reverse('admin:%s_%s_change' % (result.internal_search_app_label,
-                                               result._internal_search_model_name),
-                       args=(quote(pk),),
-                       current_app=self.model_admin.admin_site.name)
+        url = reverse('admin:%s_%s_change' % (result.internal_search_result.app_label,
+                                              result.internal_search_result.model_name),
+                      args=(quote(pk),),
+                      current_app=self.model_admin.admin_site.name)
         return url
 
     @staticmethod
     def _make_model(result):
-        model = AllIndex(pk=result.pk,achar=result.achar, aint=result.aint)
-        model.internal_search_app_label = result.model._meta.app_label
-        model._internal_search_model_name = result.model._meta.model_name
+        model = QueryProxy(pk=result.pk)
+        # TODO DL this feels hacky, not sure if there is a better way
+        model.internal_search_result = result
         return model
 
-    # def get_queryset(self, request):
-    #     """
-    #     Return a QuerySet of all model instances that can be edited by the
-    #     admin site. This is used by changelist_view.
-    #     """
-    #     qs = SearchQuerySetInternalSearch(self.haystack_connection).all()
-    #     # TODO: this should be handled by some parameter to the ChangeList.
-    #     ordering = self.get_ordering(request, qs)
-    #     if ordering:
-    #         qs = qs.order_by(*ordering)
-    #     return qs
 
 class SearchQuerySetInternalSearch(SearchQuerySet):
     def __init__(self, using=None, query=None):
@@ -116,7 +92,6 @@ class SearchQuerySetInternalSearch(SearchQuerySet):
         return clone
 
 
-
 class SearchModelAdminMixin(object):
     # haystack connection to use for searching
     haystack_connection = 'default'
@@ -125,10 +100,6 @@ class SearchModelAdminMixin(object):
     def changelist_view(self, request, extra_context=None):
         if not self.has_change_permission(request, None):
             raise PermissionDenied
-
-        # if not SEARCH_VAR in request.GET:
-        #     # Do the usual song and dance.
-        #     return super(SearchModelAdminMixin, self).changelist_view(request, extra_context)
 
         # # Do a search of just this model and populate a Changelist with the
         # # returned bits.
@@ -154,7 +125,7 @@ class SearchModelAdminMixin(object):
             'list_per_page': self.list_per_page,
             'list_editable': self.list_editable,
             'model_admin': self,
-            #'sortable_by': None, This might be needed in the next version of django
+            # 'sortable_by': None, This might be needed in the next version of django
         }
 
         # Django 1.4 compatibility.
@@ -195,7 +166,7 @@ class SearchModelAdminMixin(object):
             'actions_on_top': self.actions_on_top,
             'actions_on_bottom': self.actions_on_bottom,
             'actions_selection_counter': getattr(self, 'actions_selection_counter', 0),
-            'opts': AllIndex._meta
+            'opts': QueryProxy._meta
         }
         context.update(extra_context or {})
         request.current_app = self.admin_site.name
@@ -219,33 +190,9 @@ class SearchModelAdminMixin(object):
         return qs
 
     def get_search_results(self, request, queryset, search_term):
-        """
-        Returns a tuple containing a queryset to implement the search,
-        and a boolean indicating if the results may contain duplicates.
-        """
-        # Apply keyword searches.
-        def construct_search(field_name):
-            if field_name.startswith('^'):
-                return "%s__istartswith" % field_name[1:]
-            elif field_name.startswith('='):
-                return "%s__iexact" % field_name[1:]
-            elif field_name.startswith('@'):
-                return "%s__search" % field_name[1:]
-            else:
-                return "%s__icontains" % field_name
-
-        use_distinct = False
-        search_fields = self.get_search_fields(request)
-        if search_fields and search_term:
-            orm_lookups = [construct_search(str(search_field))
-                           for search_field in search_fields]
-            for bit in search_term.split():
-                or_queries = [models.Q(**{orm_lookup: bit})
-                              for orm_lookup in orm_lookups]
-                queryset = queryset.filter(reduce(operator.or_, or_queries))
-
-
+        """Override the base class"""
         return queryset, False
+
 
 class SearchModelAdmin(SearchModelAdminMixin, ModelAdmin):
     pass
