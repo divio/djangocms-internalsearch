@@ -1,10 +1,7 @@
 from django.contrib import admin
-from .search_all_admin import SearchModelAdmin
 
-from .models import (
-    Query,
-    QueryProxy
-)
+from .models import Query, QueryProxy
+from .search_all_admin import SearchModelAdmin
 
 
 class DemoBoolFilter(admin.SimpleListFilter):

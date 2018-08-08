@@ -1,17 +1,25 @@
 # encoding: utf-8
 
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
+
 from django.contrib.admin.options import ModelAdmin, csrf_protect_m
-from django.contrib.admin.views.main import SEARCH_VAR, ChangeList
 from django.contrib.admin.utils import quote
+from django.contrib.admin.views.main import SEARCH_VAR, ChangeList
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import InvalidPage, Paginator
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils.encoding import force_text
 from django.utils.translation import ungettext
+
 from haystack.query import SearchQuerySet
 from haystack.utils import get_model_ct_tuple
+
 from .models import QueryProxy
 
 
@@ -132,7 +140,6 @@ class SearchModelAdminMixin(object):
             kwargs['list_max_show_all'] = self.list_max_show_all
 
         changelist = SearchChangeList(**kwargs)
-        formset = changelist.formset = None
         media = self.media
 
         # Build the action form and populate it with available actions.
