@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 from __future__ import absolute_import, division, print_function, unicode_literals
-
+import operator
 from django.contrib.admin.options import ModelAdmin, csrf_protect_m
 from django.contrib.admin.views.main import SEARCH_VAR, ChangeList
 from django.contrib.admin.utils import quote
@@ -11,7 +11,8 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.utils.encoding import force_text
 from django.utils.translation import ungettext
-
+from django.db import models
+from functools import reduce
 from haystack import connections
 from haystack.query import SearchQuerySet
 from haystack.utils import get_model_ct_tuple
@@ -43,7 +44,7 @@ class SearchChangeList(ChangeList):
 
         # Note that pagination is 0-based, not 1-based.
         # sqs = SearchQuerySet(self.haystack_connection).models(self.model).auto_query(request.GET[SEARCH_VAR]).load_all()
-        sqs = self.root_queryset
+        sqs = self.queryset
         if SEARCH_VAR in request.GET:
             sqs = sqs.auto_query(request.GET[SEARCH_VAR]).load_all()
 
@@ -92,17 +93,17 @@ class SearchChangeList(ChangeList):
         model._internal_search_model_name = result.model._meta.model_name
         return model
 
-    def get_queryset(self, request):
-        """
-        Return a QuerySet of all model instances that can be edited by the
-        admin site. This is used by changelist_view.
-        """
-        qs = SearchQuerySetInternalSearch(self.haystack_connection).all()
-        # TODO: this should be handled by some parameter to the ChangeList.
-        ordering = self.get_ordering(request, qs)
-        if ordering:
-            qs = qs.order_by(*ordering)
-        return qs
+    # def get_queryset(self, request):
+    #     """
+    #     Return a QuerySet of all model instances that can be edited by the
+    #     admin site. This is used by changelist_view.
+    #     """
+    #     qs = SearchQuerySetInternalSearch(self.haystack_connection).all()
+    #     # TODO: this should be handled by some parameter to the ChangeList.
+    #     ordering = self.get_ordering(request, qs)
+    #     if ordering:
+    #         qs = qs.order_by(*ordering)
+    #     return qs
 
 class SearchQuerySetInternalSearch(SearchQuerySet):
     def __init__(self, using=None, query=None):
@@ -216,6 +217,35 @@ class SearchModelAdminMixin(object):
         if ordering:
             qs = qs.order_by(*ordering)
         return qs
+
+    def get_search_results(self, request, queryset, search_term):
+        """
+        Returns a tuple containing a queryset to implement the search,
+        and a boolean indicating if the results may contain duplicates.
+        """
+        # Apply keyword searches.
+        def construct_search(field_name):
+            if field_name.startswith('^'):
+                return "%s__istartswith" % field_name[1:]
+            elif field_name.startswith('='):
+                return "%s__iexact" % field_name[1:]
+            elif field_name.startswith('@'):
+                return "%s__search" % field_name[1:]
+            else:
+                return "%s__icontains" % field_name
+
+        use_distinct = False
+        search_fields = self.get_search_fields(request)
+        if search_fields and search_term:
+            orm_lookups = [construct_search(str(search_field))
+                           for search_field in search_fields]
+            for bit in search_term.split():
+                or_queries = [models.Q(**{orm_lookup: bit})
+                              for orm_lookup in orm_lookups]
+                queryset = queryset.filter(reduce(operator.or_, or_queries))
+
+
+        return queryset, False
 
 class SearchModelAdmin(SearchModelAdminMixin, ModelAdmin):
     pass
