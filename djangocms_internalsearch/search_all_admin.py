@@ -198,6 +198,7 @@ class SearchModelAdminMixin(object):
 
     def get_search_results(self, request, queryset, search_term):
         """Override the base class"""
+        # TODO DL not sure about cutting the base class functionality of this function completely. 
         return queryset, False
 
 
