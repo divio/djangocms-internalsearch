@@ -48,7 +48,7 @@ class PageContentConfig(BaseSearchConfig):
             CMSPlugin
             .objects
             .filter(placeholder__title=obj.pk, language=obj.language)
-            .order_by() # Needed for distinct() with values_list https://code.djangoproject.com/ticket/16058
+            .order_by()  # Needed for distinct() with values_list https://code.djangoproject.com/ticket/16058
             .values_list('plugin_type', flat=True)
             .distinct()
         )
