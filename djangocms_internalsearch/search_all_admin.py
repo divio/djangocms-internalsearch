@@ -42,8 +42,7 @@ class SearchChangeList(ChangeList):
         paginator = Paginator(sqs, self.list_per_page)
         # Get the number of objects, with admin filters applied.
         result_count = paginator.count
-        # TODO DL Here be dragons: I don't understand how the line below is working. It must be looked at.
-        full_result_count = SearchQuerySet(self.haystack_connection).models(self.model).all().count()
+        full_result_count = SearchQuerySet(self.haystack_connection).all().count()
 
         can_show_all = result_count <= list_max_show_all(self)
         multi_page = result_count > self.list_per_page
