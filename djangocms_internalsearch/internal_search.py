@@ -7,6 +7,7 @@ from django.template import RequestContext
 from django.test import RequestFactory
 
 from cms.models import CMSPlugin, Title
+# from djangocms_text_ckeditor.models import Text
 from cms.toolbar.toolbar import CMSToolbar
 
 from haystack import indexes
@@ -81,6 +82,18 @@ class PageContentConfig(BaseSearchConfig):
 
     def prepare_created_by(self, obj):
         return obj.page.changed_by
+
+
+# class TextContentConfig(BaseSearchConfig):
+#     body = indexes.CharField(model_attr='body')
+#
+#     model = Text
+#
+#     list_display = ('body', )
+#     list_filter = ('body', )
+#
+#     def prepare_text(self, obj):
+#         return "%s" % obj.body
 
 
 def get_request(language=None):
