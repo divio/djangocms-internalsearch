@@ -7,13 +7,7 @@ class Query(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
 
-class QueryProxy(Query):
+class InternalSearchProxy(Query):
     class Meta:
         proxy = True
-
-class AllIndex(models.Model):
-    achar = models.TextField()
-    adatetime = models.DateTimeField()
-    aint = models.IntegerField()
-    aurl = models.URLField()
-    abool = models.BooleanField()
+        verbose_name_plural = "Internal Searches"
