@@ -15,11 +15,18 @@ from django.utils.encoding import force_text
 from django.utils.translation import ungettext
 from django.db import models
 
+from cms.utils.urlutils import admin_reverse
+
 from haystack.query import SearchQuerySet
 from haystack.utils import get_model_ct_tuple
 from haystack.admin import SearchModelAdminMixin
-
+# from haystack.inputs import AutoQuery
 from .models import InternalSearchProxy
+from .filters import (
+    LanguageFilter,
+    VersionStateFilter,
+    ContentTypeFilter
+)
 
 
 class InternalSearchChangeList(ChangeList):
@@ -30,15 +37,18 @@ class InternalSearchChangeList(ChangeList):
     def get_results(self, request):
 
         sqs = self.queryset
-        if SEARCH_VAR in request.GET:
-            sqs = sqs.auto_query(request.GET[SEARCH_VAR]).load_all()
+        query = None
+        if hasattr(request, 'SEARCH_VAR'):
+            query = request.GET('SEARCH_VAR')
+
+        if query:
+            sqs = sqs.auto_query(query)
 
         paginator = Paginator(sqs, self.list_per_page)
-
         # Get the number of objects, with admin filters applied.
         result_count = paginator.count
         full_result_count = SearchQuerySet(
-            self.haystack_connection).models(self.model).all().count()
+            self.haystack_connection).all().count()
 
         can_show_all = result_count <= self.list_max_show_all
         multi_page = result_count > self.list_per_page
@@ -51,7 +61,8 @@ class InternalSearchChangeList(ChangeList):
 
             # result_list = [result.object for result in result_list]
             result_list = [InternalSearchChangeList._make_model(
-                result) for result in result_list]
+                result) for result in result_list
+            ]
 
         except InvalidPage:
             result_list = ()
@@ -64,12 +75,13 @@ class InternalSearchChangeList(ChangeList):
         self.paginator = paginator
 
     def get_ordering(self, request, queryset):
-        return ['-id']
+        return ['-id', ]
 
     def url_for_result(self, result):
         pk = getattr(result, self.pk_attname)
-        url = reverse('admin:%s_%s_change' % (result.internal_search_app_label,
-                                              result._internal_search_model_name),
+        # title = getattr(result, 'title')
+        url = reverse('admin:%s_%s_change' % (result.app_label,
+                                              result.model_name),
                       args=(quote(pk),),
                       current_app=self.model_admin.admin_site.name)
         return url
@@ -77,9 +89,9 @@ class InternalSearchChangeList(ChangeList):
     @staticmethod
     def _make_model(result):
         model = InternalSearchProxy(pk=result.pk)
-        model.internal_search_app_label = result.model._meta.app_label
-        model._internal_search_model_name = result.model._meta.model_name
         model.result = result
+        model.app_label = result.model._meta.app_label
+        model.model_name = result.model._meta.model_name
         return model
 
 
@@ -147,6 +159,7 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
             'cl': changelist,
             'media': media,
             'has_add_permission': self.has_add_permission(request),
+            # More Django 1.4 compatibility
             'root_path': getattr(self.admin_site, 'root_path', None),
             'app_label': self.model._meta.app_label,
             'action_form': action_form,
@@ -181,7 +194,9 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
         Returns a tuple containing a queryset to implement the search,
         and a boolean indicating if the results may contain duplicates.
         """
+
         # Apply keyword searches.
+
         def construct_search(field_name):
             if field_name.startswith('^'):
                 return "%s__istartswith" % field_name[1:]
@@ -205,53 +220,15 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
         return queryset, False
 
 
-class SearchModelAdmin(InternalSearchModelAdminMixin, ModelAdmin):
-    pass
-
-# class DemoBoolFilter(admin.SimpleListFilter):
-# # Human-readable title which will be displayed in the
-# # right admin sidebar just above the filter options.
-#     title = 'Filter bools'
-#
-#     # Parameter for the filter that will be used in the URL query.
-#     parameter_name = 'abool'
-#
-#     def lookups(self, request, model_admin):
-#         """
-#         Returns a list of tuples. The first element in each
-#         tuple is the coded value for the option that will
-#         appear in the URL query. The second element is the
-#         human-readable name for the option that will appear
-#         in the right sidebar.
-#         """
-#         return (
-#             ('abooltrue', 'abool True'),
-#             ('aboolfalse', 'abool False'),
-#         )
-#
-#     def queryset(self, request, queryset):
-#         """
-#         Returns the filtered queryset based on the value
-#         provided in the query string and retrievable via
-#         `self.value()`.
-#         """
-#         # Compare the requested value (either '80s' or '90s')
-#         # to decide how to filter the queryset.
-#         print('all {}'.format(queryset.count()))
-#         if self.value() == 'abooltrue':
-#             print('filter true {}'.format(queryset.filter(abool=1).count()))
-#             return queryset.filter(abool=1)
-#         if self.value() == 'aboolfalse':
-#             print('filter true {}'.format(queryset.filter(abool=0).count()))
-#             return queryset.filter(abool=0)
-#
-
-
 @admin.register(InternalSearchProxy)
-class IntenalSearchAdmin(SearchModelAdmin):
-    search_fields = ('text',)
-    # list_filter = (DemoBoolFilter,)
-    list_display = ['title', 'site_name', 'language', 'author', 'content_type', 'version_state']
+class IntenalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin):
+    search_fields = ('text', 'title')
+    list_filter = (LanguageFilter, VersionStateFilter)
+    list_display = ['id', 'title_link', 'site_name', 'language',
+                    'author', 'content_type', 'version_status']
+    list_per_page = 10
+
+    # ordering = ("title", "author")
 
     def has_add_permission(self, request):
         return False
@@ -265,18 +242,19 @@ class IntenalSearchAdmin(SearchModelAdmin):
     def site_name(self, obj):
         return obj.result.site_name
 
-    def title(self, obj):
-        # import ipdb
-        # ipdb.set_trace()
-        return obj.result.title
+    def title_link(self, obj):
+        url = admin_reverse('cms_page_preview_page', args=[obj.result.page, obj.result.language])
+        return u'<a href="%s">%s</a>' % (url, obj.result.title)
+    title_link.allow_tags = True
+    title_link.short_description = 'Title'
 
     def author(self, obj):
         return obj.result.created_by
 
     def content_type(self, obj):
-        return obj.result.content_type()
+        return obj.result.model.__name__
 
-    def version_state(self, obj):
+    def version_status(self, obj):
         return obj.result.version_status
     # def get_title(self, obj):
     #     return obj.title
