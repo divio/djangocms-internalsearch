@@ -12,8 +12,6 @@ class InternalsearchConfig(AppConfig):
     verbose_name = _('django CMS Internal Search')
 
     def ready(self):
-        #import djangocms_internalsearch.receivers
-        import djangocms_internalsearch.signals # noqa: F401
 
         from cms.signals import (
             post_obj_operation,

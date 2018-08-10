@@ -10,6 +10,6 @@ def update_index(sender, operation, request, token, **kwargs):
     from cms.models.titlemodels import Title
     from cms.models import Page
 
-    #if sender in [Title, Page]:
+    # if sender in [Title, Page]:
     save_to_index(Title, operation, request, token, **kwargs)
 
