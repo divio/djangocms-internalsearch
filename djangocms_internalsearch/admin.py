@@ -24,8 +24,7 @@ from haystack.admin import SearchModelAdminMixin
 from .models import InternalSearchProxy
 from .filters import (
     LanguageFilter,
-    VersionStateFilter,
-    ContentTypeFilter
+    VersionStateFilter
 )
 
 
@@ -45,6 +44,7 @@ class InternalSearchChangeList(ChangeList):
             sqs = sqs.auto_query(query)
 
         paginator = Paginator(sqs, self.list_per_page)
+
         # Get the number of objects, with admin filters applied.
         result_count = paginator.count
         full_result_count = SearchQuerySet(
@@ -58,10 +58,9 @@ class InternalSearchChangeList(ChangeList):
             result_list = paginator.page(self.page_num + 1).object_list
             # Grab just the Django models, since that's what everything else is
             # expecting.
-
-            # result_list = [result.object for result in result_list]
-            result_list = [InternalSearchChangeList._make_model(
-                result) for result in result_list
+            result_list = [
+                InternalSearchChangeList._make_model(result)
+                for result in result_list
             ]
 
         except InvalidPage:
@@ -79,7 +78,6 @@ class InternalSearchChangeList(ChangeList):
 
     def url_for_result(self, result):
         pk = getattr(result, self.pk_attname)
-        # title = getattr(result, 'title')
         url = reverse('admin:%s_%s_change' % (result.app_label,
                                               result.model_name),
                       args=(quote(pk),),
@@ -129,7 +127,6 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
             'list_editable': self.list_editable,
             'model_admin': self,
             'list_max_show_all': self.list_max_show_all
-            #'sortable_by': None, This might be needed in the next version of django
         }
 
         changelist = InternalSearchChangeList(**kwargs)
@@ -195,8 +192,6 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
         and a boolean indicating if the results may contain duplicates.
         """
 
-        # Apply keyword searches.
-
         def construct_search(field_name):
             if field_name.startswith('^'):
                 return "%s__istartswith" % field_name[1:]
@@ -228,8 +223,6 @@ class IntenalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin):
                     'author', 'content_type', 'version_status']
     list_per_page = 10
 
-    # ordering = ("title", "author")
-
     def has_add_permission(self, request):
         return False
 
@@ -245,6 +238,7 @@ class IntenalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin):
     def title_link(self, obj):
         url = admin_reverse('cms_page_preview_page', args=[obj.result.page, obj.result.language])
         return u'<a href="%s">%s</a>' % (url, obj.result.title)
+
     title_link.allow_tags = True
     title_link.short_description = 'Title'
 
@@ -256,9 +250,3 @@ class IntenalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin):
 
     def version_status(self, obj):
         return obj.result.version_status
-    # def get_title(self, obj):
-    #     return obj.title
-
-    # def __getattr__(self, obj):
-    #     if hasattr(obj, 'title'):
-    #         return getattr(obj, 'title')

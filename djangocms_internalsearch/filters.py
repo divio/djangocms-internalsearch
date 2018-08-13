@@ -1,9 +1,6 @@
 from django.contrib import admin
 
 from cms.models.titlemodels import Title
-# from haystack.query import SearchQuerySet
-
-# from .admin import InternalSearchModelAdminMixin
 
 
 class LanguageFilter(admin.SimpleListFilter):
