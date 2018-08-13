@@ -1,31 +1,33 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import operator
 from functools import reduce
 
 from django.contrib import admin
 from django.contrib.admin.options import ModelAdmin, csrf_protect_m
-from django.contrib.admin.views.main import SEARCH_VAR, ChangeList
 from django.contrib.admin.utils import quote
+from django.contrib.admin.views.main import ChangeList
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import InvalidPage, Paginator
+from django.db import models
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils.encoding import force_text
 from django.utils.translation import ungettext
-from django.db import models
 
 from cms.utils.urlutils import admin_reverse
 
+from haystack.admin import SearchModelAdminMixin
 from haystack.query import SearchQuerySet
 from haystack.utils import get_model_ct_tuple
-from haystack.admin import SearchModelAdminMixin
-# from haystack.inputs import AutoQuery
+
+from .filters import LanguageFilter, VersionStateFilter
 from .models import InternalSearchProxy
-from .filters import (
-    LanguageFilter,
-    VersionStateFilter
-)
 
 
 class InternalSearchChangeList(ChangeList):
@@ -221,7 +223,7 @@ class IntenalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin):
     list_filter = (LanguageFilter, VersionStateFilter)
     list_display = ['id', 'title_link', 'site_name', 'language',
                     'author', 'content_type', 'version_status']
-    list_per_page = 10
+    list_per_page = 15
 
     def has_add_permission(self, request):
         return False

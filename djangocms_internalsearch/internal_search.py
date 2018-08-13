@@ -19,7 +19,7 @@ class PageContentConfig(BaseSearchConfig):
     Page config and index definition
     """
     page = indexes.IntegerField(model_attr='page__id')
-    title = indexes.CharField(model_attr='title', boost=1.25)
+    title = indexes.CharField(model_attr='title')
     slug = indexes.CharField(model_attr='slug')
     site_id = indexes.IntegerField()
     site_name = indexes.CharField()
