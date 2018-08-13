@@ -26,7 +26,7 @@ from haystack.admin import SearchModelAdminMixin
 from haystack.query import SearchQuerySet
 from haystack.utils import get_model_ct_tuple
 
-from .filters import LanguageFilter, VersionStateFilter
+from .filters import AuthorFilter, LanguageFilter, VersionStateFilter
 from .models import InternalSearchProxy
 
 
@@ -76,7 +76,7 @@ class InternalSearchChangeList(ChangeList):
         self.paginator = paginator
 
     def get_ordering(self, request, queryset):
-        return ['-id', ]
+        return self.model_admin.ordering
 
     def url_for_result(self, result):
         pk = getattr(result, self.pk_attname)
@@ -128,7 +128,8 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
             'list_per_page': self.list_per_page,
             'list_editable': self.list_editable,
             'model_admin': self,
-            'list_max_show_all': self.list_max_show_all
+            'list_max_show_all': self.list_max_show_all,
+
         }
 
         changelist = InternalSearchChangeList(**kwargs)
@@ -165,9 +166,12 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
             'actions_on_top': self.actions_on_top,
             'actions_on_bottom': self.actions_on_bottom,
             'actions_selection_counter': getattr(self, 'actions_selection_counter', 0),
-            'opts': InternalSearchProxy._meta
+            'opts': InternalSearchProxy._meta,
+
         }
-        context.update(extra_context or {})
+        if extra_context:
+            context.update(extra_context)
+
         request.current_app = self.admin_site.name
         app_name, model_name = get_model_ct_tuple(self.model)
         return render(request, self.change_list_template or [
@@ -220,10 +224,11 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
 @admin.register(InternalSearchProxy)
 class IntenalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin):
     search_fields = ('text', 'title')
-    list_filter = (LanguageFilter, VersionStateFilter)
+    list_filter = (LanguageFilter, VersionStateFilter, AuthorFilter)
     list_display = ['id', 'title_link', 'site_name', 'language',
                     'author', 'content_type', 'version_status']
     list_per_page = 15
+    ordering = ('-id',)
 
     def has_add_permission(self, request):
         return False
