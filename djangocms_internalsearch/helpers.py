@@ -24,4 +24,3 @@ def save_to_index(sender, operation, request, token, **kwargs):
             index.remove_object(obj)
         else:
             index.update_object(obj)
-

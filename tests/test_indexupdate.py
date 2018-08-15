@@ -1,19 +1,22 @@
-from cms.models import Title, CMSPlugin
-from djangocms_internalsearch.helpers import save_to_index
-from tests.utils import BaseTestCase
-from djangocms_internalsearch.internal_search import PageContentConfig
-
-from cms.api import add_plugin
 from django.template import engines
 
-from haystack.query import SearchQuerySet
-from cms.plugin_pool import plugin_pool
+from cms.api import add_plugin
+from cms.models import CMSPlugin, Title
 from cms.plugin_base import CMSPluginBase
+from cms.plugin_pool import plugin_pool
+
+from tests.utils import BaseTestCase
+
+from djangocms_internalsearch.helpers import save_to_index
+from djangocms_internalsearch.internal_search import PageContentConfig
+from haystack.query import SearchQuerySet
+
 
 def template_from_string(value):
     """Create an engine-specific template based on provided string.
     """
     return engines.all()[0].from_string(value)
+
 
 class NotIndexedPlugin(CMSPluginBase):
     model = CMSPlugin
@@ -22,6 +25,7 @@ class NotIndexedPlugin(CMSPluginBase):
 
     def render(self, context, instance, placeholder):
         return context
+
 
 plugin_pool.register_plugin(NotIndexedPlugin)
 

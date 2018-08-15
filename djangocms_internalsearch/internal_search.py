@@ -40,7 +40,6 @@ class PageContentConfig(BaseSearchConfig):
     def prepare_site_id(self, obj):
         return obj.page.node.site_id
 
-
     def prepare_site_name(self, obj):
         site_id = obj.page.node.site_id
         return Site.objects.filter(pk=site_id).values_list('domain', flat=True)[0]
