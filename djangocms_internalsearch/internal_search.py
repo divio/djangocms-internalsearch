@@ -7,6 +7,7 @@ from django.template import RequestContext
 from django.test import RequestFactory
 
 from cms.models import CMSPlugin, Title
+# from djangocms_text_ckeditor.models import Text
 from cms.toolbar.toolbar import CMSToolbar
 
 from haystack import indexes
