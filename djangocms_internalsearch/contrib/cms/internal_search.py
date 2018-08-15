@@ -11,7 +11,9 @@ from cms.toolbar.toolbar import CMSToolbar
 
 from haystack import indexes
 
-from .base import BaseSearchConfig
+from djangocms_internalsearch.contrib.cms.filters import AuthorFilter
+
+from djangocms_internalsearch.base import BaseSearchConfig
 
 
 class PageContentConfig(BaseSearchConfig):
@@ -80,6 +82,8 @@ class PageContentConfig(BaseSearchConfig):
     # admin setting
     list_display = ['id', 'title', 'slug', 'site_name', 'language',
                     'author', 'content_type', 'version_status']
+
+    list_filter = (AuthorFilter, )
 
     search_fields = ('text', 'title')
     list_per_page = 15

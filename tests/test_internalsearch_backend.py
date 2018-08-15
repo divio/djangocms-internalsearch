@@ -4,7 +4,7 @@ from haystack.utils import loading
 
 from djangocms_internalsearch.base import BaseSearchConfig
 from djangocms_internalsearch.engine import InternalSearchESEngine
-from djangocms_internalsearch.internal_search import PageContentConfig
+from djangocms_internalsearch.contrib.cms.internal_search import PageContentConfig
 from djangocms_internalsearch.test_utils.app_1.cms_config import (
     TestModel3Config,
     TestModel4Config,

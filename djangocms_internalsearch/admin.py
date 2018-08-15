@@ -16,6 +16,8 @@ from haystack.admin import SearchChangeList, SearchModelAdminMixin
 from haystack.query import SearchQuerySet
 from haystack.utils import get_model_ct_tuple
 
+from djangocms_internalsearch.contrib.cms.filters import AuthorFilter
+
 from .models import InternalSearchProxy
 
 
@@ -85,6 +87,7 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
         if not self.has_change_permission(request, None):
             raise PermissionDenied
 
+        # Todo: assign admin attributes from config based on model
         list_display = list(self.list_display)
         list_filter = self.list_filter
 
@@ -199,6 +202,8 @@ class InternalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin):
     # Todo: use model config to generate admin attributes and methods
     list_display = ['id', 'title', 'slug', 'site_name', 'language',
                     'author', 'content_type', 'version_status']
+
+    list_filter = (AuthorFilter, )
 
     search_fields = ('text', 'title')
     list_per_page = 15
