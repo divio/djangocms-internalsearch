@@ -84,18 +84,6 @@ class PageContentConfig(BaseSearchConfig):
         return obj.page.changed_by
 
 
-# class TextContentConfig(BaseSearchConfig):
-#     body = indexes.CharField(model_attr='body')
-#
-#     model = Text
-#
-#     list_display = ('body', )
-#     list_filter = ('body', )
-#
-#     def prepare_text(self, obj):
-#         return "%s" % obj.body
-
-
 def get_request(language=None):
     """
     Returns a Request instance populated with cms specific attributes.
