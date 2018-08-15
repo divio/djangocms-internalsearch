@@ -11,9 +11,8 @@ from cms.toolbar.toolbar import CMSToolbar
 
 from haystack import indexes
 
-from djangocms_internalsearch.contrib.cms.filters import AuthorFilter
-
 from djangocms_internalsearch.base import BaseSearchConfig
+from djangocms_internalsearch.contrib.cms.filters import AuthorFilter
 
 
 class PageContentConfig(BaseSearchConfig):
