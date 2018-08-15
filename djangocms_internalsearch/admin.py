@@ -1,56 +1,39 @@
-from __future__ import (
-    absolute_import,
-    division,
-    print_function,
-    unicode_literals,
-)
+from __future__ import print_function, unicode_literals
 
 import operator
 from functools import reduce
 
 from django.contrib import admin
 from django.contrib.admin.options import ModelAdmin, csrf_protect_m
-from django.contrib.admin.utils import quote
-from django.contrib.admin.views.main import ChangeList
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import InvalidPage, Paginator
 from django.db import models
 from django.shortcuts import render
-from django.urls import reverse
 from django.utils.encoding import force_text
 from django.utils.translation import ungettext
 
-from cms.utils.urlutils import admin_reverse
-
-from haystack.admin import SearchModelAdminMixin
+from haystack.admin import SearchChangeList, SearchModelAdminMixin
 from haystack.query import SearchQuerySet
 from haystack.utils import get_model_ct_tuple
 
-from .filters import AuthorFilter, LanguageFilter, VersionStateFilter
 from .models import InternalSearchProxy
 
 
-class InternalSearchChangeList(ChangeList):
-    def __init__(self, **kwargs):
-        self.haystack_connection = kwargs.pop('haystack_connection', 'default')
-        super(InternalSearchChangeList, self).__init__(**kwargs)
+class InternalSearchChangeList(SearchChangeList):
 
     def get_results(self, request):
 
         sqs = self.queryset
-        query = None
         if hasattr(request, 'SEARCH_VAR'):
             query = request.GET('SEARCH_VAR')
-
-        if query:
-            sqs = sqs.auto_query(query)
+            if query:
+                sqs = sqs.auto_query(query)
 
         paginator = Paginator(sqs, self.list_per_page)
 
         # Get the number of objects, with admin filters applied.
         result_count = paginator.count
-        full_result_count = SearchQuerySet(
-            self.haystack_connection).all().count()
+        full_result_count = sqs.count()
 
         can_show_all = result_count <= self.list_max_show_all
         multi_page = result_count > self.list_per_page
@@ -75,17 +58,6 @@ class InternalSearchChangeList(ChangeList):
         self.multi_page = multi_page
         self.paginator = paginator
 
-    def get_ordering(self, request, queryset):
-        return self.model_admin.ordering
-
-    def url_for_result(self, result):
-        pk = getattr(result, self.pk_attname)
-        url = reverse('admin:%s_%s_change' % (result.app_label,
-                                              result.model_name),
-                      args=(quote(pk),),
-                      current_app=self.model_admin.admin_site.name)
-        return url
-
     @staticmethod
     def _make_model(result):
         model = InternalSearchProxy(pk=result.pk)
@@ -95,7 +67,7 @@ class InternalSearchChangeList(ChangeList):
         return model
 
 
-class SearchQuerySetInternalSearch(SearchQuerySet):
+class InternalSearchQuerySet(SearchQuerySet):
     def __init__(self, using=None, query=None):
         super().__init__(using, query)
         self.query.select_related = False
@@ -114,6 +86,7 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
             raise PermissionDenied
 
         list_display = list(self.list_display)
+        list_filter = self.list_filter
 
         kwargs = {
             'haystack_connection': self.haystack_connection,
@@ -121,7 +94,7 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
             'model': self.model,
             'list_display': list_display,
             'list_display_links': self.list_display_links,
-            'list_filter': self.list_filter,
+            'list_filter': list_filter,
             'date_hierarchy': self.date_hierarchy,
             'search_fields': self.search_fields,
             'list_select_related': self.list_select_related,
@@ -133,7 +106,7 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
         }
 
         changelist = InternalSearchChangeList(**kwargs)
-        formset = changelist.formset = None
+        changelist.formset = None
         media = self.media
 
         # Build the action form and populate it with available actions.
@@ -185,7 +158,7 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
         Return a QuerySet of all model instances that can be edited by the
         admin site. This is used by changelist_view.
         """
-        qs = SearchQuerySetInternalSearch(self.haystack_connection).all()
+        qs = InternalSearchQuerySet(self.haystack_connection).all()
         # TODO: this should be handled by some parameter to the ChangeList.
         ordering = self.get_ordering(request)
         if ordering:
@@ -208,7 +181,6 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
             else:
                 return "%s__icontains" % field_name
 
-        use_distinct = False
         search_fields = self.get_search_fields(request)
         if search_fields and search_term:
             orm_lookups = [construct_search(str(search_field))
@@ -222,32 +194,33 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
 
 
 @admin.register(InternalSearchProxy)
-class IntenalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin):
-    search_fields = ('text', 'title')
-    list_filter = (LanguageFilter, VersionStateFilter, AuthorFilter)
-    list_display = ['id', 'title_link', 'site_name', 'language',
+class InternalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin):
+
+    # Todo: use model config to generate admin attributes and methods
+    list_display = ['id', 'title', 'slug', 'site_name', 'language',
                     'author', 'content_type', 'version_status']
+
+    search_fields = ('text', 'title')
     list_per_page = 15
     ordering = ('-id',)
 
     def has_add_permission(self, request):
         return False
 
+    def slug(self, obj):
+        return obj.result.slug
+
     def text(self, obj):
         return obj.text
+
+    def title(self, obj):
+        return obj.result.title
 
     def language(self, obj):
         return obj.result.language
 
     def site_name(self, obj):
         return obj.result.site_name
-
-    def title_link(self, obj):
-        url = admin_reverse('cms_page_preview_page', args=[obj.result.page, obj.result.language])
-        return u'<a href="%s">%s</a>' % (url, obj.result.title)
-
-    title_link.allow_tags = True
-    title_link.short_description = 'Title'
 
     def author(self, obj):
         return obj.result.created_by
