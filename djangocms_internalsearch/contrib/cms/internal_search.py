@@ -11,7 +11,8 @@ from cms.toolbar.toolbar import CMSToolbar
 
 from haystack import indexes
 
-from .base import BaseSearchConfig
+from djangocms_internalsearch.base import BaseSearchConfig
+from djangocms_internalsearch.contrib.cms.filters import AuthorFilter
 
 
 class PageContentConfig(BaseSearchConfig):
@@ -31,10 +32,6 @@ class PageContentConfig(BaseSearchConfig):
 
     # model class attribute
     model = Title
-
-    # admin setting
-    list_display = ('page_title', 'language', 'version_status', 'changed_by')
-    list_filter = ('language', 'site_name', 'changed_by',)
 
     def prepare_site_id(self, obj):
         return obj.page.node.site_id
@@ -80,6 +77,16 @@ class PageContentConfig(BaseSearchConfig):
 
     def prepare_created_by(self, obj):
         return obj.page.changed_by
+
+    # admin setting
+    list_display = ['id', 'title', 'slug', 'site_name', 'language',
+                    'author', 'content_type', 'version_status']
+
+    list_filter = (AuthorFilter, )
+
+    search_fields = ('text', 'title')
+    list_per_page = 15
+    ordering = ('-id',)
 
 
 def get_request(language=None):
