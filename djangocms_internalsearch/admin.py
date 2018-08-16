@@ -72,11 +72,6 @@ class InternalSearchQuerySet(SearchQuerySet):
         super().__init__(using, query)
         self.query.select_related = False
 
-    def _clone(self, klass=None):
-        clone = super()._clone(klass)
-        clone.query.select_related = False
-        return clone
-
 
 class InternalSearchModelAdminMixin(SearchModelAdminMixin):
 
