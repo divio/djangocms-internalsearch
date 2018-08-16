@@ -12,6 +12,10 @@ from tests.utils import BaseTestCase
 from djangocms_internalsearch.helpers import save_to_index
 from djangocms_internalsearch.internal_search import PageContentConfig
 
+from . import settings
+
+import elasticsearch
+
 
 def template_from_string(value):
     """Create an engine-specific template based on provided string.
@@ -37,6 +41,12 @@ class UpdateIndexTestCase(BaseTestCase):
         self.index = PageContentConfig()
         self.request = None
         self.token = None
+        self.raw_es = elasticsearch.Elasticsearch(settings.HELPER_SETTINGS["HAYSTACK_CONNECTIONS"]["default"]["URL"])
+
+    def raw_search(self, query):
+        return self.raw_es.search(
+            q="*:*", index=settings.HELPER_SETTINGS["HAYSTACK_CONNECTIONS"]["default"]["INDEX_NAME"]
+        )
 
     def test_add_page_to_update_index(self):
         kwargs = {'obj': self.pg1}
@@ -60,5 +70,8 @@ class UpdateIndexTestCase(BaseTestCase):
         kwargs = {'placeholder': self.pg1.get_placeholders('en')[0]}
         operation = 'add_plugin'
         save_to_index(Title, operation, self.request, self.token, **kwargs)
+        # TODO: actual comparision of indexed plugin data
+
+        self.assertEqual(self.raw_search("*:*")["hits"]["total"], 1)
 
         self.assertEqual(1, plugin.id)
