@@ -192,7 +192,6 @@ class InternalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin):
     list_display = ['id', 'title', 'slug', 'site_name', 'language',
                     'author', 'content_type', 'version_status']
 
-
     search_fields = ('text', 'title')
     list_per_page = 15
     ordering = ('-id',)
