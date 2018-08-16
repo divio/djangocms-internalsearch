@@ -11,7 +11,6 @@ class InternalsearchConfig(AppConfig):
     verbose_name = _('django CMS Internal Search')
 
     def ready(self):
-
         from cms.signals import (
             post_obj_operation,
             post_placeholder_operation
