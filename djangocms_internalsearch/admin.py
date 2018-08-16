@@ -22,7 +22,6 @@ from .models import InternalSearchProxy
 class InternalSearchChangeList(SearchChangeList):
 
     def get_results(self, request):
-
         sqs = self.queryset
         if hasattr(request, 'SEARCH_VAR'):
             query = request.GET('SEARCH_VAR')
@@ -47,7 +46,6 @@ class InternalSearchChangeList(SearchChangeList):
                 InternalSearchChangeList._make_model(result)
                 for result in result_list
             ]
-
         except InvalidPage:
             result_list = ()
 
@@ -165,7 +163,6 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
         Returns a tuple containing a queryset to implement the search,
         and a boolean indicating if the results may contain duplicates.
         """
-
         def construct_search(field_name):
             if field_name.startswith('^'):
                 return "%s__istartswith" % field_name[1:]
