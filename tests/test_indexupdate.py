@@ -5,11 +5,12 @@ from cms.models import CMSPlugin, Title
 from cms.plugin_base import CMSPluginBase
 from cms.plugin_pool import plugin_pool
 
+from haystack.query import SearchQuerySet
+
 from tests.utils import BaseTestCase
 
 from djangocms_internalsearch.helpers import save_to_index
 from djangocms_internalsearch.internal_search import PageContentConfig
-from haystack.query import SearchQuerySet
 
 
 def template_from_string(value):

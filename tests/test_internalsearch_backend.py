@@ -1,5 +1,7 @@
 from django.test import TestCase
 
+from haystack.utils import loading
+
 from djangocms_internalsearch.base import BaseSearchConfig
 from djangocms_internalsearch.engine import InternalSearchESEngine
 from djangocms_internalsearch.internal_search import PageContentConfig
@@ -11,7 +13,6 @@ from djangocms_internalsearch.test_utils.app_2.cms_config import (
     TestModel1Config,
     TestModel2Config,
 )
-from haystack.utils import loading
 
 
 class LoadInternalSearchBackendTestCase(TestCase):
