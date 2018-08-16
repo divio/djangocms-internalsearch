@@ -5,16 +5,13 @@ from cms.models import CMSPlugin, Title
 from cms.plugin_base import CMSPluginBase
 from cms.plugin_pool import plugin_pool
 
-from haystack.query import SearchQuerySet
-
+from tests import settings
 from tests.utils import BaseTestCase
 
+import elasticsearch
 from djangocms_internalsearch.helpers import save_to_index
 from djangocms_internalsearch.internal_search import PageContentConfig
-
-from . import settings
-
-import elasticsearch
+from haystack.query import SearchQuerySet
 
 
 def template_from_string(value):
@@ -66,12 +63,13 @@ class UpdateIndexTestCase(BaseTestCase):
 
     def test_add_plugin_to_update_index(self):
 
-        plugin = add_plugin(self.pg1.get_placeholders('en')[0], NotIndexedPlugin, 'en')
+        add_plugin(self.pg1.get_placeholders('en')[0], NotIndexedPlugin, 'en')
         kwargs = {'placeholder': self.pg1.get_placeholders('en')[0]}
         operation = 'add_plugin'
         save_to_index(Title, operation, self.request, self.token, **kwargs)
-        # TODO: actual comparision of indexed plugin data
 
         self.assertEqual(self.raw_search("*:*")["hits"]["total"], 1)
-
-        self.assertEqual(1, plugin.id)
+        self.assertEqual(
+            "rendered plugin content",
+            [res["_source"]["text"] for res in self.raw_search("*:*")["hits"]["hits"]][0]
+        )
