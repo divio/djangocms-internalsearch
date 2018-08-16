@@ -10,7 +10,7 @@ class Query(models.Model):
 
 class InternalSearchProxy(Query):
     class Meta:
-        proxy = True
         permissions = ()
+        proxy = True
         verbose_name = _("Internal Search")
         verbose_name_plural = _("Internal Search")
