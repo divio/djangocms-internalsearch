@@ -1,75 +1,41 @@
-from django.template import engines
+from cms.models import Title
 
-from cms.api import add_plugin
-from cms.models import CMSPlugin, Title
-from cms.plugin_base import CMSPluginBase
-from cms.plugin_pool import plugin_pool
-
-from tests import settings
 from tests.utils import BaseTestCase
 
-import elasticsearch
 from djangocms_internalsearch.helpers import save_to_index
 from djangocms_internalsearch.internal_search import PageContentConfig
-from haystack.query import SearchQuerySet
 
-
-def template_from_string(value):
-    """Create an engine-specific template based on provided string.
-    """
-    return engines.all()[0].from_string(value)
-
-
-class NotIndexedPlugin(CMSPluginBase):
-    model = CMSPlugin
-    plugin_content = 'rendered plugin content'
-    render_template = template_from_string(plugin_content)
-
-    def render(self, context, instance, placeholder):
-        return context
-
-
-plugin_pool.register_plugin(NotIndexedPlugin)
+from haystack import connections
+from haystack.utils.loading import UnifiedIndex
 
 
 class UpdateIndexTestCase(BaseTestCase):
 
     def setUp(self):
-        self.index = PageContentConfig()
+        super(UpdateIndexTestCase, self).setUp()
+
+        self.ui = UnifiedIndex()
+        self.wmmi = PageContentConfig()
+        self.ui.build(indexes=[self.wmmi])
+        connections["default"]._index = self.ui
+
+        self.sb = connections["default"].get_backend()
+        connections["default"]._index = self.ui
+        self.sb.setup()
+
         self.request = None
         self.token = None
-        self.raw_es = elasticsearch.Elasticsearch(settings.HELPER_SETTINGS["HAYSTACK_CONNECTIONS"]["default"]["URL"])
-
-    def raw_search(self, query):
-        return self.raw_es.search(
-            q="*:*", index=settings.HELPER_SETTINGS["HAYSTACK_CONNECTIONS"]["default"]["INDEX_NAME"]
-        )
 
     def test_add_page_to_update_index(self):
         kwargs = {'obj': self.pg1}
         operation = 'add_page_translation'
         save_to_index(Title, operation, self.request, self.token, **kwargs)
 
-        title_obj = Title.objects.get(pk=self.pg1.title_set.all()[0].pk)
-        self.assertEqual(1, SearchQuerySet().models(Title).filter(id=title_obj.pk).count())
+        self.assertEqual(1, self.sb.index.doc_count())
 
     def test_delete_page_from_index(self):
         kwargs = {'obj': self.pg1}
         operation = 'delete_page'
         save_to_index(Title, operation, self.request, self.token, **kwargs)
 
-        title_obj = Title.objects.get(pk=self.pg1.title_set.all()[0].pk)
-        self.assertEqual(0, SearchQuerySet().models(Title).filter(id=title_obj.pk).count())
-
-    def test_add_plugin_to_update_index(self):
-
-        add_plugin(self.pg1.get_placeholders('en')[0], NotIndexedPlugin, 'en')
-        kwargs = {'placeholder': self.pg1.get_placeholders('en')[0]}
-        operation = 'add_plugin'
-        save_to_index(Title, operation, self.request, self.token, **kwargs)
-
-        self.assertEqual(self.raw_search("*:*")["hits"]["total"], 1)
-        self.assertEqual(
-            "rendered plugin content",
-            [res["_source"]["text"] for res in self.raw_search("*:*")["hits"]["hits"]][0]
-        )
+        self.assertEqual(0, self.sb.index.doc_count())
