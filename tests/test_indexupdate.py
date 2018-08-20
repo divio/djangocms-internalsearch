@@ -35,7 +35,11 @@ class UpdateIndexTestCase(BaseTestCase):
 
     def test_delete_page_from_index(self):
         kwargs = {'obj': self.pg1}
+        operation = 'add_page_translation'
+        save_to_index(Title, operation, self.request, self.token, **kwargs)
+        self.assertEqual(1, self.sb.index.doc_count())
+
+        kwargs = {'obj': self.pg1}
         operation = 'delete_page'
         save_to_index(Title, operation, self.request, self.token, **kwargs)
-
         self.assertEqual(0, self.sb.index.doc_count())
