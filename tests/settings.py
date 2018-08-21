@@ -1,5 +1,6 @@
 from tempfile import mkdtemp
 
+
 HELPER_SETTINGS = {
     'INSTALLED_APPS': [
         'djangocms_internalsearch',

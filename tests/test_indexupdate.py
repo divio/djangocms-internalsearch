@@ -4,7 +4,6 @@ from tests.utils import BaseTestCase
 
 from djangocms_internalsearch.helpers import save_to_index
 from djangocms_internalsearch.internal_search import PageContentConfig
-
 from haystack import connections
 from haystack.utils.loading import UnifiedIndex
 

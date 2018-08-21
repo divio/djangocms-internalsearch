@@ -9,4 +9,3 @@ def update_index(sender, operation, request, token, **kwargs):
 
     if sender in [Title, Page, PageAdmin]:
         save_to_index(Title, operation, request, token, **kwargs)
-
