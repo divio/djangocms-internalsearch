@@ -7,6 +7,9 @@ class BaseSearchConfig(indexes.SearchIndex, indexes.Indexable):
     """
     text = indexes.NgramField(document=True, use_template=False)
 
+    # admin setting
+    list_per_page = 50
+
     @property
     def model(self):
         raise NotImplementedError("Config class must provide model attribute")

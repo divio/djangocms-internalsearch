@@ -11,6 +11,9 @@ from cms.toolbar.toolbar import CMSToolbar
 
 from haystack import indexes
 
+from filer.models.filemodels import File
+from filer.models.imagemodels import Image
+
 from .base import BaseSearchConfig
 
 
@@ -82,7 +85,6 @@ class PageContentConfig(BaseSearchConfig):
                     'author', 'content_type', 'version_status']
 
     search_fields = ('text', 'title')
-    list_per_page = 15
     ordering = ('-id',)
 
 
@@ -99,3 +101,43 @@ def get_request(language=None):
     request.user = AnonymousUser()
     request.toolbar = CMSToolbar(request)
     return request
+
+
+class FilerConfig(BaseSearchConfig):
+    # indexes definition
+    folder_name = indexes.CharField(model_attr="folder__name")
+    slug = indexes.CharField(model_attr="file")
+    title = indexes.CharField(model_attr="original_filename")
+    file_size = indexes.IntegerField(model_attr="_file_size")
+    created_by = indexes.CharField(model_attr="owner__username")
+    version_status = indexes.CharField()
+
+    model = File
+
+    def prepare_text(self, obj):
+        # Todo: Might need to change based on file type e.g. Image
+        return ' '.join([obj.original_filename, ])
+
+    # admin setting
+    list_display = ['file_src', 'file_name', 'folder_name']
+    search_fields = ('file_name', 'folder_name')
+
+
+class ImageConfig(BaseSearchConfig):
+    # indexes definition
+    folder_name = indexes.CharField(model_attr="folder__name")
+    slug = indexes.CharField(model_attr="file")
+    title = indexes.CharField(model_attr="original_filename")
+    file_size = indexes.IntegerField(model_attr="_file_size")
+    created_by = indexes.CharField(model_attr="owner__username")
+    version_status = indexes.CharField()
+
+    model = Image
+
+    def prepare_text(self, obj):
+        # Todo: Might need to change based on file type e.g. Image
+        return ' '.join([obj.original_filename, ])
+
+    # admin setting
+    list_display = ['file_src', 'file_name', 'folder_name']
+    search_fields = ('file_name', 'folder_name')
