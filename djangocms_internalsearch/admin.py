@@ -12,8 +12,6 @@ from django.shortcuts import render
 from django.utils.encoding import force_text
 from django.utils.translation import ungettext
 
-from cms.utils.urlutils import admin_reverse
-
 from haystack.admin import SearchChangeList, SearchModelAdminMixin
 from haystack.query import SearchQuerySet
 from haystack.utils import get_model_ct_tuple
@@ -198,7 +196,6 @@ class InternalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin):
     search_fields = ('text', 'title')
     ordering = ('-id',)
     list_display_links = None
-
 
     def has_add_permission(self, request):
         return False

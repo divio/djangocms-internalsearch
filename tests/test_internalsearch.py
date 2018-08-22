@@ -7,6 +7,9 @@ from cms import app_registration
 from cms.models.titlemodels import Title
 from cms.utils.setup import setup_cms_apps
 
+from filer.models.filemodels import File
+from filer.models.imagemodels import Image
+
 from djangocms_internalsearch.cms_config import InternalSearchCMSExtension
 from djangocms_internalsearch.test_utils.app_1.cms_config import (
     TestModel3Config,
@@ -94,5 +97,7 @@ class InternalSearchIntegrationTestCase(TestCase):
             TestModel3,
             TestModel4,
             Title,
+            Image,
+            File,
         ]
         self.assertCountEqual(registered_models, expected_models)

@@ -4,7 +4,11 @@ from haystack.utils import loading
 
 from djangocms_internalsearch.base import BaseSearchConfig
 from djangocms_internalsearch.engine import InternalSearchESEngine
-from djangocms_internalsearch.internal_search import PageContentConfig
+from djangocms_internalsearch.internal_search import (
+    FilerConfig,
+    ImageConfig,
+    PageContentConfig,
+)
 from djangocms_internalsearch.test_utils.app_1.cms_config import (
     TestModel3Config,
     TestModel4Config,
@@ -37,6 +41,8 @@ class SearchIndexTestCase(TestCase):
             TestModel3Config,
             TestModel4Config,
             PageContentConfig,
+            ImageConfig,
+            FilerConfig,
         ]
         for config_obj in self.indexes:
             self.assertIsInstance(config_obj, BaseSearchConfig)
