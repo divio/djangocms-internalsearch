@@ -1,4 +1,5 @@
 from cms.models import Title
+from cms.operations import ADD_PAGE_TRANSLATION, DELETE_PAGE
 
 from tests.utils import BaseTestCase
 
@@ -19,7 +20,6 @@ class UpdateIndexTestCase(BaseTestCase):
         connections["default"]._index = self.ui
 
         self.sb = connections["default"].get_backend()
-        connections["default"]._index = self.ui
         self.sb.setup()
 
         self.request = None
@@ -27,18 +27,16 @@ class UpdateIndexTestCase(BaseTestCase):
 
     def test_add_page_to_update_index(self):
         kwargs = {'obj': self.pg1}
-        operation = 'add_page_translation'
+        operation = ADD_PAGE_TRANSLATION
         save_to_index(Title, operation, self.request, self.token, **kwargs)
-
         self.assertEqual(1, self.sb.index.doc_count())
 
     def test_delete_page_from_index(self):
         kwargs = {'obj': self.pg1}
-        operation = 'add_page_translation'
+        operation = ADD_PAGE_TRANSLATION
         save_to_index(Title, operation, self.request, self.token, **kwargs)
         self.assertEqual(1, self.sb.index.doc_count())
-
         kwargs = {'obj': self.pg1}
-        operation = 'delete_page'
+        operation = DELETE_PAGE
         save_to_index(Title, operation, self.request, self.token, **kwargs)
         self.assertEqual(0, self.sb.index.doc_count())

@@ -27,5 +27,5 @@ class InternalSearchESEngine(Elasticsearch2SearchEngine):
     unified_index = InternalSearchUnifiedIndex
 
 
-class InternalSearchWhooshEngine(WhooshEngine):
+class InternalSearchWhooshTestEngine(WhooshEngine):
     unified_index = InternalSearchUnifiedIndex
