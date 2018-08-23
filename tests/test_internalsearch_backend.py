@@ -4,19 +4,8 @@ from haystack.utils import loading
 
 from djangocms_internalsearch.base import BaseSearchConfig
 from djangocms_internalsearch.engine import InternalSearchESEngine
-from djangocms_internalsearch.internal_search import (
-    FilerConfig,
-    ImageConfig,
-    PageContentConfig,
-)
-from djangocms_internalsearch.test_utils.app_1.cms_config import (
-    TestModel3Config,
-    TestModel4Config,
-)
-from djangocms_internalsearch.test_utils.app_2.cms_config import (
-    TestModel1Config,
-    TestModel2Config,
-)
+
+from .utils import inheritors
 
 
 class LoadInternalSearchBackendTestCase(TestCase):
@@ -35,15 +24,7 @@ class SearchIndexTestCase(TestCase):
         self.indexes = self.unified_index.collect_indexes()
 
     def test_model_indexes(self):
-        expected_indexes = [
-            TestModel1Config,
-            TestModel2Config,
-            TestModel3Config,
-            TestModel4Config,
-            PageContentConfig,
-            ImageConfig,
-            FilerConfig,
-        ]
+        expected_indexes = inheritors(BaseSearchConfig)
         for config_obj in self.indexes:
             self.assertIsInstance(config_obj, BaseSearchConfig)
             self.assertTrue(type(config_obj) in expected_indexes)

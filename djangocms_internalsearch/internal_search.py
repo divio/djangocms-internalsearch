@@ -38,7 +38,6 @@ class PageContentConfig(BaseSearchConfig):
     search_fields = ('text', 'title')
     ordering = ('-id',)
 
-
     # model class attribute
     model = Title
 
@@ -88,7 +87,6 @@ class PageContentConfig(BaseSearchConfig):
         return obj.page.changed_by
 
 
-
 def get_request(language=None):
     """
     Returns a Request instance populated with cms specific attributes.
@@ -122,7 +120,6 @@ class FilerFileConfig(BaseSearchConfig):
     def prepare_text(self, obj):
         # Todo: Might need to change based on file type e.g. Image
         return ' '.join([obj.original_filename, ])
-
 
 
 class FilerImageConfig(BaseSearchConfig):
