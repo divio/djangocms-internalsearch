@@ -89,6 +89,7 @@ class InternalSearchIntegrationTestCase(TestCase):
             config.model for config in internalsearch_config.cms_extension.internalsearch_apps_config
         ]
         expected_models = [
-            config.model for config in inheritors(BaseSearchConfig) if not isinstance(config.model, property)
+            config.model for config in inheritors(BaseSearchConfig)
+            if not isinstance(config.model, property)
         ]
         self.assertCountEqual(registered_models, expected_models)
