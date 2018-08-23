@@ -5,7 +5,8 @@ class BaseSearchConfig(indexes.SearchIndex, indexes.Indexable):
     """
     Base config class to provide list of attributes that sub class must provide
     """
-    text = indexes.NgramField(document=True, use_template=False)
+    text = indexes.CharField(document=True, use_template=False)
+    ng_text = indexes.NgramField(document=False, use_template=False)
 
     @property
     def model(self):
@@ -20,3 +21,6 @@ class BaseSearchConfig(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_text(self, obj):
         raise NotImplementedError("Config class must provide prepare_text method for index")
+
+    def prepare_ng_text(self, obj):
+        return self.prepare_text(obj)
