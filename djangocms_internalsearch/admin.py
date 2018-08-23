@@ -80,6 +80,7 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
 
         list_display = list(self.list_display)
         list_filter = self.list_filter
+        extra_context = {'title': 'Internal Search'}
 
         kwargs = {
             'haystack_connection': self.haystack_connection,
@@ -190,11 +191,11 @@ class InternalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin):
 
     # Todo: use model config to generate admin attributes and methods
     list_display = ['id', 'title', 'slug', 'site_name', 'language',
-                    'author', 'content_type', 'version_status']
+                    'author', 'content_type', 'version_status', ]
 
     search_fields = ('text', 'title')
-    list_per_page = 15
     ordering = ('-id',)
+    list_display_links = None
 
     def has_add_permission(self, request):
         return False

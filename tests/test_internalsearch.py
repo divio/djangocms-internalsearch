@@ -4,9 +4,9 @@ from django.apps import apps
 from django.core.exceptions import ImproperlyConfigured
 
 from cms import app_registration
-from cms.models.titlemodels import Title
 from cms.utils.setup import setup_cms_apps
 
+from djangocms_internalsearch.base import BaseSearchConfig
 from djangocms_internalsearch.cms_config import InternalSearchCMSExtension
 from djangocms_internalsearch.test_utils.app_1.cms_config import (
     TestModel3Config,
@@ -25,7 +25,7 @@ from djangocms_internalsearch.test_utils.app_2.models import (
     TestModel2,
 )
 
-from .utils import TestCase
+from .utils import TestCase, inheritors
 
 
 class InternalSearchUnitTestCase(TestCase):
@@ -89,10 +89,7 @@ class InternalSearchIntegrationTestCase(TestCase):
             config.model for config in internalsearch_config.cms_extension.internalsearch_apps_config
         ]
         expected_models = [
-            TestModel1,
-            TestModel2,
-            TestModel3,
-            TestModel4,
-            Title,
+            config.model for config in inheritors(BaseSearchConfig)
+            if not isinstance(config.model, property)
         ]
         self.assertCountEqual(registered_models, expected_models)
