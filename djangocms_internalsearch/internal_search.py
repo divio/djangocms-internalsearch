@@ -31,6 +31,14 @@ class PageContentConfig(BaseSearchConfig):
     version_status = indexes.CharField()
     creation_date = indexes.DateTimeField(model_attr='creation_date')
 
+    # admin setting
+    list_display = ['id', 'title', 'slug', 'site_name', 'language',
+                    'author', 'content_type', 'version_status']
+
+    search_fields = ('text', 'title')
+    ordering = ('-id',)
+
+
     # model class attribute
     model = Title
 
@@ -79,12 +87,6 @@ class PageContentConfig(BaseSearchConfig):
     def prepare_created_by(self, obj):
         return obj.page.changed_by
 
-    # admin setting
-    list_display = ['id', 'title', 'slug', 'site_name', 'language',
-                    'author', 'content_type', 'version_status']
-
-    search_fields = ('text', 'title')
-    ordering = ('-id',)
 
 
 def get_request(language=None):
@@ -102,14 +104,18 @@ def get_request(language=None):
     return request
 
 
-class FilerConfig(BaseSearchConfig):
+class FilerFileConfig(BaseSearchConfig):
     # indexes definition
     folder_name = indexes.CharField(model_attr="folder__name")
-    file = indexes.CharField(model_attr="file")
+    file_path = indexes.CharField(model_attr="file")
     title = indexes.CharField(model_attr="original_filename")
     file_size = indexes.IntegerField(model_attr="_file_size")
-    created_by = indexes.CharField(model_attr="owner__username")
+    created_by = indexes.CharField(model_attr="owner")
     version_status = indexes.CharField()
+
+    # admin setting
+    list_display = ['file_src', 'file_name', 'folder_name']
+    search_fields = ('file_name', 'folder_name')
 
     model = File
 
@@ -117,26 +123,23 @@ class FilerConfig(BaseSearchConfig):
         # Todo: Might need to change based on file type e.g. Image
         return ' '.join([obj.original_filename, ])
 
+
+
+class FilerImageConfig(BaseSearchConfig):
+    # indexes definition
+    folder_name = indexes.CharField(model_attr="folder__name")
+    file_path = indexes.CharField(model_attr="file")
+    title = indexes.CharField(model_attr="original_filename")
+    file_size = indexes.IntegerField(model_attr="_file_size")
+    created_by = indexes.CharField(model_attr="owner")
+    version_status = indexes.CharField()
+
     # admin setting
     list_display = ['file_src', 'file_name', 'folder_name']
     search_fields = ('file_name', 'folder_name')
-
-
-class ImageConfig(BaseSearchConfig):
-    # indexes definition
-    folder_name = indexes.CharField(model_attr="folder__name")
-    file = indexes.CharField(model_attr="file")
-    title = indexes.CharField(model_attr="original_filename")
-    file_size = indexes.IntegerField(model_attr="_file_size")
-    created_by = indexes.CharField(model_attr="owner__username")
-    version_status = indexes.CharField()
 
     model = Image
 
     def prepare_text(self, obj):
         # Todo: Might need to change based on file type e.g. Image
         return ' '.join([obj.original_filename, ])
-
-    # admin setting
-    list_display = ['file_src', 'file_name', 'folder_name']
-    search_fields = ('file_name', 'folder_name')

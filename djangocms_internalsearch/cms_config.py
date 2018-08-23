@@ -5,8 +5,8 @@ from django.core.exceptions import ImproperlyConfigured
 from cms.app_base import CMSAppConfig, CMSAppExtension
 
 from djangocms_internalsearch.internal_search import (
-    FilerConfig,
-    ImageConfig,
+    FilerFileConfig,
+    FilerImageConfig,
     PageContentConfig,
 )
 
@@ -31,4 +31,8 @@ class InternalSearchCMSExtension(CMSAppExtension):
 
 class CoreCMSAppConfig(CMSAppConfig):
     djangocms_internalsearch_enabled = True
-    internalsearch_config_list = [PageContentConfig, FilerConfig, ImageConfig]
+    internalsearch_config_list = [
+        PageContentConfig,
+        FilerFileConfig,
+        FilerImageConfig,
+    ]
