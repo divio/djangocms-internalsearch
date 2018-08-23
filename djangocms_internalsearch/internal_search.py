@@ -105,7 +105,7 @@ def get_request(language=None):
 class FilerConfig(BaseSearchConfig):
     # indexes definition
     folder_name = indexes.CharField(model_attr="folder__name")
-    slug = indexes.CharField(model_attr="file")
+    file = indexes.CharField(model_attr="file")
     title = indexes.CharField(model_attr="original_filename")
     file_size = indexes.IntegerField(model_attr="_file_size")
     created_by = indexes.CharField(model_attr="owner__username")
@@ -125,7 +125,7 @@ class FilerConfig(BaseSearchConfig):
 class ImageConfig(BaseSearchConfig):
     # indexes definition
     folder_name = indexes.CharField(model_attr="folder__name")
-    slug = indexes.CharField(model_attr="file")
+    file = indexes.CharField(model_attr="file")
     title = indexes.CharField(model_attr="original_filename")
     file_size = indexes.IntegerField(model_attr="_file_size")
     created_by = indexes.CharField(model_attr="owner__username")
