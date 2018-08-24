@@ -23,11 +23,11 @@ def save_to_index(sender, operation, request, token, **kwargs):
         index.update_object(obj)
     if 'plugin' in kwargs:
         plugin_type = kwargs['plugin'].plugin_type
-        if plugin_type is 'TextPlugin':
+        if plugin_type == 'TextPlugin':
             index = connections["default"].get_unified_index().get_index(Title)
-        if plugin_type is 'FilePlugin':
+        if plugin_type == 'FilePlugin':
             index = connections["default"].get_unified_index().get_index(File)
-        if plugin_type is 'ImagePlugin':
+        if plugin_type == 'PicturePlugin':
             index = connections["default"].get_unified_index().get_index(Image)
 
         obj = kwargs['placeholder'].page.get_title_obj(get_language_from_request(request, check_path=False))
