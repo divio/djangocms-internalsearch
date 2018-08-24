@@ -9,7 +9,7 @@ HELPER_SETTINGS = {
     ],
     'HAYSTACK_CONNECTIONS': {
         'default': {
-            'ENGINE': 'djangocms_internalsearch.engine.InternalSearchWhooshTestEngine',
+            'ENGINE': 'djangocms_internalsearch.engine.InternalSearchWhooshEngine',
             "PATH": mkdtemp(prefix="test_whoosh_query"),
         },
     }
