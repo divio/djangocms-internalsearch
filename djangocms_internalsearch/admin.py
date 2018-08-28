@@ -34,10 +34,6 @@ def get_internalsearch_config(model_class):
 
 class InternalSearchChangeList(SearchChangeList):
 
-    # def __init__(self, **kwargs):
-    #     self.haystack_connection = kwargs.pop("haystack_connection", "default")
-    #     super(InternalSearchChangeList, self).__init__(**kwargs)
-
     def get_results(self, request):
 
         sqs = self.queryset
@@ -82,23 +78,6 @@ class InternalSearchChangeList(SearchChangeList):
         model.model_name = result.model._meta.model_name
         return model
 
-    # def get_queryset(self, request):
-    #     """
-    #     Return a QuerySet of all model instances that can be edited by the
-    #     admin site. This is used by changelist_view.
-    #     """
-    #     if request.GET.get('ct_type'):
-    #         app_config = get_internalsearch_config(request.GET.get('ct_type'))
-    #         # admin.site.register(app_config.model)
-    #         qs = InternalSearchQuerySet(self.haystack_connection).models(app_config.model).load_all()
-    #     else:
-    #         qs = InternalSearchQuerySet(self.haystack_connection).all()
-    #
-    #     # TODO: this should be handled by some parameter to the ChangeList.
-    #     ordering = self.get_ordering(request)
-    #     if ordering:
-    #         qs = qs.order_by(*ordering)
-    #     return qs
 
 class InternalSearchQuerySet(SearchQuerySet):
     def __init__(self, using=None, query=None):
@@ -124,7 +103,7 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
                 ct_config = app_config
                 list_display = ct_config.list_display
                 list_filter = ct_config.list_filter
-                # checking if model is already register or not?
+                # checking if model is already register in django admin or not?
                 if not admin.site._registry.get(ct_config.model):
                     admin.site.register(ct_config.model, CTAdmin)
                 model_admin = CTAdmin
@@ -147,12 +126,9 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
             'list_select_related': self.list_select_related,
             'list_per_page': self.list_per_page,
             'list_editable': self.list_editable,
-            # 'model_admin': self,
             'model_admin': model_admin,
-            # 'root_queryset': model_admin.get_queryset(request),
-            'list_max_show_all': self.list_max_show_all,
+             'list_max_show_all': self.list_max_show_all,
         }
-
 
         changelist = InternalSearchChangeList(**kwargs)
         changelist.formset = None
