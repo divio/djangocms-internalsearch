@@ -101,12 +101,12 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
             app_config = get_internalsearch_config(request.GET.get('ct_type'))
             if app_config:
                 ct_config = app_config
-                list_display = ct_config.list_display
-                list_filter = ct_config.list_filter
                 # checking if model is already register in django admin or not?
                 if not admin.site._registry.get(ct_config.model):
                     admin.site.register(ct_config.model, CTAdmin)
                 model_admin = CTAdmin
+                list_display = ct_config.list_display
+                list_filter = ct_config.list_filter
         else:
             model_admin = self
             list_display = self.list_display
