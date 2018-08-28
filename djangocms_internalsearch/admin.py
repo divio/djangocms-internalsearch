@@ -49,7 +49,6 @@ class InternalSearchChangeList(SearchChangeList):
                 InternalSearchChangeList._make_model(result)
                 for result in result_list
             ]
-
         except InvalidPage:
             result_list = ()
 
@@ -74,11 +73,6 @@ class InternalSearchQuerySet(SearchQuerySet):
         super().__init__(using, query)
         self.query.select_related = False
 
-    def _clone(self, klass=None):
-        clone = super()._clone(klass)
-        clone.query.select_related = False
-        return clone
-
 
 class InternalSearchModelAdminMixin(SearchModelAdminMixin):
 
@@ -90,6 +84,7 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
         # Todo: assign admin attributes from config based on model
         list_display = list(self.list_display)
         list_filter = self.list_filter
+        extra_context = {'title': 'Internal Search'}
 
         kwargs = {
             'haystack_connection': self.haystack_connection,
@@ -202,9 +197,7 @@ class InternalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin):
     # Todo: use model config to generate admin attributes and methods
     list_display = ['id', 'title', 'slug', 'site_name', 'language',
                     'author', 'content_type', 'version_status']
-
     list_filter = (AuthorFilter, )
-
     search_fields = ('text', 'title')
     list_per_page = 15
     ordering = ('-id',)
