@@ -25,13 +25,26 @@ def save_to_index(sender, operation, request, token, **kwargs):
         plugin_type = kwargs['plugin'].plugin_type
         if plugin_type == 'TextPlugin':
             index = connections["default"].get_unified_index().get_index(Title)
+
+            obj = kwargs['placeholder'].page.get_title_obj(get_language_from_request(request, check_path=False))
+            if operation is DELETE_PLUGIN:
+                index.remove_object(obj)
+            else:
+                index.update_object(obj)
         if plugin_type == 'FilePlugin':
             index = connections["default"].get_unified_index().get_index(File)
+
+            obj = kwargs['plugin']
+            if operation is DELETE_PLUGIN:
+                index.remove_object(obj.file_src.file.instance)
+            else:
+                index.update_object(obj.file_src.file.instance)
+
         if plugin_type == 'PicturePlugin':
             index = connections["default"].get_unified_index().get_index(Image)
 
-        obj = kwargs['placeholder'].page.get_title_obj(get_language_from_request(request, check_path=False))
-        if operation is DELETE_PLUGIN:
-            index.remove_object(obj)
-        else:
-            index.update_object(obj)
+            obj = kwargs['plugin']
+            if operation is DELETE_PLUGIN:
+                index.remove_object(obj.picture)
+            else:
+                index.update_object(obj.picture)
