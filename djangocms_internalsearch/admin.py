@@ -3,6 +3,7 @@ from __future__ import print_function, unicode_literals
 import operator
 from functools import reduce
 
+from django.apps import apps
 from django.contrib import admin
 from django.contrib.admin.options import ModelAdmin, csrf_protect_m
 from django.core.exceptions import PermissionDenied
@@ -16,12 +17,26 @@ from haystack.admin import SearchChangeList, SearchModelAdminMixin
 from haystack.query import SearchQuerySet
 from haystack.utils import get_model_ct_tuple
 
-from djangocms_internalsearch.contrib.cms.filters import AuthorFilter
+from djangocms_internalsearch.contrib.cms.filters import (
+    AuthorFilter,
+    ContentTypeFilter,
+)
+from django.contrib import admin
 
 from .models import InternalSearchProxy
 
 
+def get_internalsearch_config(model_class):
+    internalsearch_config = apps.get_app_config('djangocms_internalsearch')
+    apps_config = internalsearch_config.cms_extension.internalsearch_apps_config
+    app_config = (app for app in apps_config if app.model.__name__ == model_class)
+    return app_config.__next__()
+
 class InternalSearchChangeList(SearchChangeList):
+
+    # def __init__(self, **kwargs):
+    #     self.haystack_connection = kwargs.pop("haystack_connection", "default")
+    #     super(InternalSearchChangeList, self).__init__(**kwargs)
 
     def get_results(self, request):
 
@@ -67,6 +82,23 @@ class InternalSearchChangeList(SearchChangeList):
         model.model_name = result.model._meta.model_name
         return model
 
+    # def get_queryset(self, request):
+    #     """
+    #     Return a QuerySet of all model instances that can be edited by the
+    #     admin site. This is used by changelist_view.
+    #     """
+    #     if request.GET.get('ct_type'):
+    #         app_config = get_internalsearch_config(request.GET.get('ct_type'))
+    #         # admin.site.register(app_config.model)
+    #         qs = InternalSearchQuerySet(self.haystack_connection).models(app_config.model).load_all()
+    #     else:
+    #         qs = InternalSearchQuerySet(self.haystack_connection).all()
+    #
+    #     # TODO: this should be handled by some parameter to the ChangeList.
+    #     ordering = self.get_ordering(request)
+    #     if ordering:
+    #         qs = qs.order_by(*ordering)
+    #     return qs
 
 class InternalSearchQuerySet(SearchQuerySet):
     def __init__(self, using=None, query=None):
@@ -82,8 +114,25 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
             raise PermissionDenied
 
         # Todo: assign admin attributes from config based on model
-        list_display = list(self.list_display)
-        list_filter = self.list_filter
+
+        class CTAdmin(admin.ModelAdmin):
+            pass
+
+        if request.GET.get('ct_type'):
+            app_config = get_internalsearch_config(request.GET.get('ct_type'))
+            if app_config:
+                ct_config = app_config
+                list_display = ct_config.list_display
+                list_filter = ct_config.list_filter
+                # checking if model is already register or not?
+                if not admin.site._registry.get(ct_config.model):
+                    admin.site.register(ct_config.model, CTAdmin)
+                model_admin = CTAdmin
+        else:
+            model_admin = self
+            list_display = self.list_display
+            list_filter = self.list_filter
+
         extra_context = {'title': 'Internal Search'}
 
         kwargs = {
@@ -98,10 +147,12 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
             'list_select_related': self.list_select_related,
             'list_per_page': self.list_per_page,
             'list_editable': self.list_editable,
-            'model_admin': self,
+            # 'model_admin': self,
+            'model_admin': model_admin,
+            # 'root_queryset': model_admin.get_queryset(request),
             'list_max_show_all': self.list_max_show_all,
-
         }
+
 
         changelist = InternalSearchChangeList(**kwargs)
         changelist.formset = None
@@ -156,7 +207,12 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
         Return a QuerySet of all model instances that can be edited by the
         admin site. This is used by changelist_view.
         """
-        qs = InternalSearchQuerySet(self.haystack_connection).all()
+        if request.GET.get('ct_type'):
+            app_config = get_internalsearch_config(request.GET.get('ct_type'))
+            qs = InternalSearchQuerySet(self.haystack_connection).models(app_config.model).all()
+        else:
+             qs = InternalSearchQuerySet(self.haystack_connection).all()
+
         # TODO: this should be handled by some parameter to the ChangeList.
         ordering = self.get_ordering(request)
         if ordering:
@@ -197,7 +253,7 @@ class InternalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin):
     # Todo: use model config to generate admin attributes and methods
     list_display = ['id', 'title', 'slug', 'site_name', 'language',
                     'author', 'content_type', 'version_status']
-    list_filter = (AuthorFilter, )
+    list_filter = (ContentTypeFilter, )
     search_fields = ('text', 'title')
     list_per_page = 15
     ordering = ('-id',)

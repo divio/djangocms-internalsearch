@@ -15,6 +15,8 @@ class BaseSearchConfig(indexes.SearchIndex, indexes.Indexable):
     def model(self):
         raise NotImplementedError("Config class must provide model attribute")
 
+
+
     @property
     def list_display(self):
         raise NotImplementedError("Config class must provide list_display fields")
