@@ -132,7 +132,7 @@ class InternalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin):
     def has_add_permission(self, request):
         return False
 
-    def modified_date(selfs, obj):
+    def modified_date(self, obj):
         return obj.result.modified_date
 
     def slug(self, obj):
