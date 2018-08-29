@@ -87,30 +87,40 @@ class InternalSearchQuerySet(SearchQuerySet):
 
 class InternalSearchModelAdminMixin(SearchModelAdminMixin):
 
+
     @csrf_protect_m
     def changelist_view(self, request, extra_context=None):
         if not self.has_change_permission(request, None):
             raise PermissionDenied
 
-        # Todo: assign admin attributes from config based on model
+        list_filter = []
+        list_filter.extend(InternalSearchAdmin.list_filter)
 
-        class CTAdmin(admin.ModelAdmin):
-            pass
+        list_display = []
+        list_display.extend(InternalSearchAdmin.list_display)
 
         if request.GET.get('ct_type'):
             app_config = get_internalsearch_config(request.GET.get('ct_type'))
             if app_config:
                 ct_config = app_config
-                # checking if model is already register in django admin or not?
-                if not admin.site._registry.get(ct_config.model):
-                    admin.site.register(ct_config.model, CTAdmin)
-                model_admin = CTAdmin
-                list_display = ct_config.list_display
-                list_filter = ct_config.list_filter
+                # model_admin = CTAdmin
+                list_display = self.list_display
+                for item in ct_config.list_filter:
+                    if item not in self.list_filter:
+                          list_filter.append(item)
+
+                if ct_config.list_display:
+                   list_display = ct_config.list_display
+
+                # for method_name in ct_config.list_display:
+                    # self.__dict__[str(method_name)] = getattr(ct_config, method_name)(self)
+                super(self, ct_config)
+
         else:
-            model_admin = self
-            list_display = self.list_display
-            list_filter = self.list_filter
+            # Deleting preserved filter parameters for root UI
+            request.GET = request.GET.copy()
+            request.GET.pop('version_state', None)
+            request.GET.pop('auth', None)
 
         extra_context = {'title': 'Internal Search'}
 
@@ -126,8 +136,8 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
             'list_select_related': self.list_select_related,
             'list_per_page': self.list_per_page,
             'list_editable': self.list_editable,
-            'model_admin': model_admin,
-             'list_max_show_all': self.list_max_show_all,
+            'model_admin': self,
+            'list_max_show_all': self.list_max_show_all,
         }
 
         changelist = InternalSearchChangeList(**kwargs)
@@ -229,7 +239,7 @@ class InternalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin):
     # Todo: use model config to generate admin attributes and methods
     list_display = ['id', 'title', 'slug', 'site_name', 'language',
                     'author', 'content_type', 'version_status']
-    list_filter = (ContentTypeFilter, )
+    list_filter = [ContentTypeFilter, ]
     search_fields = ('text', 'title')
     list_per_page = 15
     ordering = ('-id',)
@@ -260,3 +270,4 @@ class InternalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin):
 
     def version_status(self, obj):
         return obj.result.version_status
+

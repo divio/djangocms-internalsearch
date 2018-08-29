@@ -14,7 +14,10 @@ from filer.models.imagemodels import Image
 from haystack import indexes
 
 from djangocms_internalsearch.base import BaseSearchConfig
-from djangocms_internalsearch.contrib.cms.filters import AuthorFilter
+from djangocms_internalsearch.contrib.cms.filters import (
+    AuthorFilter,
+    VersionStateFilter,
+)
 
 
 class PageContentConfig(BaseSearchConfig):
@@ -91,10 +94,10 @@ class PageContentConfig(BaseSearchConfig):
     list_display = ['id', 'title', 'slug', 'site_name', 'language',
                     'author', 'content_type', 'version_status']
 
-    list_filter = (AuthorFilter, )
+    list_filter = [AuthorFilter, VersionStateFilter]
 
     search_fields = ('text', 'title')
-    list_per_page = 15
+
     ordering = ('-id',)
 
 
@@ -123,10 +126,18 @@ class FilerFileConfig(BaseSearchConfig):
     version_status = indexes.CharField()
 
     # admin setting
-    list_display = ['file_src', 'file_name', 'folder_name']
+    list_display = ['title', ]
     search_fields = ('file_name', 'folder_name')
+    list_filter = ()
 
     model = File
+
+    def file_path(self, obj):
+        return obj.result.file
+
+    def folder_name(self, obj):
+        return obj.result.folder_name
+
 
     def prepare_text(self, obj):
         # Todo: Might need to change based on file type e.g. Image
@@ -143,10 +154,17 @@ class FilerImageConfig(BaseSearchConfig):
     version_status = indexes.CharField()
 
     # admin setting
-    list_display = ['file_src', 'file_name', 'folder_name']
-    search_fields = ('file_name', 'folder_name')
+    list_display = ['file_path',  'folder_name', 'title']
+    search_fields = ('folder_name')
+    list_filter = (AuthorFilter,)
 
     model = Image
+
+    def file_path(self, obj):
+        return obj.result.file
+
+    def folder_name(self, obj):
+        return obj.result.folder_name
 
     def prepare_text(self, obj):
         # Todo: Might need to change based on file type e.g. Image
