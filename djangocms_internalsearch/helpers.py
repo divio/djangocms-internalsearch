@@ -12,7 +12,7 @@ def save_to_index(sender, operation, request, token, **kwargs):
     if 'obj' in kwargs:
         index = connections["default"].get_unified_index().get_index(Title)
         obj = kwargs['obj'].get_title_obj(get_language_from_request(request, check_path=False))
-        update_or_remove_object(index, obj, operation)
+        save_object(index, obj, operation)
 
     if 'new_plugin' in kwargs:
         index = connections["default"].get_unified_index().get_index(Title)
@@ -26,26 +26,26 @@ def save_to_index(sender, operation, request, token, **kwargs):
             index = connections["default"].get_unified_index().get_index(Title)
 
             obj = kwargs['placeholder'].page.get_title_obj(get_language_from_request(request, check_path=False))
-            update_or_remove_object(index, obj, operation)
+            save_object(index, obj, operation)
 
         if plugin_type == 'FilePlugin':
             index = connections["default"].get_unified_index().get_index(File)
 
             obj = kwargs['plugin']
-            update_or_remove_object(index, obj.file_src.file.instance, operation)
+            save_object(index, obj.file_src.file.instance, operation)
 
         if plugin_type == 'PicturePlugin':
             index = connections["default"].get_unified_index().get_index(Image)
 
             obj = kwargs['plugin']
-            update_or_remove_object(index, obj.picture, operation)
+            save_object(index, obj.picture, operation)
 
 
-def update_or_remove_object(index, obj, operation):
+def save_object(index, obj, operation):
 
     from cms.operations import DELETE_PAGE, DELETE_PLUGIN
 
-    if operation is DELETE_PLUGIN or operation is DELETE_PAGE:
+    if operation in [DELETE_PLUGIN, DELETE_PAGE]:
         index.remove_object(obj)
     else:
         index.update_object(obj)
