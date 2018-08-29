@@ -16,13 +16,9 @@ from .models import InternalSearchProxy
 
 
 class InternalSearchChangeList(ChangeList):
-    def __init__(self, request, model, list_display, list_display_links,
-                 list_filter, date_hierarchy, search_fields, list_select_related,
-                 list_per_page, list_max_show_all, list_editable, model_admin):
+    def __init__(self, *args, **kwargs):
         self.haystack_connection = 'default'
-        super().__init__(request, model, list_display, list_display_links,
-                         list_filter, date_hierarchy, search_fields, list_select_related,
-                         list_per_page, list_max_show_all, list_editable, model_admin)
+        super().__init__(*args, **kwargs)
 
     def get_results(self, request):
         sqs = self.queryset
