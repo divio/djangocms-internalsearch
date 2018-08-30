@@ -4,6 +4,7 @@ import operator
 from functools import reduce
 
 from django.apps import apps
+from django.contrib import admin
 from django.contrib.admin.options import ModelAdmin, csrf_protect_m
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import InvalidPage, Paginator
@@ -16,11 +17,7 @@ from haystack.admin import SearchChangeList, SearchModelAdminMixin
 from haystack.query import SearchQuerySet
 from haystack.utils import get_model_ct_tuple
 
-from djangocms_internalsearch.contrib.cms.filters import (
-    ContentTypeFilter,
-    SiteFilter,
-)
-from django.contrib import admin
+from djangocms_internalsearch.contrib.cms.filters import ContentTypeFilter
 
 from .models import InternalSearchProxy
 
@@ -30,6 +27,7 @@ def get_internalsearch_config(model_class):
     apps_config = internalsearch_config.cms_extension.internalsearch_apps_config
     app_config = (app for app in apps_config if app.model.__name__ == model_class)
     return app_config.__next__()
+
 
 class InternalSearchChangeList(SearchChangeList):
 
@@ -85,7 +83,6 @@ class InternalSearchQuerySet(SearchQuerySet):
 
 
 class InternalSearchModelAdminMixin(SearchModelAdminMixin):
-
 
     @csrf_protect_m
     def changelist_view(self, request, extra_context=None):
@@ -193,7 +190,7 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
             app_config = get_internalsearch_config(content_type)
             qs = InternalSearchQuerySet(self.haystack_connection).models(app_config.model).all()
         else:
-             qs = InternalSearchQuerySet(self.haystack_connection).all()
+            qs = InternalSearchQuerySet(self.haystack_connection).all()
 
         # TODO: this should be handled by some parameter to the ChangeList.
         ordering = self.get_ordering(request)
@@ -265,4 +262,3 @@ class InternalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin):
 
     def version_status(self, obj):
         return obj.result.version_status
-
