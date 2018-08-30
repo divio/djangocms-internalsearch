@@ -3,4 +3,3 @@ tox
 coverage
 flake8
 isort
-
