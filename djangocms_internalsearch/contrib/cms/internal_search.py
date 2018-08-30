@@ -17,6 +17,7 @@ from djangocms_internalsearch.base import BaseSearchConfig
 from djangocms_internalsearch.contrib.cms.filters import (
     AuthorFilter,
     VersionStateFilter,
+    SiteFilter,
 )
 
 
@@ -38,9 +39,10 @@ class PageContentConfig(BaseSearchConfig):
     # admin setting
     list_display = ['id', 'title', 'slug', 'site_name', 'language',
                     'author', 'content_type', 'version_status']
-
+    list_filter = [SiteFilter, AuthorFilter, VersionStateFilter, ]
     search_fields = ('text', 'title')
     ordering = ('-id',)
+    list_per_page = 15
 
     # model class attribute
     model = Title
@@ -90,15 +92,6 @@ class PageContentConfig(BaseSearchConfig):
     def prepare_created_by(self, obj):
         return obj.page.changed_by
 
-    # admin setting
-    list_display = ['id', 'title', 'slug', 'site_name', 'language',
-                    'author', 'content_type', 'version_status']
-
-    list_filter = [AuthorFilter, VersionStateFilter]
-
-    search_fields = ('text', 'title')
-
-    ordering = ('-id',)
 
 
 def get_request(language=None):
@@ -127,7 +120,7 @@ class FilerFileConfig(BaseSearchConfig):
 
     # admin setting
     list_display = ['title', ]
-    search_fields = ('file_name', 'folder_name')
+    search_fields = ('title', 'folder_name')
     list_filter = ()
 
     model = File
@@ -154,9 +147,9 @@ class FilerImageConfig(BaseSearchConfig):
     version_status = indexes.CharField()
 
     # admin setting
-    list_display = ['file_path',  'folder_name', 'title']
-    search_fields = ('folder_name')
-    list_filter = (AuthorFilter,)
+    list_display = ['title']
+    search_fields = ('title', 'folder_name')
+    list_filter = ()
 
     model = Image
 

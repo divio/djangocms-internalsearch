@@ -4,7 +4,6 @@ import operator
 from functools import reduce
 
 from django.apps import apps
-from django.contrib import admin
 from django.contrib.admin.options import ModelAdmin, csrf_protect_m
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import InvalidPage, Paginator
@@ -18,8 +17,8 @@ from haystack.query import SearchQuerySet
 from haystack.utils import get_model_ct_tuple
 
 from djangocms_internalsearch.contrib.cms.filters import (
-    AuthorFilter,
     ContentTypeFilter,
+    SiteFilter,
 )
 from django.contrib import admin
 
@@ -98,9 +97,9 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
 
         list_display = []
         list_display.extend(InternalSearchAdmin.list_display)
-
-        if request.GET.get('ct_type'):
-            app_config = get_internalsearch_config(request.GET.get('ct_type'))
+        content_type = request.GET.get('type')
+        if content_type:
+            app_config = get_internalsearch_config(content_type)
             if app_config:
                 ct_config = app_config
                 # model_admin = CTAdmin
@@ -112,15 +111,12 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
                 if ct_config.list_display:
                    list_display = ct_config.list_display
 
-                # for method_name in ct_config.list_display:
-                    # self.__dict__[str(method_name)] = getattr(ct_config, method_name)(self)
-                super(self, ct_config)
-
         else:
             # Deleting preserved filter parameters for root UI
             request.GET = request.GET.copy()
             request.GET.pop('version_state', None)
             request.GET.pop('auth', None)
+            request.GET.pop('site', None)
 
         extra_context = {'title': 'Internal Search'}
 
@@ -193,8 +189,9 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
         Return a QuerySet of all model instances that can be edited by the
         admin site. This is used by changelist_view.
         """
-        if request.GET.get('ct_type'):
-            app_config = get_internalsearch_config(request.GET.get('ct_type'))
+        content_type = request.GET.get('type')
+        if content_type:
+            app_config = get_internalsearch_config(content_type)
             qs = InternalSearchQuerySet(self.haystack_connection).models(app_config.model).all()
         else:
              qs = InternalSearchQuerySet(self.haystack_connection).all()
@@ -241,7 +238,6 @@ class InternalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin):
                     'author', 'content_type', 'version_status']
     list_filter = [ContentTypeFilter, ]
     search_fields = ('text', 'title')
-    list_per_page = 15
     ordering = ('-id',)
 
     def has_add_permission(self, request):
