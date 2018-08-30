@@ -4,21 +4,22 @@ import operator
 from functools import reduce
 
 from django.contrib import admin
-from django.contrib.admin.options import ModelAdmin
-from django.contrib.admin.views.main import ChangeList
+from django.contrib.admin.options import ModelAdmin, csrf_protect_m
+from django.core.exceptions import PermissionDenied
 from django.core.paginator import InvalidPage, Paginator
 from django.db import models
+from django.shortcuts import render
+from django.utils.encoding import force_text
+from django.utils.translation import ungettext
 
-from haystack.admin import SearchModelAdminMixin
+from haystack.admin import SearchChangeList, SearchModelAdminMixin
 from haystack.query import SearchQuerySet
+from haystack.utils import get_model_ct_tuple
 
 from .models import InternalSearchProxy
 
 
-class InternalSearchChangeList(ChangeList):
-    def __init__(self, *args, **kwargs):
-        self.haystack_connection = 'default'
-        super().__init__(*args, **kwargs)
+class InternalSearchChangeList(SearchChangeList):
 
     def get_results(self, request):
         sqs = self.queryset
@@ -49,9 +50,7 @@ class InternalSearchChangeList(ChangeList):
             result_list = ()
 
         self.result_count = result_count
-        self.show_full_result_count = self.model_admin.show_full_result_count
         self.full_result_count = full_result_count
-        self.show_admin_actions = not self.show_full_result_count or bool(full_result_count)
         self.result_list = result_list
         self.can_show_all = can_show_all
         self.multi_page = multi_page
@@ -74,11 +73,79 @@ class InternalSearchQuerySet(SearchQuerySet):
 
 class InternalSearchModelAdminMixin(SearchModelAdminMixin):
 
-    def get_changelist(self, request, **kwargs):
-        """
-        Returns the ChangeList class for use on the changelist page.
-        """
-        return InternalSearchChangeList
+    @csrf_protect_m
+    def changelist_view(self, request, extra_context=None):
+        if not self.has_change_permission(request, None):
+            raise PermissionDenied
+
+        list_display = list(self.list_display)
+        list_filter = self.list_filter
+        extra_context = {'title': 'Internal Search'}
+
+        kwargs = {
+            'haystack_connection': self.haystack_connection,
+            'request': request,
+            'model': self.model,
+            'list_display': list_display,
+            'list_display_links': self.list_display_links,
+            'list_filter': list_filter,
+            'date_hierarchy': self.date_hierarchy,
+            'search_fields': self.search_fields,
+            'list_select_related': self.list_select_related,
+            'list_per_page': self.list_per_page,
+            'list_editable': self.list_editable,
+            'model_admin': self,
+            'list_max_show_all': self.list_max_show_all,
+
+        }
+
+        changelist = InternalSearchChangeList(**kwargs)
+        changelist.formset = None
+        media = self.media
+
+        # Build the action form and populate it with available actions.
+        # Check actions to see if any are available on this changelist
+        actions = self.get_actions(request)
+        if actions:
+            action_form = self.action_form(auto_id=None)
+            action_form.fields['action'].choices = self.get_action_choices(request)
+        else:
+            action_form = None
+
+        selection_note = ungettext('0 of %(count)d selected',
+                                   'of %(count)d selected', len(changelist.result_list))
+        selection_note_all = ungettext('%(total_count)s selected',
+                                       'All %(total_count)s selected', changelist.result_count)
+
+        context = {
+            'module_name': force_text(self.model._meta.verbose_name_plural),
+            'selection_note': selection_note % {'count': len(changelist.result_list)},
+            'selection_note_all': selection_note_all % {'total_count': changelist.result_count},
+            'title': changelist.title,
+            'is_popup': changelist.is_popup,
+            'cl': changelist,
+            'media': media,
+            'has_add_permission': self.has_add_permission(request),
+            # More Django 1.4 compatibility
+            'root_path': getattr(self.admin_site, 'root_path', None),
+            'app_label': self.model._meta.app_label,
+            'action_form': action_form,
+            'actions_on_top': self.actions_on_top,
+            'actions_on_bottom': self.actions_on_bottom,
+            'actions_selection_counter': getattr(self, 'actions_selection_counter', 0),
+            'opts': InternalSearchProxy._meta,
+
+        }
+        if extra_context:
+            context.update(extra_context)
+
+        request.current_app = self.admin_site.name
+        app_name, model_name = get_model_ct_tuple(self.model)
+        return render(request, self.change_list_template or [
+            'admin/%s/%s/change_list.html' % (app_name, model_name),
+            'admin/%s/change_list.html' % app_name,
+            'admin/change_list.html'
+        ], context)
 
     def get_queryset(self, request):
         """
