@@ -163,7 +163,6 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
             'cl': changelist,
             'media': media,
             'has_add_permission': self.has_add_permission(request),
-            # More Django 1.4 compatibility
             'root_path': getattr(self.admin_site, 'root_path', None),
             'app_label': self.model._meta.app_label,
             'action_form': action_form,
