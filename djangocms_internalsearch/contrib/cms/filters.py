@@ -5,6 +5,9 @@ from django.contrib.sites.models import Site
 from cms.models.pagemodel import Page
 from cms.models.titlemodels import Title
 
+from filer.models.filemodels import File
+from filer.models.imagemodels import Image
+
 
 class ContentTypeFilter(admin.SimpleListFilter):
     # Human-readable title which will be displayed in the
