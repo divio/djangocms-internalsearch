@@ -9,9 +9,10 @@ from django.test import RequestFactory
 from cms.models import CMSPlugin, Title
 from cms.toolbar.toolbar import CMSToolbar
 
+from haystack import indexes
+
 from filer.models.filemodels import File
 from filer.models.imagemodels import Image
-from haystack import indexes
 
 from .base import BaseSearchConfig
 
