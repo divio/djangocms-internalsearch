@@ -98,21 +98,21 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
         list_display = []
         list_display.extend(InternalSearchAdmin.list_display)
         content_type = request.GET.get('type')
+
         if content_type:
             app_config = get_internalsearch_config(content_type)
             if app_config:
-                ct_config = app_config
-                # model_admin = CTAdmin
+                # append list_filter based on content_type
+                for item in app_config.list_filter:
+                    if item not in list_filter:
+                        list_filter.append(item)
+                # override list_display based on content_type
                 list_display = self.list_display
-                for item in ct_config.list_filter:
-                    if item not in self.list_filter:
-                          list_filter.append(item)
-
-                if ct_config.list_display:
-                   list_display = ct_config.list_display
+                if app_config.list_display:
+                    list_display = app_config.list_display
 
         else:
-            # Deleting preserved filter parameters for root UI
+            # Deleting preserved filter parameters for all content type UI
             request.GET = request.GET.copy()
             request.GET.pop('version_state', None)
             request.GET.pop('auth', None)
