@@ -213,6 +213,7 @@ class InternalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin):
         else:
             return obj.result.url
 
+    absolute_url.short_description = 'URL'
     absolute_url.allow_tags = True
 
     def text(self, obj):
