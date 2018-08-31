@@ -9,10 +9,9 @@ from django.test import RequestFactory
 from cms.models import CMSPlugin, Title
 from cms.toolbar.toolbar import CMSToolbar
 
-from haystack import indexes
-
 from filer.models.filemodels import File
 from filer.models.imagemodels import Image
+from haystack import indexes
 
 from djangocms_internalsearch.base import BaseSearchConfig
 from djangocms_internalsearch.contrib.cms.filters import (
@@ -125,7 +124,10 @@ class FilerFileConfig(BaseSearchConfig):
 
     model = File
 
-    def file_path(self, obj):
+    def title_new(self, obj):
+        return obj.original_filename
+
+    def file_path_new(self, obj):
         return obj.result.file
 
     def folder_name(self, obj):

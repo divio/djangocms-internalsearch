@@ -1,7 +1,7 @@
 from django.contrib.admin.sites import AdminSite
 
 from djangocms_internalsearch.admin import InternalSearchAdmin
-from djangocms_internalsearch.contrib.cms.filters import ContentTypeFilter
+from djangocms_internalsearch.filters import ContentTypeFilter
 from djangocms_internalsearch.models import InternalSearchProxy
 
 from .utils import TestCase
