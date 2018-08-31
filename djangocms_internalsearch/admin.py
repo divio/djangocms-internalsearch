@@ -208,7 +208,7 @@ class InternalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin):
         return obj.result.slug
 
     def absolute_url(self, obj):
-        if obj.result.url is not None:
+        if obj.result.url:
             return format_html("<a href='{url}'>{url}</a>", url=obj.result.url)
         else:
             return obj.result.url
