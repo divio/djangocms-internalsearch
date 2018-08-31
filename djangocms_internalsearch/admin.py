@@ -10,6 +10,7 @@ from django.core.paginator import InvalidPage, Paginator
 from django.db import models
 from django.shortcuts import render
 from django.utils.encoding import force_text
+from django.utils.html import format_html
 from django.utils.translation import ungettext
 
 from haystack.admin import SearchChangeList, SearchModelAdminMixin
@@ -219,10 +220,12 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
 
 @admin.register(InternalSearchProxy)
 class InternalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin):
-
     # Todo: use model config to generate admin attributes and methods
-    list_display = ['id', 'title', 'slug', 'site_name', 'language',
-                    'author', 'content_type', 'version_status']
+
+
+    list_display = ['title', 'slug', 'absolute_url', 'content_type', 'language', 'author', 'version_status',
+                    'modified_date']
+    list_per_page = 50
     list_filter = [ContentTypeFilter, ]
     search_fields = ('text', 'title')
     ordering = ('-id',)
@@ -230,8 +233,20 @@ class InternalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin):
     def has_add_permission(self, request):
         return False
 
+    def modified_date(self, obj):
+        return obj.result.modified_date
+
     def slug(self, obj):
         return obj.result.slug
+
+    def absolute_url(self, obj):
+        if obj.result.url:
+            return format_html("<a href='{url}'>{url}</a>", url=obj.result.url)
+        else:
+            return obj.result.url
+
+    absolute_url.short_description = 'URL'
+    absolute_url.allow_tags = True
 
     def text(self, obj):
         return obj.text
