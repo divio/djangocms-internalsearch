@@ -221,10 +221,8 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
 @admin.register(InternalSearchProxy)
 class InternalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin):
     # Todo: use model config to generate admin attributes and methods
-
-
-    list_display = ['title', 'slug', 'absolute_url', 'content_type', 'language', 'author', 'version_status',
-                    'modified_date']
+    list_display = ['title', 'slug', 'absolute_url', 'content_type', 'site_name', 'language', 'author',
+                    'version_status', 'modified_date']
     list_per_page = 50
     list_filter = [ContentTypeFilter, ]
     search_fields = ('text', 'title')
