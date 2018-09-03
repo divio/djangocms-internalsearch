@@ -21,10 +21,9 @@ class InternalSearchAdminListing(TestCase):
         self.model_admin = InternalSearchAdmin(InternalSearchProxy, self.site)
 
     def test_field_arguments(self):
-        self.assertEqual(list(self.model_admin.get_list_display(request)),
-                         ['title', 'slug', 'absolute_url', 'content_type', 'site_name', 'language',
-                          'author', 'version_status', 'modified_date'])
-
+        expected_list_display = ['title', 'slug', 'absolute_url', 'content_type', 'site_name', 'language',
+                                 'author', 'version_status', 'modified_date']
+        self.assertEqual(expected_list_display, list(self.model_admin.get_list_display(request)))
         self.assertEqual(list(self.model_admin.get_ordering(request)), ['-id', ])
         self.assertEqual(self.model_admin.list_filter, [ContentTypeFilter, ])
         self.assertEqual(self.model_admin.list_per_page, 50)

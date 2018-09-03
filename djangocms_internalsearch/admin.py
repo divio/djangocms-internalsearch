@@ -235,3 +235,4 @@ class InternalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin, InternalSea
     list_per_page = 50
     search_fields = ('text', 'title')
     ordering = ('-id',)
+    list_display_links = None
