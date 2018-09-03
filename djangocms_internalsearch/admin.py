@@ -10,12 +10,15 @@ from django.core.paginator import InvalidPage, Paginator
 from django.db import models
 from django.shortcuts import render
 from django.utils.encoding import force_text
-from django.utils.html import format_html
 from django.utils.translation import ungettext
 
 from haystack.admin import SearchChangeList, SearchModelAdminMixin
 from haystack.query import SearchQuerySet
 from haystack.utils import get_model_ct_tuple
+
+from djangocms_internalsearch.contrib.cms.internal_search import (
+    DefaultAdminSetting,
+)
 
 from .filters import ContentTypeFilter
 from .helpers import get_internalsearch_model_config, get_model_class
@@ -82,8 +85,8 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
         if not self.has_change_permission(request, None):
             raise PermissionDenied
 
-        list_filter = list(InternalSearchAdmin.list_filter)
-        list_display = list(InternalSearchAdmin.list_display)
+        list_filter = list(DefaultAdminSetting.list_filter)
+        list_display = list(DefaultAdminSetting.list_display)
 
         model_meta = request.GET.get('type')
         model_class = get_model_class(model_meta)
@@ -95,7 +98,6 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
                     if item not in list_filter:
                         list_filter.append(item)
                 # override list_display based on content_type
-                list_display = self.list_display
                 if app_config.list_display:
                     list_display = app_config.list_display
                     for item in list_display:
@@ -109,9 +111,9 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
             request.GET.pop('auth', None)
             request.GET.pop('site', None)
 
-            # re applying method attributes to class
-            for item in InternalSearchAdmin.list_display:
-                setattr(InternalSearchAdmin, item, getattr(InternalSearchAdmin, item))
+            # re applying method attributes to class in case any model has same column name
+            for item in DefaultAdminSetting.list_display:
+                setattr(InternalSearchAdmin, item, getattr(DefaultAdminSetting, item))
 
         extra_context = {'title': 'Internal Search'}
 
@@ -226,50 +228,10 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
 
 
 @admin.register(InternalSearchProxy)
-class InternalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin):
-    # Todo: use model config to generate admin attributes and methods
+class InternalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin, DefaultAdminSetting):
     list_display = ['title', 'slug', 'absolute_url', 'content_type', 'site_name', 'language', 'author',
                     'version_status', 'modified_date']
-    list_per_page = 50
     list_filter = [ContentTypeFilter, ]
+    list_per_page = 50
     search_fields = ('text', 'title')
     ordering = ('-id',)
-
-    def has_add_permission(self, request):
-        return False
-
-    def modified_date(self, obj):
-        return obj.result.modified_date
-
-    def slug(self, obj):
-        return obj.result.slug
-
-    def absolute_url(self, obj):
-        if obj.result.url:
-            return format_html("<a href='{url}'>{url}</a>", url=obj.result.url)
-        else:
-            return obj.result.url
-
-    absolute_url.short_description = 'URL'
-    absolute_url.allow_tags = True
-
-    def text(self, obj):
-        return obj.text
-
-    def title(self, obj):
-        return obj.result.title
-
-    def language(self, obj):
-        return obj.result.language
-
-    def site_name(self, obj):
-        return obj.result.site_name
-
-    def author(self, obj):
-        return obj.result.created_by
-
-    def content_type(self, obj):
-        return obj.result.model.__name__
-
-    def version_status(self, obj):
-        return obj.result.version_status
