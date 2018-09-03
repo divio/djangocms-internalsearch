@@ -17,7 +17,7 @@ from haystack.query import SearchQuerySet
 from haystack.utils import get_model_ct_tuple
 
 from djangocms_internalsearch.contrib.cms.internal_search import (
-    DefaultAdminSetting,
+    InternalSearchAdminSetting,
 )
 
 from .filters import ContentTypeFilter
@@ -85,8 +85,8 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
         if not self.has_change_permission(request, None):
             raise PermissionDenied
 
-        list_filter = list(DefaultAdminSetting.list_filter)
-        list_display = list(DefaultAdminSetting.list_display)
+        list_filter = list(InternalSearchAdminSetting.list_filter)
+        list_display = list(InternalSearchAdminSetting.list_display)
 
         model_meta = request.GET.get('type')
         model_class = get_model_class(model_meta)
@@ -112,8 +112,8 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
             request.GET.pop('site', None)
 
             # re applying method attributes to class in case any model has same column name
-            for item in DefaultAdminSetting.list_display:
-                setattr(InternalSearchAdmin, item, getattr(DefaultAdminSetting, item))
+            for item in InternalSearchAdminSetting.list_display:
+                setattr(InternalSearchAdmin, item, getattr(InternalSearchAdminSetting, item))
 
         extra_context = {'title': 'Internal Search'}
 
@@ -228,7 +228,7 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
 
 
 @admin.register(InternalSearchProxy)
-class InternalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin, DefaultAdminSetting):
+class InternalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin, InternalSearchAdminSetting):
     list_display = ['title', 'slug', 'absolute_url', 'content_type', 'site_name', 'language', 'author',
                     'version_status', 'modified_date']
     list_filter = [ContentTypeFilter, ]

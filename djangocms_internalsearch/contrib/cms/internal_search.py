@@ -23,10 +23,12 @@ from djangocms_internalsearch.contrib.cms.filters import (
 from djangocms_internalsearch.filters import ContentTypeFilter
 
 
-class DefaultAdminSetting:
-    list_display = ['title', 'slug', 'absolute_url', 'content_type', 'site_name', 'language', 'author',
-                    'version_status', 'modified_date']
-
+class InternalSearchAdminSetting:
+    """
+    Default admin setting for all models listing
+    """
+    list_display = ['title', 'slug', 'absolute_url', 'content_type', 'site_name', 'language',
+                    'author', 'version_status', 'modified_date']
     list_filter = [ContentTypeFilter, ]
     list_per_page = 50
     search_fields = ('text', 'title')
