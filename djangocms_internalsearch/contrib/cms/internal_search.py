@@ -5,6 +5,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.contrib.sites.models import Site
 from django.template import RequestContext
 from django.test import RequestFactory
+from django.utils.html import format_html
 
 from cms.models import CMSPlugin, Title
 from cms.toolbar.toolbar import CMSToolbar
@@ -127,6 +128,7 @@ class PageContentConfig(BaseSearchConfig):
 
     def version_status(self, obj):
         return obj.result.version_status
+
 
 def get_request(language=None):
     """

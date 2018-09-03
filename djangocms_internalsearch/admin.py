@@ -12,7 +12,6 @@ from django.shortcuts import render
 from django.utils.encoding import force_text
 from django.utils.html import format_html
 from django.utils.translation import ungettext
-from djangocms_internalsearch.contrib.cms.internal_search import PageContentConfig
 
 from haystack.admin import SearchChangeList, SearchModelAdminMixin
 from haystack.query import SearchQuerySet
@@ -274,4 +273,3 @@ class InternalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin):
 
     def version_status(self, obj):
         return obj.result.version_status
-
