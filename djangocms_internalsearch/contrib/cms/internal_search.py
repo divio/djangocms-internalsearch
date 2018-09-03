@@ -37,8 +37,8 @@ class PageContentConfig(BaseSearchConfig):
     creation_date = indexes.DateTimeField(model_attr='creation_date')
 
     # admin setting
-    list_display = ['id', 'title', 'slug', 'site_name', 'language',
-                    'author', 'content_type', 'version_status']
+    list_display = ['title', 'slug', 'absolute_url', 'content_type', 'site_name', 'language', 'author',
+                    'version_status', 'modified_date']
     list_filter = [SiteFilter, AuthorFilter, VersionStateFilter, ]
     search_fields = ('text', 'title')
     ordering = ('-id',)
@@ -92,6 +92,41 @@ class PageContentConfig(BaseSearchConfig):
     def prepare_created_by(self, obj):
         return obj.page.changed_by
 
+    def modified_date(self, obj):
+        return obj.result.modified_date
+
+    def slug(self, obj):
+        return obj.result.slug
+
+    def absolute_url(self, obj):
+        if obj.result.url:
+            return format_html("<a href='{url}'>{url}</a>", url=obj.result.url)
+        else:
+            return obj.result.url
+
+    absolute_url.short_description = 'URL'
+    absolute_url.allow_tags = True
+
+    def text(self, obj):
+        return obj.text
+
+    def title(self, obj):
+        return obj.result.title
+
+    def language(self, obj):
+        return obj.result.language
+
+    def site_name(self, obj):
+        return obj.result.site_name
+
+    def author(self, obj):
+        return obj.result.created_by
+
+    def content_type(self, obj):
+        return obj.result.model.__name__
+
+    def version_status(self, obj):
+        return obj.result.version_status
 
 def get_request(language=None):
     """
@@ -118,20 +153,20 @@ class FilerFileConfig(BaseSearchConfig):
     version_status = indexes.CharField()
 
     # admin setting
-    list_display = ['title', ]
+    list_display = ['title', 'file_size', 'file_path_new']
     search_fields = ('title', 'folder_name')
     list_filter = ()
 
     model = File
 
-    def title_new(self, obj):
-        return obj.original_filename
+    def title(self, obj):
+        return obj.result.file_path
 
     def file_path_new(self, obj):
         return obj.result.file
 
-    def folder_name(self, obj):
-        return obj.result.folder_name
+    def file_size(self, obj):
+        return obj.result.file_size
 
     def prepare_text(self, obj):
         # Todo: Might need to change based on file type e.g. Image
@@ -148,7 +183,7 @@ class FilerImageConfig(BaseSearchConfig):
     version_status = indexes.CharField()
 
     # admin setting
-    list_display = ['title']
+    list_display = ['title', 'file_path']
     search_fields = ('title', 'folder_name')
     list_filter = ()
 

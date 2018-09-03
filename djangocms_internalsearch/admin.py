@@ -12,6 +12,7 @@ from django.shortcuts import render
 from django.utils.encoding import force_text
 from django.utils.html import format_html
 from django.utils.translation import ungettext
+from djangocms_internalsearch.contrib.cms.internal_search import PageContentConfig
 
 from haystack.admin import SearchChangeList, SearchModelAdminMixin
 from haystack.query import SearchQuerySet
@@ -98,13 +99,20 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
                 list_display = self.list_display
                 if app_config.list_display:
                     list_display = app_config.list_display
-                # self.__dict__.update(app_config.__dict__.copy())
+                    for item in list_display:
+                        if callable(getattr(app_config, item)):
+                            setattr(InternalSearchAdmin, item, getattr(app_config, item))
+
         else:
             # Deleting preserved filter parameters for all content type UI
             request.GET = request.GET.copy()
             request.GET.pop('version_state', None)
             request.GET.pop('auth', None)
             request.GET.pop('site', None)
+
+            # re applying method attributes to class
+            for item in InternalSearchAdmin.list_display:
+                setattr(InternalSearchAdmin, item, getattr(InternalSearchAdmin, item))
 
         extra_context = {'title': 'Internal Search'}
 
@@ -266,3 +274,4 @@ class InternalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin):
 
     def version_status(self, obj):
         return obj.result.version_status
+
