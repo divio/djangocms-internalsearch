@@ -3,6 +3,7 @@ from __future__ import print_function, unicode_literals
 import operator
 from functools import reduce
 
+from django.apps import apps
 from django.contrib import admin
 from django.contrib.admin.options import ModelAdmin, csrf_protect_m
 from django.core.exceptions import PermissionDenied
@@ -19,7 +20,7 @@ from haystack.utils import get_model_ct_tuple
 from djangocms_internalsearch.internal_search import InternalSearchAdminSetting
 
 from .filters import ContentTypeFilter
-from .helpers import get_internalsearch_model_config, get_model_class
+from .helpers import get_internalsearch_model_config
 from .models import InternalSearchProxy
 
 
@@ -78,7 +79,7 @@ class InternalSearchQuerySet(SearchQuerySet):
 
 def get_admin_settings_from_config(model_meta):
     result = {}
-    model_class = get_model_class(model_meta)
+    model_class = apps.get_model(model_meta)
     if model_class:
         app_config = get_internalsearch_model_config(model_class)
         if app_config:
@@ -197,7 +198,7 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
         model_meta = request.GET.get('type')
         qs = InternalSearchQuerySet(self.haystack_connection).all()
         if model_meta:
-            model_class = get_model_class(model_meta)
+            model_class = apps.get_model(model_meta)
             if model_class:
                 app_config = get_internalsearch_model_config(model_class)
                 qs = InternalSearchQuerySet(self.haystack_connection).models(app_config.model).all()

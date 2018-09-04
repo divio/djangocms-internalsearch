@@ -21,12 +21,6 @@ def get_internalsearch_config():
     return apps_config
 
 
-def get_model_class(model_meta):
-    app_label, model_name = model_meta.split('.')
-    model_class = apps.get_model(app_label, model_name)
-    return model_class
-
-
 def get_request(language=None):
     from django.contrib.auth.models import AnonymousUser
     from cms.toolbar.toolbar import CMSToolbar

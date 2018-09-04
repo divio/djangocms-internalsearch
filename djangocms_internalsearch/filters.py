@@ -1,8 +1,8 @@
+from django.apps import apps
 from django.contrib import admin
 
 from djangocms_internalsearch.helpers import (
     get_internalsearch_config,
-    get_model_class,
 )
 
 
@@ -39,6 +39,6 @@ class ContentTypeFilter(admin.SimpleListFilter):
         if not self.value():
             return
 
-        model = get_model_class(self.value())
+        model = apps.get_model(self.value())
         if model:
             return queryset.models(model)
