@@ -36,7 +36,9 @@ class ContentTypeFilter(admin.SimpleListFilter):
         # Compare the requested value (either '80s' or '90s')
         # to decide how to filter the queryset.
         # qs = super(InternalSearchAdmin, self).changelist(request, queryset)
-        if self.value():
-            model = get_model_class(self.value())
-            if model:
-                return queryset.models(model)
+        if not self.value():
+            return
+
+        model = get_model_class(self.value())
+        if model:
+            return queryset.models(model)

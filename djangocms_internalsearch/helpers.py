@@ -1,4 +1,6 @@
 from django.apps import apps
+from django.conf import settings
+from django.test import RequestFactory
 
 
 def save_to_index(sender, operation, request, token, **kwargs):
@@ -20,8 +22,23 @@ def get_internalsearch_config():
 
 
 def get_model_class(model_meta):
-    if model_meta:
-        app_label, model_name = model_meta.split('.')
-        model_class = apps.get_model(app_label, model_name)
-        return model_class
-    return None
+    app_label, model_name = model_meta.split('.')
+    model_class = apps.get_model(app_label, model_name)
+    return model_class
+
+
+def get_request(language=None):
+    from django.contrib.auth.models import AnonymousUser
+    from cms.toolbar.toolbar import CMSToolbar
+    """
+    Returns a Request instance populated with cms specific attributes.
+    """
+    request_factory = RequestFactory(HTTP_HOST=settings.ALLOWED_HOSTS[0])
+    request = request_factory.get("/")
+    request.session = {}
+    request.LANGUAGE_CODE = language or settings.LANGUAGE_CODE
+    # Needed for plugin rendering.
+    request.current_page = None
+    request.user = AnonymousUser()
+    request.toolbar = CMSToolbar(request)
+    return request

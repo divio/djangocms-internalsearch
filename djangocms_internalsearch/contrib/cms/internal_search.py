@@ -1,14 +1,10 @@
 import random
 
-from django.conf import settings
-from django.contrib.auth.models import AnonymousUser
 from django.contrib.sites.models import Site
 from django.template import RequestContext
-from django.test import RequestFactory
 from django.utils.html import format_html
 
 from cms.models import CMSPlugin, Title
-from cms.toolbar.toolbar import CMSToolbar
 
 from haystack import indexes
 
@@ -18,6 +14,7 @@ from djangocms_internalsearch.contrib.cms.filters import (
     SiteFilter,
     VersionStateFilter,
 )
+from djangocms_internalsearch.helpers import get_request
 
 
 class PageContentConfig(BaseSearchConfig):
@@ -126,18 +123,3 @@ class PageContentConfig(BaseSearchConfig):
 
     def version_status(self, obj):
         return obj.result.version_status
-
-
-def get_request(language=None):
-    """
-    Returns a Request instance populated with cms specific attributes.
-    """
-    request_factory = RequestFactory(HTTP_HOST=settings.ALLOWED_HOSTS[0])
-    request = request_factory.get("/")
-    request.session = {}
-    request.LANGUAGE_CODE = language or settings.LANGUAGE_CODE
-    # Needed for plugin rendering.
-    request.current_page = None
-    request.user = AnonymousUser()
-    request.toolbar = CMSToolbar(request)
-    return request

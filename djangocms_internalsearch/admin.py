@@ -76,6 +76,23 @@ class InternalSearchQuerySet(SearchQuerySet):
         self.query.select_related = False
 
 
+def get_admin_settings_from_config(model_meta):
+    result = {}
+    model_class = get_model_class(model_meta)
+    if model_class:
+        app_config = get_internalsearch_model_config(model_class)
+        if app_config:
+            result.update({
+                'list_display': app_config.list_display,
+                'list_filter': app_config.list_filter,
+                # TODO: adept more settings
+            })
+            for item in app_config.list_display:
+                if callable(getattr(app_config, item)):
+                    setattr(InternalSearchAdmin, item, getattr(app_config, item))
+    return result
+
+
 class InternalSearchModelAdminMixin(SearchModelAdminMixin):
 
     @csrf_protect_m
@@ -88,20 +105,13 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
 
         model_meta = request.GET.get('type')
         if model_meta:
-            model_class = get_model_class(model_meta)
-            if model_class:
-                app_config = get_internalsearch_model_config(model_class)
-                if app_config:
-                    # append list_filter based on content_type
-                    for item in app_config.list_filter:
-                        if item not in list_filter:
-                            list_filter.append(item)
-                    # override list_display based on content_type
-                    if app_config.list_display:
-                        list_display = app_config.list_display
-                        for item in list_display:
-                            if callable(getattr(app_config, item)):
-                                setattr(InternalSearchAdmin, item, getattr(app_config, item))
+            config_setting = get_admin_settings_from_config(model_meta)
+            for item in config_setting.get('list_filter'):
+                if item not in list_filter:
+                    list_filter.append(item)
+
+            if config_setting.get('list_display'):
+                list_display = config_setting.get('list_display')
 
         else:
             # Deleting preserved filter parameters for all content type UI
