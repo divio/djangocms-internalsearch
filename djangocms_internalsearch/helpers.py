@@ -1,6 +1,7 @@
 from cms.operations import DELETE_PAGE, DELETE_PLUGIN
 
 from haystack import connections
+from haystack.exceptions import NotHandled
 
 
 def save_to_index(sender, operation, request, token, **kwargs):
@@ -24,7 +25,7 @@ def save_to_index(sender, operation, request, token, **kwargs):
             plugin = kwargs['plugin']
             index = connections["default"].get_unified_index().get_index(type(plugin))
             save_object(index, obj, operation)
-        except:
+        except NotHandled:
             pass
 
 
