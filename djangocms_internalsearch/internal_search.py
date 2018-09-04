@@ -11,7 +11,6 @@ from cms.toolbar.toolbar import CMSToolbar
 
 from filer.models.filemodels import File
 from filer.models.imagemodels import Image
-
 from haystack import indexes
 
 from .base import BaseSearchConfig
