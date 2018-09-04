@@ -7,7 +7,6 @@ INSTALL_REQUIREMENTS = [
     'Django>=1.11,<2.0',
     'django-cms>=3.5.0',
     'django-haystack>=2.7.0',
-    'django-filer',
     'elasticsearch>=2.0.0,<3.0.0',
 ]
 
