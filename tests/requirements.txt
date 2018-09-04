@@ -3,4 +3,5 @@ tox
 coverage
 flake8
 isort
+Whoosh
 easy_thumbnails

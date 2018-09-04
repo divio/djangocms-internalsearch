@@ -1,3 +1,6 @@
+from tempfile import mkdtemp
+
+
 HELPER_SETTINGS = {
     'INSTALLED_APPS': [
         'djangocms_internalsearch',
@@ -7,9 +10,8 @@ HELPER_SETTINGS = {
     ],
     'HAYSTACK_CONNECTIONS': {
         'default': {
-            'ENGINE': 'djangocms_internalsearch.engine.InternalSearchESEngine',
-            'URL': 'http://127.0.0.1:9200/',
-            'INDEX_NAME': 'test_haystack',
+            'ENGINE': 'djangocms_internalsearch.engine.InternalSearchWhooshEngine',
+            "PATH": mkdtemp(prefix="test_whoosh_query"),
         },
     }
 }
