@@ -37,7 +37,6 @@ class ContentTypeFilter(admin.SimpleListFilter):
         # to decide how to filter the queryset.
         # qs = super(InternalSearchAdmin, self).changelist(request, queryset)
         if self.value():
-
             model = get_model_class(self.value())
             if model:
                 return queryset.models(model)

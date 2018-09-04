@@ -16,9 +16,7 @@ from haystack.admin import SearchChangeList, SearchModelAdminMixin
 from haystack.query import SearchQuerySet
 from haystack.utils import get_model_ct_tuple
 
-from djangocms_internalsearch.contrib.cms.internal_search import (
-    InternalSearchAdminSetting,
-)
+from djangocms_internalsearch.internal_search import InternalSearchAdminSetting
 
 from .filters import ContentTypeFilter
 from .helpers import get_internalsearch_model_config, get_model_class
@@ -89,20 +87,21 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
         list_display = list(InternalSearchAdminSetting.list_display)
 
         model_meta = request.GET.get('type')
-        model_class = get_model_class(model_meta)
-        if model_class:
-            app_config = get_internalsearch_model_config(model_class)
-            if app_config:
-                # append list_filter based on content_type
-                for item in app_config.list_filter:
-                    if item not in list_filter:
-                        list_filter.append(item)
-                # override list_display based on content_type
-                if app_config.list_display:
-                    list_display = app_config.list_display
-                    for item in list_display:
-                        if callable(getattr(app_config, item)):
-                            setattr(InternalSearchAdmin, item, getattr(app_config, item))
+        if model_meta:
+            model_class = get_model_class(model_meta)
+            if model_class:
+                app_config = get_internalsearch_model_config(model_class)
+                if app_config:
+                    # append list_filter based on content_type
+                    for item in app_config.list_filter:
+                        if item not in list_filter:
+                            list_filter.append(item)
+                    # override list_display based on content_type
+                    if app_config.list_display:
+                        list_display = app_config.list_display
+                        for item in list_display:
+                            if callable(getattr(app_config, item)):
+                                setattr(InternalSearchAdmin, item, getattr(app_config, item))
 
         else:
             # Deleting preserved filter parameters for all content type UI
@@ -186,17 +185,17 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
         admin site. This is used by changelist_view.
         """
         model_meta = request.GET.get('type')
-        model_class = get_model_class(model_meta)
-        if model_class:
-            app_config = get_internalsearch_model_config(model_class)
-            qs = InternalSearchQuerySet(self.haystack_connection).models(app_config.model).all()
-        else:
-            qs = InternalSearchQuerySet(self.haystack_connection).all()
+        qs = InternalSearchQuerySet(self.haystack_connection).all()
+        if model_meta:
+            model_class = get_model_class(model_meta)
+            if model_class:
+                app_config = get_internalsearch_model_config(model_class)
+                qs = InternalSearchQuerySet(self.haystack_connection).models(app_config.model).all()
 
-        # TODO: this should be handled by some parameter to the ChangeList.
-        ordering = self.get_ordering(request)
-        if ordering:
-            qs = qs.order_by(*ordering)
+            # TODO: this should be handled by some parameter to the ChangeList.
+            ordering = self.get_ordering(request)
+            if ordering:
+                qs = qs.order_by(*ordering)
         return qs
 
     def get_search_results(self, request, queryset, search_term):

@@ -5,9 +5,11 @@ from django.core.exceptions import ImproperlyConfigured
 from cms.app_base import CMSAppConfig, CMSAppExtension
 
 from djangocms_internalsearch.contrib.cms.internal_search import (
+    PageContentConfig,
+)
+from djangocms_internalsearch.contrib.filer.internal_search import (
     FilerFileConfig,
     FilerImageConfig,
-    PageContentConfig,
 )
 
 

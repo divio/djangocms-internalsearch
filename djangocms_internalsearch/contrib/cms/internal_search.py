@@ -10,8 +10,6 @@ from django.utils.html import format_html
 from cms.models import CMSPlugin, Title
 from cms.toolbar.toolbar import CMSToolbar
 
-from filer.models.filemodels import File
-from filer.models.imagemodels import Image
 from haystack import indexes
 
 from djangocms_internalsearch.base import BaseSearchConfig
@@ -20,58 +18,6 @@ from djangocms_internalsearch.contrib.cms.filters import (
     SiteFilter,
     VersionStateFilter,
 )
-from djangocms_internalsearch.filters import ContentTypeFilter
-
-
-class InternalSearchAdminSetting:
-    """
-    Default admin setting for all models listing
-    """
-    list_display = ['title', 'slug', 'absolute_url', 'content_type', 'site_name', 'language',
-                    'author', 'version_status', 'modified_date']
-    list_filter = [ContentTypeFilter, ]
-    list_per_page = 50
-    search_fields = ('text', 'title')
-    ordering = ('-id',)
-
-    def has_add_permission(self, request):
-        return False
-
-    def modified_date(self, obj):
-        return obj.result.modified_date
-
-    def slug(self, obj):
-        return obj.result.slug
-
-    def absolute_url(self, obj):
-        if obj.result.url:
-            return format_html("<a href='{url}'>{url}</a>", url=obj.result.url)
-        else:
-            return obj.result.url
-
-    absolute_url.short_description = 'URL'
-    absolute_url.allow_tags = True
-
-    def text(self, obj):
-        return obj.text
-
-    def title(self, obj):
-        return obj.result.title
-
-    def language(self, obj):
-        return obj.result.language
-
-    def site_name(self, obj):
-        return obj.result.site_name
-
-    def author(self, obj):
-        return obj.result.created_by
-
-    def content_type(self, obj):
-        return obj.result.model.__name__
-
-    def version_status(self, obj):
-        return obj.result.version_status
 
 
 class PageContentConfig(BaseSearchConfig):
@@ -195,60 +141,3 @@ def get_request(language=None):
     request.user = AnonymousUser()
     request.toolbar = CMSToolbar(request)
     return request
-
-
-class FilerFileConfig(BaseSearchConfig):
-    # indexes definition
-    folder_name = indexes.CharField(model_attr="folder__name")
-    file_path = indexes.CharField(model_attr="file")
-    title = indexes.CharField(model_attr="original_filename")
-    file_size = indexes.IntegerField(model_attr="_file_size")
-    created_by = indexes.CharField(model_attr="owner")
-    version_status = indexes.CharField()
-
-    # admin setting
-    list_display = ['title', 'file_size', 'file_path_new']
-    search_fields = ('title', 'folder_name')
-    list_filter = ()
-
-    model = File
-
-    def title(self, obj):
-        return obj.result.file_path
-
-    def file_path_new(self, obj):
-        return obj.result.file
-
-    def file_size(self, obj):
-        return obj.result.file_size
-
-    def prepare_text(self, obj):
-        # Todo: Might need to change based on file type e.g. Image
-        return ' '.join([obj.original_filename, ])
-
-
-class FilerImageConfig(BaseSearchConfig):
-    # indexes definition
-    folder_name = indexes.CharField(model_attr="folder__name")
-    file_path = indexes.CharField(model_attr="file")
-    title = indexes.CharField(model_attr="original_filename")
-    file_size = indexes.IntegerField(model_attr="_file_size")
-    created_by = indexes.CharField(model_attr="owner")
-    version_status = indexes.CharField()
-
-    # admin setting
-    list_display = ['title', 'file_path']
-    search_fields = ('title', 'folder_name')
-    list_filter = ()
-
-    model = Image
-
-    def file_path(self, obj):
-        return obj.result.file
-
-    def folder_name(self, obj):
-        return obj.result.folder_name
-
-    def prepare_text(self, obj):
-        # Todo: Might need to change based on file type e.g. Image
-        return ' '.join([obj.original_filename, ])

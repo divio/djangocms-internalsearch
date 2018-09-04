@@ -22,7 +22,8 @@ class LanguageFilter(admin.SimpleListFilter):
         in the right sidebar.
         """
         languages = (
-            Title.objects
+            Title
+            .objects
             .order_by()
             .distinct()
             .values_list('language', flat=True)
@@ -93,7 +94,8 @@ class AuthorFilter(admin.SimpleListFilter):
         in the right sidebar.
         """
         authors = (
-            Page.objects
+            Page
+            .objects
             .order_by()
             .distinct()
             .values_list('changed_by', flat=True)
@@ -129,7 +131,8 @@ class SiteFilter(admin.SimpleListFilter):
         in the right sidebar.
         """
         sites = (
-            Site.objects
+            Site
+            .objects
             .order_by()
             .distinct()
             .values_list('name', flat=True)
