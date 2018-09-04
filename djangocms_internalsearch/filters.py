@@ -1,9 +1,7 @@
 from django.apps import apps
 from django.contrib import admin
 
-from djangocms_internalsearch.helpers import (
-    get_internalsearch_config,
-)
+from djangocms_internalsearch.helpers import get_internalsearch_config
 
 
 class ContentTypeFilter(admin.SimpleListFilter):
