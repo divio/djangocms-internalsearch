@@ -2,7 +2,6 @@ import random
 
 from django.contrib.sites.models import Site
 from django.template import RequestContext
-from django.utils.html import format_html
 
 from cms.models import CMSPlugin, Title
 
@@ -33,14 +32,13 @@ class PageContentConfig(BaseSearchConfig):
     creation_date = indexes.DateTimeField(model_attr='creation_date')
 
     # admin setting
-    list_display = ['title', 'slug', 'absolute_url', 'content_type', 'site_name', 'language', 'author',
-                    'version_status', 'modified_date']
+    list_display = ['get_title', 'get_slug', 'get_content_type', 'get_site_name', 'get_language', 'get_author',
+                    'get_version_status', 'get_modified_date']
     list_filter = [SiteFilter, AuthorFilter, VersionStateFilter, ]
     search_fields = ('text', 'title')
     ordering = ('-id',)
-    list_per_page = 15
+    list_per_page = 50
 
-    # model class attribute
     model = Title
 
     def prepare_site_id(self, obj):
@@ -88,38 +86,34 @@ class PageContentConfig(BaseSearchConfig):
     def prepare_created_by(self, obj):
         return obj.page.changed_by
 
-    def modified_date(self, obj):
-        return obj.result.modified_date
+    def get_modified_date(self, obj):
+        return obj.result.creation_date
+    get_modified_date.short_description = 'Modified Date'
 
-    def slug(self, obj):
+    def get_slug(self, obj):
         return obj.result.slug
+    get_slug.short_description = 'slug'
 
-    def absolute_url(self, obj):
-        if obj.result.url:
-            return format_html("<a href='{url}'>{url}</a>", url=obj.result.url)
-        else:
-            return obj.result.url
-
-    absolute_url.short_description = 'URL'
-    absolute_url.allow_tags = True
-
-    def text(self, obj):
-        return obj.text
-
-    def title(self, obj):
+    def get_title(self, obj):
         return obj.result.title
+    get_title.short_description = 'title'
 
-    def language(self, obj):
+    def get_language(self, obj):
         return obj.result.language
+    get_language.short_description = 'language'
 
-    def site_name(self, obj):
+    def get_site_name(self, obj):
         return obj.result.site_name
+    get_site_name.short_description = 'site_name'
 
-    def author(self, obj):
+    def get_author(self, obj):
         return obj.result.created_by
+    get_author.short_description = 'Author'
 
-    def content_type(self, obj):
+    def get_content_type(self, obj):
         return obj.result.model.__name__
+    get_content_type.short_description = 'Content Type'
 
-    def version_status(self, obj):
+    def get_version_status(self, obj):
         return obj.result.version_status
+    get_version_status.short_description = 'Version Status'
