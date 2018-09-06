@@ -36,3 +36,9 @@ def get_request(language=None):
     request.user = AnonymousUser()
     request.toolbar = CMSToolbar(request)
     return request
+
+
+def set_admin_list_display(admin_klass, source_klass):
+    for item in source_klass.list_display:
+        if callable(getattr(source_klass, item)):
+            setattr(admin_klass, item, getattr(source_klass, item))
