@@ -20,7 +20,7 @@ from haystack.utils import get_model_ct_tuple
 from djangocms_internalsearch.internal_search import InternalSearchAdminSetting
 
 from .filters import ContentTypeFilter
-from .helpers import get_internalsearch_model_config, set_admin_list_display
+from .helpers import get_internalsearch_model_config
 from .models import InternalSearchProxy
 
 
@@ -88,8 +88,7 @@ def get_admin_settings_from_config(model_meta):
                 'list_filter': app_config.list_filter,
                 # TODO: adept more settings
             })
-            # setting list_display callable to admin class
-            set_admin_list_display(InternalSearchAdmin, app_config)
+
     return result
 
 
@@ -119,9 +118,6 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
             request.GET.pop('version_state', None)
             request.GET.pop('auth', None)
             request.GET.pop('site', None)
-
-            # setting list_display callable to admin class
-            set_admin_list_display(InternalSearchAdmin, InternalSearchAdminSetting)
 
         extra_context = {'title': 'Internal Search'}
 
