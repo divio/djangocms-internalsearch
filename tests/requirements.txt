@@ -3,5 +3,5 @@ tox
 coverage
 flake8
 isort
-djangocms-file
+django-filer
 easy-thumbnails
