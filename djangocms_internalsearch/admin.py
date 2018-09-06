@@ -3,6 +3,7 @@ from __future__ import print_function, unicode_literals
 import operator
 from functools import reduce
 
+from django.apps import apps
 from django.contrib import admin
 from django.contrib.admin.options import ModelAdmin, csrf_protect_m
 from django.core.exceptions import PermissionDenied
@@ -10,19 +11,23 @@ from django.core.paginator import InvalidPage, Paginator
 from django.db import models
 from django.shortcuts import render
 from django.utils.encoding import force_text
-from django.utils.html import format_html
 from django.utils.translation import ungettext
 
 from haystack.admin import SearchChangeList, SearchModelAdminMixin
 from haystack.query import SearchQuerySet
 from haystack.utils import get_model_ct_tuple
 
+from djangocms_internalsearch.internal_search import InternalSearchAdminSetting
+
+from .filters import ContentTypeFilter
+from .helpers import get_internalsearch_model_config
 from .models import InternalSearchProxy
 
 
 class InternalSearchChangeList(SearchChangeList):
 
     def get_results(self, request):
+
         sqs = self.queryset
         if hasattr(request, 'SEARCH_VAR'):
             query = request.GET('SEARCH_VAR')
@@ -72,6 +77,21 @@ class InternalSearchQuerySet(SearchQuerySet):
         self.query.select_related = False
 
 
+def get_admin_settings_from_config(model_meta):
+    result = {}
+    model_class = apps.get_model(model_meta)
+    if model_class:
+        app_config = get_internalsearch_model_config(model_class)
+        if app_config:
+            result.update({
+                'list_display': app_config.list_display,
+                'list_filter': app_config.list_filter,
+                # TODO: adept more settings
+            })
+
+    return result
+
+
 class InternalSearchModelAdminMixin(SearchModelAdminMixin):
 
     @csrf_protect_m
@@ -79,8 +99,26 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
         if not self.has_change_permission(request, None):
             raise PermissionDenied
 
-        list_display = list(self.list_display)
-        list_filter = self.list_filter
+        list_filter = list(InternalSearchAdminSetting.list_filter)
+        list_display = list(InternalSearchAdminSetting.list_display)
+
+        model_meta = request.GET.get('type')
+        if model_meta:
+            config_setting = get_admin_settings_from_config(model_meta)
+            for item in config_setting.get('list_filter'):
+                if item not in list_filter:
+                    list_filter.append(item)
+
+            if config_setting.get('list_display'):
+                list_display = config_setting.get('list_display')
+
+        else:
+            # Deleting preserved filter parameters for all content type UI
+            request.GET = request.GET.copy()
+            request.GET.pop('version_state', None)
+            request.GET.pop('auth', None)
+            request.GET.pop('site', None)
+
         extra_context = {'title': 'Internal Search'}
 
         kwargs = {
@@ -97,7 +135,6 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
             'list_editable': self.list_editable,
             'model_admin': self,
             'list_max_show_all': self.list_max_show_all,
-
         }
 
         changelist = InternalSearchChangeList(**kwargs)
@@ -127,7 +164,6 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
             'cl': changelist,
             'media': media,
             'has_add_permission': self.has_add_permission(request),
-            # More Django 1.4 compatibility
             'root_path': getattr(self.admin_site, 'root_path', None),
             'app_label': self.model._meta.app_label,
             'action_form': action_form,
@@ -153,11 +189,16 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
         Return a QuerySet of all model instances that can be edited by the
         admin site. This is used by changelist_view.
         """
+        model_meta = request.GET.get('type')
         qs = InternalSearchQuerySet(self.haystack_connection).all()
-        # TODO: this should be handled by some parameter to the ChangeList.
-        ordering = self.get_ordering(request)
-        if ordering:
-            qs = qs.order_by(*ordering)
+        if model_meta:
+            model_klass = apps.get_model(model_meta)
+            qs = InternalSearchQuerySet(self.haystack_connection).models(model_klass).all()
+
+            # TODO: this should be handled by some parameter to the ChangeList.
+            ordering = self.get_ordering(request)
+            if ordering:
+                qs = qs.order_by(*ordering)
         return qs
 
     def get_search_results(self, request, queryset, search_term):
@@ -189,50 +230,11 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
 
 
 @admin.register(InternalSearchProxy)
-class InternalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin):
-    # Todo: use model config to generate admin attributes and methods
-    list_display = ['title', 'slug', 'absolute_url', 'content_type', 'language', 'author', 'version_status',
-                    'modified_date']
+class InternalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin, InternalSearchAdminSetting):
+    list_display = ['title', 'slug', 'absolute_url', 'content_type', 'site_name', 'language', 'author',
+                    'version_status', 'modified_date']
+    list_filter = [ContentTypeFilter, ]
     list_per_page = 50
     search_fields = ('text', 'title')
     ordering = ('-id',)
     list_display_links = None
-
-    def has_add_permission(self, request):
-        return False
-
-    def modified_date(self, obj):
-        return obj.result.modified_date
-
-    def slug(self, obj):
-        return obj.result.slug
-
-    def absolute_url(self, obj):
-        if obj.result.url:
-            return format_html("<a href='{url}'>{url}</a>", url=obj.result.url)
-        else:
-            return obj.result.url
-
-    absolute_url.short_description = 'URL'
-    absolute_url.allow_tags = True
-
-    def text(self, obj):
-        return obj.text
-
-    def title(self, obj):
-        return obj.result.title
-
-    def language(self, obj):
-        return obj.result.language
-
-    def site_name(self, obj):
-        return obj.result.site_name
-
-    def author(self, obj):
-        return obj.result.created_by
-
-    def content_type(self, obj):
-        return obj.result.model.__name__
-
-    def version_status(self, obj):
-        return obj.result.version_status
