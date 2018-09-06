@@ -7,7 +7,7 @@ from django.contrib.sites.models import Site
 from django.template import RequestContext
 from django.test import RequestFactory
 
-from cms.models import CMSPlugin, PageContent, PageUrl
+from cms.models import CMSPlugin, PageContent
 from cms.toolbar.toolbar import CMSToolbar
 
 from filer.models.filemodels import File
