@@ -2,6 +2,7 @@ import random
 
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.template import RequestContext
 from django.test import RequestFactory
@@ -42,7 +43,7 @@ class PageContentConfig(BaseSearchConfig):
     model = PageContent
 
     def prepare_slug(self, obj):
-        return PageUrl.objects.filter(pk=obj.page_id).first().slug
+        return obj.page.get_slug(obj.language, fallback=False)
 
     def prepare_site_id(self, obj):
         return obj.page.node.site_id
@@ -55,7 +56,11 @@ class PageContentConfig(BaseSearchConfig):
         plugin_types = (
             CMSPlugin
             .objects
-            .filter(placeholder_id=obj.pk, language=obj.language)
+            .filter(
+                placeholder__content_type=ContentType.objects.get_for_model(obj),
+                placeholder__object_id=obj.pk,
+                language=obj.language,
+            )
             .order_by()  # Needed for distinct() with values_list https://code.djangoproject.com/ticket/16058
             .values_list('plugin_type', flat=True)
             .distinct()
@@ -64,8 +69,9 @@ class PageContentConfig(BaseSearchConfig):
 
     def prepare_text(self, obj):
         plugins = CMSPlugin.objects.filter(
+            placeholder__content_type=ContentType.objects.get_for_model(obj),
+            placeholder__object_id=obj.pk,
             language=obj.language,
-            placeholder_id=obj.id,
         )
         request = get_request(obj.language)
         context = RequestContext(request)
