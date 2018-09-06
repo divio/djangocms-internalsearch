@@ -13,7 +13,7 @@ HELPER_SETTINGS = {
             'ENGINE': 'djangocms_internalsearch.engine.InternalSearchWhooshEngine',
             "PATH": mkdtemp(prefix="test_whoosh_query"),
         },
-    }
+    },
 }
 
 
