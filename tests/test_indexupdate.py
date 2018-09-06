@@ -1,4 +1,4 @@
-from cms.models import Title
+from cms.models import PageContent
 from cms.operations import ADD_PAGE_TRANSLATION, DELETE_PAGE
 
 from haystack import connections
@@ -30,13 +30,13 @@ class UpdateIndexTestCase(BaseTestCase):
 
     def test_add_page_to_update_index(self):
         kwargs = {'obj': self.pg1}
-        save_to_index(Title, ADD_PAGE_TRANSLATION, self.request, self.token, **kwargs)
+        save_to_index(PageContent, ADD_PAGE_TRANSLATION, self.request, self.token, **kwargs)
         self.assertEqual(1, self.sb.index.doc_count())
 
     def test_delete_page_from_index(self):
         kwargs = {'obj': self.pg1}
-        save_to_index(Title, ADD_PAGE_TRANSLATION, self.request, self.token, **kwargs)
+        save_to_index(PageContent, ADD_PAGE_TRANSLATION, self.request, self.token, **kwargs)
         self.assertEqual(1, self.sb.index.doc_count())
         kwargs = {'obj': self.pg1}
-        save_to_index(Title, DELETE_PAGE, self.request, self.token, **kwargs)
+        save_to_index(PageContent, DELETE_PAGE, self.request, self.token, **kwargs)
         self.assertEqual(0, self.sb.index.doc_count())
