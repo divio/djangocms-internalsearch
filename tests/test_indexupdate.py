@@ -5,11 +5,8 @@ from haystack import connections
 from haystack.utils.loading import UnifiedIndex
 from tests.utils import BaseTestCase
 
-from djangocms_internalsearch.helpers import save_to_index
-from djangocms_internalsearch.internal_search import (
-    PageContentConfig,
-    get_request,
-)
+from djangocms_internalsearch.contrib.cms.internal_search import PageContentConfig
+from djangocms_internalsearch.helpers import get_request, save_to_index
 
 
 class UpdateIndexTestCase(BaseTestCase):
