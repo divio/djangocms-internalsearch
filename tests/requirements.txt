@@ -3,4 +3,5 @@ tox
 coverage
 flake8
 isort
-easy_thumbnails
+django-filer
+easy-thumbnails
