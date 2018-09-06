@@ -1,8 +1,7 @@
 from django.contrib import admin
 from django.contrib.sites.models import Site
 
-from cms.models.pagemodel import Page
-from cms.models.titlemodels import Title
+from cms.models import Page, PageContent
 
 
 class LanguageFilter(admin.SimpleListFilter):
@@ -22,7 +21,7 @@ class LanguageFilter(admin.SimpleListFilter):
         in the right sidebar.
         """
         languages = (
-            Title
+            PageContent
             .objects
             .order_by()
             .distinct()
