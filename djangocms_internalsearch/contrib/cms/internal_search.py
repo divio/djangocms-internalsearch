@@ -3,6 +3,7 @@ import random
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.template import RequestContext
+from django.utils.translation import ugettext_lazy as _
 
 from cms.models import CMSPlugin, PageContent
 
@@ -21,32 +22,56 @@ def get_title(obj):
     return obj.result.title
 
 
+get_title.short_description = _('title')
+
+
 def get_slug(obj):
     return obj.result.slug
+
+
+get_slug.short_description = _('slug')
 
 
 def get_site_name(obj):
     return obj.result.site_name
 
 
+get_site_name.short_description = _('site_name')
+
+
 def get_language(obj):
     return obj.result.language
+
+
+get_language.short_description = _('language')
 
 
 def get_author(obj):
     return obj.result.created_by
 
 
+get_author.short_description = _('Author')
+
+
 def get_content_type(obj):
     return obj.result.model.__name__
+
+
+get_content_type.short_description = _('Content Type')
 
 
 def get_version_status(obj):
     return obj.result.version_status
 
 
+get_version_status.short_description = _('Version Status')
+
+
 def get_modified_date(obj):
         return obj.result.creation_date
+
+
+get_modified_date.short_description = _('Modified Date')
 
 
 class PageContentConfig(BaseSearchConfig):
@@ -71,15 +96,6 @@ class PageContentConfig(BaseSearchConfig):
     search_fields = ('text', 'title')
     ordering = ('-id',)
     list_per_page = 50
-
-    get_slug.short_description = 'slug'
-    get_title.short_description = 'title'
-    get_language.short_description = 'language'
-    get_site_name.short_description = 'site_name'
-    get_author.short_description = 'Author'
-    get_content_type.short_description = 'Content Type'
-    get_version_status.short_description = 'Version Status'
-    get_modified_date.short_description = 'Modified Date'
 
     model = PageContent
 
