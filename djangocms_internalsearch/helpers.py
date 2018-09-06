@@ -1,3 +1,5 @@
+from django.utils.translation import get_language_from_request
+
 from cms.operations import (
     ADD_PAGE_TRANSLATION,
     ADD_PLUGIN,
@@ -8,8 +10,6 @@ from cms.operations import (
     DELETE_PLUGIN,
     MOVE_PLUGIN,
 )
-
-from django.utils.translation import get_language_from_request
 
 from haystack import connections
 
