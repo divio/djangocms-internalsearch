@@ -48,6 +48,7 @@ def move_plugin(index, request, **kwargs):
 def save_to_index(sender, operation, request, token, **kwargs):
     from cms.models import PageContent
 
+    # FIXME Don't hardcode 'default' connection
     index = connections["default"].get_unified_index().get_index(PageContent)
 
     operation_actions = {

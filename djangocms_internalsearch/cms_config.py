@@ -7,10 +7,13 @@ from cms.app_base import CMSAppConfig, CMSAppExtension
 from djangocms_internalsearch.contrib.cms.internal_search import (
     PageContentConfig,
 )
-from djangocms_internalsearch.contrib.filer.internal_search import (
-    FilerFileConfig,
-    FilerImageConfig,
-)
+try:
+    from djangocms_internalsearch.contrib.filer.internal_search import (
+        FilerFileConfig,
+        FilerImageConfig,
+    )
+except ImportError:
+    FilerFileConfig = FilerImageConfig = None
 
 
 class InternalSearchCMSExtension(CMSAppExtension):
@@ -35,6 +38,9 @@ class CoreCMSAppConfig(CMSAppConfig):
     djangocms_internalsearch_enabled = True
     internalsearch_config_list = [
         PageContentConfig,
-        FilerFileConfig,
-        FilerImageConfig,
     ]
+    if FilerFileConfig:
+        internalsearch_config_list += [
+            FilerFileConfig,
+            FilerImageConfig,
+        ]
