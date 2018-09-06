@@ -2,11 +2,12 @@ import random
 
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.template import RequestContext
 from django.test import RequestFactory
 
-from cms.models import CMSPlugin, Title
+from cms.models import CMSPlugin, PageContent
 from cms.toolbar.toolbar import CMSToolbar
 
 from filer.models.filemodels import File
@@ -22,7 +23,7 @@ class PageContentConfig(BaseSearchConfig):
     """
     page = indexes.IntegerField(model_attr='page__id')
     title = indexes.CharField(model_attr='title')
-    slug = indexes.CharField(model_attr='slug')
+    slug = indexes.CharField()
     site_id = indexes.IntegerField()
     site_name = indexes.CharField()
     language = indexes.CharField(model_attr='language')
@@ -39,7 +40,10 @@ class PageContentConfig(BaseSearchConfig):
     ordering = ('-id',)
 
     # model class attribute
-    model = Title
+    model = PageContent
+
+    def prepare_slug(self, obj):
+        return obj.page.get_slug(obj.language, fallback=False)
 
     def prepare_site_id(self, obj):
         return obj.page.node.site_id
@@ -52,7 +56,11 @@ class PageContentConfig(BaseSearchConfig):
         plugin_types = (
             CMSPlugin
             .objects
-            .filter(placeholder__title=obj.pk, language=obj.language)
+            .filter(
+                placeholder__content_type=ContentType.objects.get_for_model(obj),
+                placeholder__object_id=obj.pk,
+                language=obj.language,
+            )
             .order_by()  # Needed for distinct() with values_list https://code.djangoproject.com/ticket/16058
             .values_list('plugin_type', flat=True)
             .distinct()
@@ -61,8 +69,9 @@ class PageContentConfig(BaseSearchConfig):
 
     def prepare_text(self, obj):
         plugins = CMSPlugin.objects.filter(
+            placeholder__content_type=ContentType.objects.get_for_model(obj),
+            placeholder__object_id=obj.pk,
             language=obj.language,
-            placeholder__title=obj.id,
         )
         request = get_request(obj.language)
         context = RequestContext(request)
