@@ -198,10 +198,8 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
         model_meta = request.GET.get('type')
         qs = InternalSearchQuerySet(self.haystack_connection).all()
         if model_meta:
-            model_class = apps.get_model(model_meta)
-            if model_class:
-                app_config = get_internalsearch_model_config(model_class)
-                qs = InternalSearchQuerySet(self.haystack_connection).models(app_config.model).all()
+            model_klass = apps.get_model(model_meta)
+            qs = InternalSearchQuerySet(self.haystack_connection).models(model_klass).all()
 
             # TODO: this should be handled by some parameter to the ChangeList.
             ordering = self.get_ordering(request)
