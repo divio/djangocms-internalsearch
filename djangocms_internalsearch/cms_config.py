@@ -7,6 +7,8 @@ from cms.app_base import CMSAppConfig, CMSAppExtension
 from djangocms_internalsearch.contrib.cms.internal_search import (
     PageContentConfig,
 )
+
+
 try:
     from djangocms_internalsearch.contrib.filer.internal_search import (
         FilerFileConfig,
