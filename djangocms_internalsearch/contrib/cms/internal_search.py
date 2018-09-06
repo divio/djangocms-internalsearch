@@ -68,7 +68,7 @@ get_version_status.short_description = _('Version Status')
 
 
 def get_modified_date(obj):
-        return obj.result.creation_date
+    return obj.result.creation_date
 
 
 get_modified_date.short_description = _('Modified Date')
