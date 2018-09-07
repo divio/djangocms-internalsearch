@@ -1,7 +1,13 @@
 from django.apps import apps
 
-from haystack.backends.elasticsearch2_backend import Elasticsearch2SearchEngine
-from haystack.backends.whoosh_backend import WhooshEngine
+try:
+    from haystack.backends.elasticsearch2_backend import Elasticsearch2SearchEngine
+except ImportError:
+    Elasticsearch2SearchEngine = None
+try:
+    from haystack.backends.whoosh_backend import WhooshEngine
+except ImportError:
+    WhooshEngine = None
 from haystack.utils.loading import UnifiedIndex
 
 
@@ -23,9 +29,11 @@ class InternalSearchUnifiedIndex(UnifiedIndex):
         return indexes
 
 
-class InternalSearchESEngine(Elasticsearch2SearchEngine):
-    unified_index = InternalSearchUnifiedIndex
+if Elasticsearch2SearchEngine:
+    class InternalSearchESEngine(Elasticsearch2SearchEngine):
+        unified_index = InternalSearchUnifiedIndex
 
 
-class InternalSearchWhooshEngine(WhooshEngine):
-    unified_index = InternalSearchUnifiedIndex
+if WhooshEngine:
+    class InternalSearchWhooshEngine(WhooshEngine):
+        unified_index = InternalSearchUnifiedIndex
