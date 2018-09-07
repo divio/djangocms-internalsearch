@@ -5,12 +5,14 @@ from django.test import TestCase
 from haystack.utils import loading
 
 from djangocms_internalsearch.base import BaseSearchConfig
+
+from .utils import inheritors
+
+
 try:
     from djangocms_internalsearch.backends.elasticsearch2 import InternalSearchESEngine
 except ImportError:
     InternalSearchESEngine = None
-
-from .utils import inheritors
 
 
 @skipIf(InternalSearchESEngine is None, "elasticsearch not installed")
