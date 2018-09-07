@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from django.apps import AppConfig
 from django.utils.translation import ugettext_lazy as _
 
-from .handlers import update_index
+from .helpers import save_to_index
 
 
 class InternalsearchConfig(AppConfig):
@@ -16,5 +16,5 @@ class InternalsearchConfig(AppConfig):
             post_placeholder_operation
         )
 
-        post_obj_operation.connect(update_index)
-        post_placeholder_operation.connect(update_index)
+        post_obj_operation.connect(save_to_index)
+        post_placeholder_operation.connect(save_to_index)
