@@ -56,6 +56,10 @@ class InternalSearchChangeList(SearchChangeList):
             result_list = ()
 
         self.result_count = result_count
+        self.show_full_result_count = self.model_admin.show_full_result_count
+        # Admin actions are shown if there is at least one entry
+        # or if entries are not counted because show_full_result_count is disabled
+        self.show_admin_actions = not self.show_full_result_count or bool(full_result_count)
         self.full_result_count = full_result_count
         self.result_list = result_list
         self.can_show_all = can_show_all
@@ -121,6 +125,9 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
 
         extra_context = {'title': 'Internal Search'}
 
+        if self.get_actions(request):
+            list_display = ['action_checkbox'] + list(list_display)
+
         kwargs = {
             'haystack_connection': self.haystack_connection,
             'request': request,
@@ -147,6 +154,7 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
         if actions:
             action_form = self.action_form(auto_id=None)
             action_form.fields['action'].choices = self.get_action_choices(request)
+            media += action_form.media
         else:
             action_form = None
 
@@ -227,6 +235,12 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
                 queryset = queryset.filter(reduce(operator.or_, or_queries))
 
         return queryset, False
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if 'delete_selected' in actions:
+            del actions['delete_selected']
+        return actions
 
 
 @admin.register(InternalSearchProxy)
