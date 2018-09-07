@@ -1,22 +1,29 @@
+from unittest import skipIf
+
 from django.test import TestCase
 
 from haystack.utils import loading
 
 from djangocms_internalsearch.base import BaseSearchConfig
-from djangocms_internalsearch.engine import InternalSearchESEngine
+try:
+    from djangocms_internalsearch.backends.elasticsearch2 import InternalSearchESEngine
+except ImportError:
+    InternalSearchESEngine = None
 
 from .utils import inheritors
 
 
+@skipIf(InternalSearchESEngine is None, "elasticsearch not installed")
 class LoadInternalSearchBackendTestCase(TestCase):
 
     def test_load_internalsearch_elasticsearch(self):
         backend = loading.load_backend(
-            "djangocms_internalsearch.engine.InternalSearchESEngine"
+            "djangocms_internalsearch.backends.elasticsearch2.InternalSearchESEngine"
         )
         self.assertEqual(backend.__name__, "InternalSearchESEngine")
 
 
+@skipIf(InternalSearchESEngine is None, "elasticsearch not installed")
 class SearchIndexTestCase(TestCase):
 
     def setUp(self):
