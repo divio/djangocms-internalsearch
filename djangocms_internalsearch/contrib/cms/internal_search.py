@@ -88,6 +88,7 @@ class PageContentConfig(BaseSearchConfig):
     created_by = indexes.CharField()
     version_status = indexes.CharField()
     creation_date = indexes.DateTimeField(model_attr='creation_date')
+    url = indexes.CharField()
 
     # admin setting
     list_display = [get_title, get_slug, get_content_type, get_site_name, get_language, get_author,
@@ -112,15 +113,15 @@ class PageContentConfig(BaseSearchConfig):
     def prepare_plugin_types(self, obj):
         plugin_types = (
             CMSPlugin
-            .objects
-            .filter(
+                .objects
+                .filter(
                 placeholder__content_type=ContentType.objects.get_for_model(obj),
                 placeholder__object_id=obj.pk,
                 language=obj.language,
             )
-            .order_by()  # Needed for distinct() with values_list https://code.djangoproject.com/ticket/16058
-            .values_list('plugin_type', flat=True)
-            .distinct()
+                .order_by()  # Needed for distinct() with values_list https://code.djangoproject.com/ticket/16058
+                .values_list('plugin_type', flat=True)
+                .distinct()
         )
         return list(plugin_types)
 
@@ -151,3 +152,6 @@ class PageContentConfig(BaseSearchConfig):
 
     def prepare_created_by(self, obj):
         return obj.page.changed_by
+
+    def prepare_url(self, obj):
+        return obj.get_absolute_url(obj.language)
