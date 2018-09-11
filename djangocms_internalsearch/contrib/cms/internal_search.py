@@ -6,8 +6,7 @@ from django.template import RequestContext
 from django.utils.translation import ugettext_lazy as _
 
 from cms.models import CMSPlugin, PageContent
-
-from haystack import indexes
+from cms.toolbar.utils import get_object_preview_url
 
 from djangocms_internalsearch.base import BaseSearchConfig
 from djangocms_internalsearch.contrib.cms.filters import (
@@ -16,6 +15,7 @@ from djangocms_internalsearch.contrib.cms.filters import (
     VersionStateFilter,
 )
 from djangocms_internalsearch.helpers import get_request
+from haystack import indexes
 
 
 def get_title(obj):
@@ -154,4 +154,4 @@ class PageContentConfig(BaseSearchConfig):
         return obj.page.changed_by
 
     def prepare_url(self, obj):
-        return obj.get_absolute_url(obj.language)
+        return get_object_preview_url(obj, obj.language)
