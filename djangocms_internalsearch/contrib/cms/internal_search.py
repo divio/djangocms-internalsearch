@@ -10,11 +10,7 @@ from cms.models import CMSPlugin, PageContent
 from haystack import indexes
 
 from djangocms_internalsearch.base import BaseSearchConfig
-from djangocms_internalsearch.contrib.cms.filters import (
-    AuthorFilter,
-    SiteFilter,
-    VersionStateFilter,
-)
+from djangocms_internalsearch.contrib.cms.filters import SiteFilter
 from djangocms_internalsearch.helpers import get_request
 
 
@@ -92,7 +88,7 @@ class PageContentConfig(BaseSearchConfig):
     # admin setting
     list_display = [get_title, get_slug, get_content_type, get_site_name, get_language, get_author,
                     get_version_status, get_modified_date]
-    list_filter = [SiteFilter, AuthorFilter, VersionStateFilter, ]
+    list_filter = [SiteFilter, ]
     search_fields = ('text', 'title')
     ordering = ('-id',)
     list_per_page = 50
