@@ -8,6 +8,8 @@ from django.utils.translation import ugettext_lazy as _
 from cms.models import CMSPlugin, PageContent
 from cms.toolbar.utils import get_object_preview_url
 
+from haystack import indexes
+
 from djangocms_internalsearch.base import BaseSearchConfig
 from djangocms_internalsearch.contrib.cms.filters import (
     AuthorFilter,
@@ -15,7 +17,6 @@ from djangocms_internalsearch.contrib.cms.filters import (
     VersionStateFilter,
 )
 from djangocms_internalsearch.helpers import get_request
-from haystack import indexes
 
 
 def get_title(obj):
@@ -113,15 +114,15 @@ class PageContentConfig(BaseSearchConfig):
     def prepare_plugin_types(self, obj):
         plugin_types = (
             CMSPlugin
-                .objects
-                .filter(
+            .objects
+            .filter(
                 placeholder__content_type=ContentType.objects.get_for_model(obj),
                 placeholder__object_id=obj.pk,
                 language=obj.language,
             )
-                .order_by()  # Needed for distinct() with values_list https://code.djangoproject.com/ticket/16058
-                .values_list('plugin_type', flat=True)
-                .distinct()
+            .order_by()  # Needed for distinct() with values_list https://code.djangoproject.com/ticket/16058
+            .values_list('plugin_type', flat=True)
+            .distinct()
         )
         return list(plugin_types)
 
