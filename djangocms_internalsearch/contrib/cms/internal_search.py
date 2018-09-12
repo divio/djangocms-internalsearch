@@ -9,10 +9,8 @@ from cms.toolbar.utils import get_object_preview_url
 from haystack import indexes
 
 from djangocms_internalsearch.base import BaseSearchConfig
-
-from djangocms_internalsearch.helpers import get_version_object
 from djangocms_internalsearch.contrib.cms.filters import SiteFilter
-from djangocms_internalsearch.helpers import get_request
+from djangocms_internalsearch.helpers import get_request, get_version_object
 
 
 def get_title(obj):
