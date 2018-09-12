@@ -19,7 +19,7 @@ from haystack.utils import get_model_ct_tuple
 
 from djangocms_internalsearch.internal_search import InternalSearchAdminSetting
 
-from .filters import ContentTypeFilter
+from .filters import AuthorFilter, ContentTypeFilter, VersionStateFilter
 from .helpers import get_internalsearch_model_config
 from .models import InternalSearchProxy
 
@@ -115,13 +115,6 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
 
             if config_setting.get('list_display'):
                 list_display = config_setting.get('list_display')
-
-        else:
-            # Deleting preserved filter parameters for all content type UI
-            request.GET = request.GET.copy()
-            request.GET.pop('version_state', None)
-            request.GET.pop('auth', None)
-            request.GET.pop('site', None)
 
         extra_context = {'title': 'Internal Search'}
 
@@ -247,7 +240,7 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
 class InternalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin, InternalSearchAdminSetting):
     list_display = ['title', 'slug', 'absolute_url', 'content_type', 'site_name', 'language', 'author',
                     'version_status', 'modified_date']
-    list_filter = [ContentTypeFilter, ]
+    list_filter = [ContentTypeFilter, AuthorFilter, VersionStateFilter, ]
     list_per_page = 50
     search_fields = ('text', 'title')
     ordering = ('-id',)
