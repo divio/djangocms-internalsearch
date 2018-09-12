@@ -43,6 +43,7 @@ class FilerFileConfig(BaseSearchConfig):
     file_size = indexes.IntegerField(model_attr="_file_size")
     created_by = indexes.CharField(model_attr="owner")
     version_status = indexes.CharField()
+    url = indexes.CharField()
 
     # admin setting
     list_display = [get_title, get_file_size, get_file_path]
@@ -55,6 +56,9 @@ class FilerFileConfig(BaseSearchConfig):
         # Todo: Might need to change based on file type e.g. Image
         return ' '.join([obj.original_filename, ])
 
+    def prepare_url(self, obj):
+        return obj.get_admin_change_url()
+
 
 class FilerImageConfig(BaseSearchConfig):
     # indexes definition
@@ -64,6 +68,7 @@ class FilerImageConfig(BaseSearchConfig):
     file_size = indexes.IntegerField(model_attr="_file_size")
     created_by = indexes.CharField(model_attr="owner")
     version_status = indexes.CharField()
+    url = indexes.CharField()
 
     # admin setting
     list_display = [get_title, get_folder_name, get_file_size]
@@ -75,3 +80,6 @@ class FilerImageConfig(BaseSearchConfig):
     def prepare_text(self, obj):
         # Todo: Might need to change based on file type e.g. Image
         return ' '.join([obj.original_filename, ])
+
+    def prepare_url(self, obj):
+        return obj.get_admin_change_url()
