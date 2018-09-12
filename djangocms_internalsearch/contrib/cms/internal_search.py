@@ -6,6 +6,7 @@ from django.template import RequestContext
 from django.utils.translation import ugettext_lazy as _
 
 from cms.models import CMSPlugin, PageContent
+from cms.toolbar.utils import get_object_preview_url
 
 from haystack import indexes
 
@@ -88,6 +89,7 @@ class PageContentConfig(BaseSearchConfig):
     created_by = indexes.CharField()
     version_status = indexes.CharField()
     creation_date = indexes.DateTimeField(model_attr='creation_date')
+    url = indexes.CharField()
 
     # admin setting
     list_display = [get_title, get_slug, get_content_type, get_site_name, get_language, get_author,
@@ -151,3 +153,6 @@ class PageContentConfig(BaseSearchConfig):
 
     def prepare_created_by(self, obj):
         return obj.page.changed_by
+
+    def prepare_url(self, obj):
+        return get_object_preview_url(obj, obj.language)
