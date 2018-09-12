@@ -18,3 +18,4 @@ class InternalSearchUnifiedIndex(UnifiedIndex):
                     self.excluded_indexes_ids[str(item_name)] = id(item)
                     continue
                 indexes.append(item())
+        return indexes
