@@ -240,6 +240,11 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
         actions = super().get_actions(request)
         if 'delete_selected' in actions:
             del actions['delete_selected']
+
+        internalsearch_config = apps.get_app_config('djangocms_internalsearch')
+        config_actions = {name: (func, name, short_description) for func, name, short_description in
+                          internalsearch_config.cms_extension.internalsearch_actions}
+        actions.update(config_actions)
         return actions
 
 
