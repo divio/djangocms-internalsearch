@@ -4,14 +4,16 @@ import operator
 from functools import reduce
 
 from django.apps import apps
-from django.contrib import admin
+from django.contrib import admin, messages
+from django.contrib.admin import helpers
 from django.contrib.admin.options import ModelAdmin, csrf_protect_m
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import InvalidPage, Paginator
 from django.db import models
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.encoding import force_text
-from django.utils.translation import ungettext
+from django.utils.translation import ugettext as _, ungettext
 
 from haystack.admin import SearchChangeList, SearchModelAdminMixin
 from haystack.query import SearchQuerySet
@@ -150,6 +152,45 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
         changelist = InternalSearchChangeList(**kwargs)
         changelist.formset = None
         media = self.media
+
+        # If the request was POSTed, this might be a bulk action or a bulk
+        # edit. Try to look up an action or confirmation first, but if this
+        # isn't an action the POST will fall through to the bulk edit check,
+        # below.
+        action_failed = False
+        selected = request.POST.getlist(helpers.ACTION_CHECKBOX_NAME)
+
+        # Actions with no confirmation
+        if (actions and request.method == 'POST' and
+            'index' in request.POST and '_save' not in request.POST):
+            if selected:
+                response = self.response_action(request, queryset=changelist.get_queryset(request))
+                if response:
+                    return response
+                else:
+                    action_failed = True
+            else:
+                msg = _("Items must be selected in order to perform "
+                        "actions on them. No items have been changed.")
+                self.message_user(request, msg, messages.WARNING)
+                action_failed = True
+
+        # Actions with confirmation
+        if (actions and request.method == 'POST' and
+            helpers.ACTION_CHECKBOX_NAME in request.POST and
+            'index' not in request.POST and '_save' not in request.POST):
+            if selected:
+                response = self.response_action(request, queryset=changelist.get_queryset(request))
+                if response:
+                    return response
+                else:
+                    action_failed = True
+
+        if action_failed:
+            # Redirect back to the changelist page to avoid resubmitting the
+            # form if the user refreshes the browser or uses the "No, take
+            # me back" button on the action confirmation page.
+            return HttpResponseRedirect(request.get_full_path())
 
         # Build the action form and populate it with available actions.
         # Check actions to see if any are available on this changelist
