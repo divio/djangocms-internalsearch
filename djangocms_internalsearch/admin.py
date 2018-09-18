@@ -20,7 +20,10 @@ from haystack.utils import get_model_ct_tuple
 from djangocms_internalsearch.internal_search import InternalSearchAdminSetting
 
 from .filters import ContentTypeFilter
-from .helpers import get_internalsearch_model_config
+from .helpers import (
+    get_internalsearch_model_config,
+    get_moderated_models_config,
+)
 from .models import InternalSearchProxy
 
 
@@ -124,8 +127,8 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
             request.GET.pop('site', None)
 
         extra_context = {'title': 'Internal Search'}
-
-        if self.get_actions(request):
+        actions = self.get_actions(request)
+        if actions:
             list_display = ['action_checkbox'] + list(list_display)
 
         kwargs = {
@@ -150,7 +153,6 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
 
         # Build the action form and populate it with available actions.
         # Check actions to see if any are available on this changelist
-        actions = self.get_actions(request)
         if actions:
             action_form = self.action_form(auto_id=None)
             action_form.fields['action'].choices = self.get_action_choices(request)
@@ -241,10 +243,15 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
         if 'delete_selected' in actions:
             del actions['delete_selected']
 
-        internalsearch_config = apps.get_app_config('djangocms_internalsearch')
-        config_actions = {name: (func, name, short_description) for func, name, short_description in
-                          internalsearch_config.cms_extension.internalsearch_actions}
-        actions.update(config_actions)
+        model_meta = request.GET.get('type')
+        if not model_meta or model_meta in get_moderated_models_config():
+            try:
+                from djangocms_moderation.admin_actions import add_items_to_collection
+                actions['djangocms_moderation'] = (
+                    add_items_to_collection, 'djangocms_moderation', add_items_to_collection.short_description)
+            except:
+                pass
+
         return actions
 
 

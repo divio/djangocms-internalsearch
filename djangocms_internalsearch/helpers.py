@@ -81,6 +81,11 @@ def get_internalsearch_config():
     return apps_config
 
 
+def get_moderated_models_config():
+    moderation_config = apps.get_app_config('djangocms_moderation')
+    return moderation_config.cms_extension.moderated_models
+
+
 def get_request(language=None):
     from django.contrib.auth.models import AnonymousUser
     from cms.toolbar.toolbar import CMSToolbar
