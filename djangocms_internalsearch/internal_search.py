@@ -49,7 +49,7 @@ class InternalSearchAdminSetting:
         return obj.result.site_name
 
     def author(self, obj):
-        return obj.result.created_by
+        return obj.result.version_author
 
     def content_type(self, obj):
         return obj.result.model.__name__
