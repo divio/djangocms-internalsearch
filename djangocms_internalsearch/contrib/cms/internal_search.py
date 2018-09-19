@@ -7,6 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from cms.models import CMSPlugin, PageContent
 from cms.toolbar.utils import get_object_preview_url
+from cms.utils.plugins import downcast_plugins
 
 from haystack import indexes
 
@@ -108,7 +109,7 @@ class PageContentConfig(BaseSearchConfig):
         return Site.objects.filter(pk=site_id).values_list('domain', flat=True)[0]
 
     def prepare_plugin_types(self, obj):
-        plugin_types = (
+        plugins = downcast_plugins(
             CMSPlugin
             .objects
             .filter(
@@ -116,31 +117,14 @@ class PageContentConfig(BaseSearchConfig):
                 placeholder__object_id=obj.pk,
                 language=obj.language,
             )
-            .order_by()  # Needed for distinct() with values_list https://code.djangoproject.com/ticket/16058
-            .values_list('plugin_type', flat=True)
-            .distinct()
         )
-        return list(plugin_types)
+        return list(set(plugin.plugin_type for plugin in plugins))
 
     def prepare_text(self, obj):
-        plugins = CMSPlugin.objects.filter(
-            placeholder__content_type=ContentType.objects.get_for_model(obj),
-            placeholder__object_id=obj.pk,
-            language=obj.language,
-        )
         request = get_request(obj.language)
         context = RequestContext(request)
         renderer = request.toolbar.content_renderer
-        rendered_plugins = []
-
-        for base_plugin in plugins:
-            plugin_content = renderer.render_plugin(
-                instance=base_plugin,
-                context=context,
-                editable=False,
-            )
-            rendered_plugins.append(plugin_content)
-        return ' '.join(rendered_plugins)
+        return ' ' .join(self._render_plugins(obj, context, renderer))
 
     def prepare_version_status(self, obj):
         # TODO: prepare from djangocms_versioning apps
@@ -152,3 +136,7 @@ class PageContentConfig(BaseSearchConfig):
 
     def prepare_url(self, obj):
         return get_object_preview_url(obj, obj.language)
+
+    def _render_plugins(self, obj, context, renderer):
+        for placeholder in obj.get_placeholders():
+            yield from renderer.render_plugins(placeholder, obj.language, context)
