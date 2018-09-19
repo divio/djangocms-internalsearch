@@ -113,4 +113,4 @@ class AuthorFilter(admin.SimpleListFilter):
         # Compare the requested value (either '80s' or '90s')
         # to decide how to filter the queryset.
         if self.value() is not None:
-            return queryset.filter(created_by=self.value())
+            return queryset.filter(version_author=self.value())
