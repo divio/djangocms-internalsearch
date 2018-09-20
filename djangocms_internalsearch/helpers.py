@@ -57,6 +57,9 @@ def save_to_index(sender, operation, request, token, **kwargs):
             # there's nothing to update
             return
         content_model = source.__class__
+        register_models = [config.model for config in get_internalsearch_config()]
+        if content_model not in register_models:
+            return
     else:
         from cms.models import PageContent
         content_model = PageContent
