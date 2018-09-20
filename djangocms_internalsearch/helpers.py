@@ -46,12 +46,7 @@ def move_plugin(index, request, **kwargs):
 
 
 def save_to_index(sender, operation, request, token, **kwargs):
-    plugin_actions = {
-        ADD_PLUGIN: 'placeholder',
-        CHANGE_PLUGIN: 'placeholder',
-        DELETE_PLUGIN: 'placeholder',
-        MOVE_PLUGIN: 'target_placeholder',
-    }
+    plugin_actions = [ADD_PLUGIN, CHANGE_PLUGIN, DELETE_PLUGIN, MOVE_PLUGIN]
     if operation in plugin_actions:
         placeholder_field = (
             'target_placeholder' if operation == MOVE_PLUGIN else 'placeholder'
