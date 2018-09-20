@@ -46,6 +46,11 @@ def move_plugin(index, request, **kwargs):
 
 
 def save_to_index(sender, operation, request, token, **kwargs):
+
+    register_models = [config.model for config in get_internalsearch_config()]
+    if sender not in register_models:
+        return
+
     plugin_actions = [ADD_PLUGIN, CHANGE_PLUGIN, DELETE_PLUGIN, MOVE_PLUGIN]
     if operation in plugin_actions:
         placeholder_field = (
