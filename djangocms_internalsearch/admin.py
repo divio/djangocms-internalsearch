@@ -245,3 +245,6 @@ class InternalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin, InternalSea
     search_fields = ('text', 'title')
     ordering = ('-id',)
     list_display_links = None
+
+    def has_add_permission(self, request):
+        return False
