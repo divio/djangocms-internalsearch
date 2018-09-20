@@ -121,7 +121,8 @@ class PageContentConfig(BaseSearchConfig):
     def prepare_text(self, obj):
         request = get_request(obj.language)
         context = RequestContext(request)
-        context['request'] = request
+        if 'request' not in context:
+            context['request'] = request
         renderer = request.toolbar.content_renderer
         return ' ' .join(self._render_plugins(obj, context, renderer))
 
