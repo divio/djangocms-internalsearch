@@ -1,5 +1,3 @@
-import random
-
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.template import RequestContext
@@ -7,16 +5,13 @@ from django.utils.translation import ugettext_lazy as _
 
 from cms.models import CMSPlugin, PageContent
 from cms.toolbar.utils import get_object_preview_url
+from cms.utils.plugins import downcast_plugins
 
 from haystack import indexes
 
 from djangocms_internalsearch.base import BaseSearchConfig
-from djangocms_internalsearch.contrib.cms.filters import (
-    AuthorFilter,
-    SiteFilter,
-    VersionStateFilter,
-)
-from djangocms_internalsearch.helpers import get_request
+from djangocms_internalsearch.contrib.cms.filters import SiteFilter
+from djangocms_internalsearch.helpers import get_request, get_version_object
 
 
 def get_title(obj):
@@ -47,11 +42,11 @@ def get_language(obj):
 get_language.short_description = _('language')
 
 
-def get_author(obj):
-    return obj.result.created_by
+def get_version_author(obj):
+    return obj.result.version_author
 
 
-get_author.short_description = _('Author')
+get_version_author.short_description = _('Author')
 
 
 def get_content_type(obj):
@@ -86,15 +81,15 @@ class PageContentConfig(BaseSearchConfig):
     site_name = indexes.CharField()
     language = indexes.CharField(model_attr='language')
     plugin_types = indexes.MultiValueField()
-    created_by = indexes.CharField()
+    version_author = indexes.CharField()
     version_status = indexes.CharField()
     creation_date = indexes.DateTimeField(model_attr='creation_date')
     url = indexes.CharField()
 
     # admin setting
-    list_display = [get_title, get_slug, get_content_type, get_site_name, get_language, get_author,
+    list_display = [get_title, get_slug, get_content_type, get_site_name, get_language, get_version_author,
                     get_version_status, get_modified_date]
-    list_filter = [SiteFilter, AuthorFilter, VersionStateFilter, ]
+    list_filter = [SiteFilter, ]
     search_fields = ('text', 'title')
     ordering = ('-id',)
     list_per_page = 50
@@ -112,7 +107,7 @@ class PageContentConfig(BaseSearchConfig):
         return Site.objects.filter(pk=site_id).values_list('domain', flat=True)[0]
 
     def prepare_plugin_types(self, obj):
-        plugin_types = (
+        plugins = downcast_plugins(
             CMSPlugin
             .objects
             .filter(
@@ -120,39 +115,30 @@ class PageContentConfig(BaseSearchConfig):
                 placeholder__object_id=obj.pk,
                 language=obj.language,
             )
-            .order_by()  # Needed for distinct() with values_list https://code.djangoproject.com/ticket/16058
-            .values_list('plugin_type', flat=True)
-            .distinct()
         )
-        return list(plugin_types)
+        return list(set(plugin.plugin_type for plugin in plugins))
 
     def prepare_text(self, obj):
-        plugins = CMSPlugin.objects.filter(
-            placeholder__content_type=ContentType.objects.get_for_model(obj),
-            placeholder__object_id=obj.pk,
-            language=obj.language,
-        )
         request = get_request(obj.language)
         context = RequestContext(request)
         renderer = request.toolbar.content_renderer
-        rendered_plugins = []
-
-        for base_plugin in plugins:
-            plugin_content = renderer.render_plugin(
-                instance=base_plugin,
-                context=context,
-                editable=False,
-            )
-            rendered_plugins.append(plugin_content)
-        return ' '.join(rendered_plugins)
+        return ' ' .join(self._render_plugins(obj, context, renderer))
 
     def prepare_version_status(self, obj):
-        # TODO: prepare from djangocms_versioning apps
-        # Creating random for time being for UI Filter
-        return random.choice(['Draft', 'Published', 'Unpublished', 'Archived', 'Locked'])
+        version_obj = get_version_object(obj)
+        if not version_obj:
+            return
+        return version_obj.state
 
-    def prepare_created_by(self, obj):
-        return obj.page.changed_by
+    def prepare_version_author(self, obj):
+        version_obj = get_version_object(obj)
+        if not version_obj:
+            return
+        return version_obj.created_by.username
 
     def prepare_url(self, obj):
         return get_object_preview_url(obj, obj.language)
+
+    def _render_plugins(self, obj, context, renderer):
+        for placeholder in obj.get_placeholders():
+            yield from renderer.render_plugins(placeholder, obj.language, context)

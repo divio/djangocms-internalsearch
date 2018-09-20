@@ -101,3 +101,11 @@ def get_request(language=None):
     request.user = AnonymousUser()
     request.toolbar = CMSToolbar(request)
     return request
+
+
+def get_version_object(obj):
+    try:
+        from djangocms_versioning.models import Version
+    except ImportError:
+        return
+    return Version.objects.get_for_content(obj)
