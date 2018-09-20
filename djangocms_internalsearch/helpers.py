@@ -46,10 +46,28 @@ def move_plugin(index, request, **kwargs):
 
 
 def save_to_index(sender, operation, request, token, **kwargs):
-    from cms.models import PageContent
+    plugin_actions = {
+        ADD_PLUGIN: 'placeholder',
+        CHANGE_PLUGIN: 'placeholder',
+        DELETE_PLUGIN: 'placeholder',
+        MOVE_PLUGIN: 'target_placeholder',
+    }
+    if operation in plugin_actions:
+        placeholder_field = (
+            'target_placeholder' if operation == MOVE_PLUGIN else 'placeholder'
+        )
+        source = kwargs[placeholder_field].source
+        if source is None:
+            # plugin operation on a placeholder without source,
+            # there's nothing to update
+            return
+        content_model = source.__class__
+    else:
+        from cms.models import PageContent
+        content_model = PageContent
 
     # FIXME Don't hardcode 'default' connection
-    index = connections["default"].get_unified_index().get_index(PageContent)
+    index = connections["default"].get_unified_index().get_index(content_model)
 
     operation_actions = {
         DELETE_PAGE: delete_page,
