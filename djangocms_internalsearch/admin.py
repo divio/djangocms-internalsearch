@@ -11,8 +11,10 @@ from django.core.exceptions import PermissionDenied
 from django.core.paginator import InvalidPage, Paginator
 from django.db import models
 from django.http import HttpResponseRedirect
+from django.http.response import HttpResponseBase
 from django.shortcuts import render
 from django.utils.encoding import force_text
+from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _, ungettext
 
 from haystack.admin import SearchChangeList, SearchModelAdminMixin
@@ -22,11 +24,14 @@ from haystack.utils import get_model_ct_tuple
 from djangocms_internalsearch.internal_search import InternalSearchAdminSetting
 
 from .filters import ContentTypeFilter
-from .helpers import (
-    get_internalsearch_model_config,
-    get_moderated_models_config,
-)
+from .helpers import get_internalsearch_model_config, get_moderated_models
 from .models import InternalSearchProxy
+
+
+try:
+    from djangocms_moderation.admin_actions import add_items_to_collection
+except ImportError:
+    add_items_to_collection = None
 
 
 class InternalSearchChangeList(SearchChangeList):
@@ -74,6 +79,7 @@ class InternalSearchChangeList(SearchChangeList):
     @staticmethod
     def _make_model(result):
         model = InternalSearchProxy(pk=result.pk)
+        model.haystack_id = result.id
         model.result = result
         model.app_label = result.model._meta.app_label
         model.model_name = result.model._meta.model_name
@@ -131,7 +137,10 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
         extra_context = {'title': 'Internal Search'}
         actions = self.get_actions(request)
         if actions:
-            list_display = ['action_checkbox'] + list(list_display)
+            if model_meta:
+                list_display = ['action_checkbox'] + list(list_display)
+            else:
+                list_display = ['action_checkbox_haystack'] + list(list_display)
 
         kwargs = {
             'haystack_connection': self.haystack_connection,
@@ -161,8 +170,7 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
         selected = request.POST.getlist(helpers.ACTION_CHECKBOX_NAME)
 
         # Actions with no confirmation
-        if (actions and request.method == 'POST' and
-            'index' in request.POST and '_save' not in request.POST):
+        if (actions and request.method == 'POST' and 'index' in request.POST and '_save' not in request.POST):
             if selected:
                 response = self.response_action(request, queryset=changelist.get_queryset(request))
                 if response:
@@ -176,9 +184,8 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
                 action_failed = True
 
         # Actions with confirmation
-        if (actions and request.method == 'POST' and
-            helpers.ACTION_CHECKBOX_NAME in request.POST and
-            'index' not in request.POST and '_save' not in request.POST):
+        if (actions and request.method == 'POST' and helpers.ACTION_CHECKBOX_NAME in request.POST and
+                'index' not in request.POST and '_save' not in request.POST):
             if selected:
                 response = self.response_action(request, queryset=changelist.get_queryset(request))
                 if response:
@@ -285,15 +292,99 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
             del actions['delete_selected']
 
         model_meta = request.GET.get('type')
-        if not model_meta or model_meta in get_moderated_models_config():
-            try:
-                from djangocms_moderation.admin_actions import add_items_to_collection
+        if not model_meta or apps.get_model(model_meta) in get_moderated_models():
+            if add_items_to_collection:
                 actions['djangocms_moderation'] = (
                     add_items_to_collection, 'djangocms_moderation', add_items_to_collection.short_description)
-            except:
-                pass
 
         return actions
+
+    def action_checkbox_haystack(self, obj):
+        """
+        A list_display column containing a checkbox widget.
+        """
+        return helpers.checkbox.render(helpers.ACTION_CHECKBOX_NAME, str(obj.haystack_id))
+
+    action_checkbox_haystack.short_description = mark_safe('<input type="checkbox" id="action-toggle">')
+
+    def action_checkbox(self, obj):
+        """
+        A list_display column containing a checkbox widget.
+        """
+        return helpers.checkbox.render(helpers.ACTION_CHECKBOX_NAME, str(obj.pk))
+
+    action_checkbox.short_description = mark_safe('<input type="checkbox" id="action-toggle">')
+
+    def response_action(self, request, queryset):
+        """
+        Handle an admin action. This is called if a request is POSTed to the
+        changelist; it returns an HttpResponse if the action was handled, and
+        None otherwise.
+        """
+
+        # There can be multiple action forms on the page (at the top
+        # and bottom of the change list, for example). Get the action
+        # whose button was pushed.
+        try:
+            action_index = int(request.POST.get('index', 0))
+        except ValueError:
+            action_index = 0
+
+        # Construct the action form.
+        data = request.POST.copy()
+        data.pop(helpers.ACTION_CHECKBOX_NAME, None)
+        data.pop("index", None)
+
+        # Use the action whose button was pushed
+        try:
+            data.update({'action': data.getlist('action')[action_index]})
+        except IndexError:
+            # If we didn't get an action from the chosen form that's invalid
+            # POST data, so by deleting action it'll fail the validation check
+            # below. So no need to do anything here
+            pass
+
+        action_form = self.action_form(data, auto_id=None)
+        action_form.fields['action'].choices = self.get_action_choices(request)
+
+        # If the form's valid we can handle the action.
+        if action_form.is_valid():
+            action = action_form.cleaned_data['action']
+            select_across = action_form.cleaned_data['select_across']
+            func = self.get_actions(request)[action][0]
+
+            # Get the list of selected PKs. If nothing's selected, we can't
+            # perform an action on it, so bail. Except we want to perform
+            # the action explicitly on all objects.
+            selected = request.POST.getlist(helpers.ACTION_CHECKBOX_NAME)
+            if not selected and not select_across:
+                # Reminder that something needs to be selected or nothing will happen
+                msg = _("Items must be selected in order to perform "
+                        "actions on them. No items have been changed.")
+                self.message_user(request, msg, messages.WARNING)
+                return None
+
+            if not select_across:
+                # Perform the action only on the selected objects
+                model_meta = request.GET.get('type')
+                if model_meta:
+                    queryset = queryset.filter(pk__in=selected)
+                else:
+                    queryset = queryset.filter(id__in=selected)
+
+            response = func(self, request, queryset)
+
+            # Actions may return an HttpResponse-like object, which will be
+            # used as the response from the POST. If not, we'll be a good
+            # little HTTP citizen and redirect back to the changelist page.
+            if isinstance(response, HttpResponseBase):
+                return response
+            else:
+                return HttpResponseRedirect(request.get_full_path())
+        else:
+            msg = _("No action selected.")
+            self.message_user(request, msg, messages.WARNING)
+            return None
 
 
 @admin.register(InternalSearchProxy)

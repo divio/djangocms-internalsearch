@@ -22,7 +22,6 @@ class InternalSearchCMSExtension(CMSAppExtension):
 
     def __init__(self):
         self.internalsearch_apps_config = []
-        self.internalsearch_actions = []
 
     def configure_app(self, cms_config):
         if hasattr(cms_config, 'internalsearch_config_list'):
@@ -35,14 +34,6 @@ class InternalSearchCMSExtension(CMSAppExtension):
         else:
             raise ImproperlyConfigured(
                 "cms_config.py must have internalsearch_config_list attribute")
-
-        if hasattr(cms_config, 'internalsearch_actions'):
-            internalsearch_actions = getattr(cms_config, 'internalsearch_actions')
-            if isinstance(internalsearch_config_list, Iterable):
-                self.internalsearch_actions.extend(internalsearch_actions)
-            else:
-                raise ImproperlyConfigured(
-                    "InternalSearch actions must be a Iterable object")
 
 
 class CoreCMSAppConfig(CMSAppConfig):
