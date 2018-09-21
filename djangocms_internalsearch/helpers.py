@@ -8,6 +8,7 @@ from cms.operations import (
     ADD_PLUGIN,
     CHANGE_PAGE_TRANSLATION,
     CHANGE_PLUGIN,
+    CHANGE_PAGE,
     DELETE_PAGE,
     DELETE_PAGE_TRANSLATION,
     DELETE_PLUGIN,
@@ -18,18 +19,15 @@ from haystack import connections
 
 
 def delete_page(index, request, **kwargs):
-    obj = kwargs['obj'].get_title_obj(get_language_from_request(request))
-    index.remove_object(obj)
+    index.remove_object(kwargs['obj'])
 
 
 def update_page_content(index, request, **kwargs):
-    obj = kwargs['obj'].get_title_obj(get_language_from_request(request))
-    index.update_object(obj)
+    index.update_object(kwargs['obj'])
 
 
 def delete_page_content(index, request, **kwargs):
-    obj = kwargs['obj'].get_title_obj(get_language_from_request(request))
-    index.remove_object(obj)
+    index.remove_object(kwargs['obj'])
 
 
 def update_plugin(index, request, **kwargs):
@@ -68,6 +66,7 @@ def save_to_index(sender, operation, request, token, **kwargs):
         DELETE_PAGE: delete_page,
         ADD_PAGE_TRANSLATION: update_page_content,
         CHANGE_PAGE_TRANSLATION: update_page_content,
+        CHANGE_PAGE: update_page_content,
         DELETE_PAGE_TRANSLATION: delete_page_content,
         ADD_PLUGIN: update_plugin,
         CHANGE_PLUGIN: update_plugin,
