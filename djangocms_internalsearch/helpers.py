@@ -95,8 +95,11 @@ def get_internalsearch_config():
 
 
 def get_moderated_models():
-    moderation_config = apps.get_app_config('djangocms_moderation')
-    return moderation_config.cms_extension.moderated_models
+    try:
+        moderation_config = apps.get_app_config('djangocms_moderation')
+        return moderation_config.cms_extension.moderated_models
+    except LookupError:
+        return []
 
 
 def get_request(language=None):
