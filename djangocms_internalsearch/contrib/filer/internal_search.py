@@ -57,7 +57,7 @@ class FilerFileConfig(BaseSearchConfig):
     url = indexes.CharField()
 
     # admin setting
-    list_display = [get_title, get_absolute_url, get_file_size,  get_file_path]
+    list_display = [get_title, get_absolute_url, get_file_size, get_file_path]
     search_fields = ('title', 'folder_name')
     list_filter = ()
 
