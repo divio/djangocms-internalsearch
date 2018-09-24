@@ -77,6 +77,12 @@ def save_to_index(sender, operation, request, token, **kwargs):
     operation_actions[operation](index, request, **kwargs)
 
 
+def page_content_change_receiver(sender, page_content_object, **kwargs):
+    from cms.models import PageContent
+    index = connections["default"].get_unified_index().get_index(PageContent)
+    index.update_object(page_content_object)
+
+
 def get_internalsearch_model_config(model_class):
     internalsearch_config = apps.get_app_config('djangocms_internalsearch')
     apps_config = internalsearch_config.cms_extension.internalsearch_apps_config
