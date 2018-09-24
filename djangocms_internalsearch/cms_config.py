@@ -17,6 +17,11 @@ try:
 except ImportError:
     FilerFileConfig = FilerImageConfig = None
 
+try:
+    from djangocms_internalsearch.contrib.alias.internal_search import AliasContentConfig
+except ImportError:
+    AliasContentConfig = None
+
 
 class InternalSearchCMSExtension(CMSAppExtension):
 
@@ -45,4 +50,8 @@ class CoreCMSAppConfig(CMSAppConfig):
         internalsearch_config_list += [
             FilerFileConfig,
             FilerImageConfig,
+        ]
+    if AliasContentConfig:
+        internalsearch_config_list += [
+            AliasContentConfig
         ]
