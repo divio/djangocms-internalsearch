@@ -74,11 +74,9 @@ get_modified_date.short_description = _('Modified Date')
 def get_absolute_url(obj):
     if obj.result.url:
         return format_html("<a href='{url}'>{url}</a>", url=obj.result.url)
-    else:
-        return obj.result.url
 
 
-get_absolute_url.short_description = 'URL'
+get_absolute_url.short_description = _('URL')
 
 
 class PageContentConfig(BaseSearchConfig):
