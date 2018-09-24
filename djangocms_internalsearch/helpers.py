@@ -1,6 +1,7 @@
 from django.apps import apps
 from django.conf import settings
 from django.test import RequestFactory
+from django.utils.translation import get_language_from_request
 
 from cms.operations import (
     ADD_PAGE_TRANSLATION,
@@ -17,15 +18,18 @@ from haystack import connections
 
 
 def delete_page(index, request, **kwargs):
-    index.remove_object(kwargs['obj'])
+    obj = kwargs['obj'].get_title_obj(get_language_from_request(request))
+    index.remove_object(obj)
 
 
 def update_page_content(index, request, **kwargs):
-    index.update_object(kwargs['obj'])
+    obj = kwargs['obj'].get_title_obj(get_language_from_request(request))
+    index.update_object(obj)
 
 
 def delete_page_content(index, request, **kwargs):
-    index.remove_object(kwargs['obj'])
+    obj = kwargs['obj'].get_title_obj(get_language_from_request(request))
+    index.remove_object(obj)
 
 
 def update_plugin(index, request, **kwargs):
@@ -77,10 +81,14 @@ def save_to_index(sender, operation, request, token, **kwargs):
     operation_actions[operation](index, request, **kwargs)
 
 
-def page_content_change_receiver(sender, page_content_object, **kwargs):
+def page_content_change_receiver(sender, content_object, **kwargs):
+    """
+     Signal receiver for page content. Third party apps need  to implement
+     similar function
+    """
     from cms.models import PageContent
     index = connections["default"].get_unified_index().get_index(PageContent)
-    index.update_object(page_content_object)
+    index.update_object(content_object)
 
 
 def get_internalsearch_model_config(model_class):

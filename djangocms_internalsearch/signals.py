@@ -1,8 +1,8 @@
 from django.dispatch import Signal
 
-page_content_change_signal = Signal(
+content_object_change_signal = Signal(
     providing_args=[
-        "page_content_object",
+        "content_object",
     ]
 )
 
