@@ -1,14 +1,12 @@
 from django.apps import apps
 from django.conf import settings
 from django.test import RequestFactory
-from django.utils.translation import get_language_from_request
 
 from cms.operations import (
     ADD_PAGE_TRANSLATION,
     ADD_PLUGIN,
     CHANGE_PAGE_TRANSLATION,
     CHANGE_PLUGIN,
-    CHANGE_PAGE,
     DELETE_PAGE,
     DELETE_PAGE_TRANSLATION,
     DELETE_PLUGIN,
@@ -66,7 +64,6 @@ def save_to_index(sender, operation, request, token, **kwargs):
         DELETE_PAGE: delete_page,
         ADD_PAGE_TRANSLATION: update_page_content,
         CHANGE_PAGE_TRANSLATION: update_page_content,
-        CHANGE_PAGE: update_page_content,
         DELETE_PAGE_TRANSLATION: delete_page_content,
         ADD_PLUGIN: update_plugin,
         CHANGE_PLUGIN: update_plugin,
