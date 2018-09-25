@@ -88,6 +88,7 @@ def page_content_change_receiver(sender, content_object, **kwargs):
     """
     from cms.models import PageContent
     index = connections["default"].get_unified_index().get_index(PageContent)
+
     index.update_object(content_object)
 
 
