@@ -1,6 +1,7 @@
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.template import RequestContext
+from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
 
 from cms.models import CMSPlugin, PageContent
@@ -70,6 +71,14 @@ def get_modified_date(obj):
 get_modified_date.short_description = _('Modified Date')
 
 
+def get_absolute_url(obj):
+    if obj.result.url:
+        return format_html("<a href='{url}'>{url}</a>", url=obj.result.url)
+
+
+get_absolute_url.short_description = _('URL')
+
+
 class PageContentConfig(BaseSearchConfig):
     """
     Page config and index definition
@@ -87,8 +96,8 @@ class PageContentConfig(BaseSearchConfig):
     url = indexes.CharField()
 
     # admin setting
-    list_display = [get_title, get_slug, get_content_type, get_site_name, get_language, get_version_author,
-                    get_version_status, get_modified_date]
+    list_display = [get_title, get_slug, get_absolute_url, get_content_type, get_site_name, get_language,
+                    get_version_author, get_version_status, get_modified_date]
     list_filter = [SiteFilter, ]
     search_fields = ('text', 'title')
     ordering = ('-id',)
@@ -124,7 +133,7 @@ class PageContentConfig(BaseSearchConfig):
         if 'request' not in context:
             context['request'] = request
         renderer = request.toolbar.content_renderer
-        return ' ' .join(self._render_plugins(obj, context, renderer))
+        return ' '.join(self._render_plugins(obj, context, renderer))
 
     def prepare_version_status(self, obj):
         version_obj = get_version_object(obj)
