@@ -1,7 +1,9 @@
 from django.apps import apps
 from django.contrib import admin
+from django.contrib.auth.models import User
 
 from cms.models import Site
+from cms.utils.i18n import get_language_list
 
 from djangocms_internalsearch.helpers import get_internalsearch_config
 
@@ -95,13 +97,7 @@ class AuthorFilter(admin.SimpleListFilter):
         human-readable name for the option that will appear
         in the right sidebar.
         """
-        from djangocms_internalsearch.admin import InternalSearchQuerySet
-
-        # Fixme: don't use "default"
-        qs = InternalSearchQuerySet("default").auto_query('')
-        authors = set(
-            item[0] for item in qs.values_list('version_author') if item[0]
-        )
+        authors = User.objects.all()
         return ((item, item) for item in authors)
 
     def queryset(self, request, queryset):
@@ -132,14 +128,7 @@ class LanguageFilter(admin.SimpleListFilter):
         human-readable name for the option that will appear
         in the right sidebar.
         """
-        from djangocms_internalsearch.admin import InternalSearchQuerySet
-
-        # Fixme: don't use "default"
-        qs = InternalSearchQuerySet("default")
-        languages = set(
-            item[0] for item in qs.values_list('language') if item[0]
-        )
-        return ((item, item) for item in languages)
+        return ((item, item) for item in get_language_list())
 
     def queryset(self, request, queryset):
         """
@@ -147,8 +136,6 @@ class LanguageFilter(admin.SimpleListFilter):
         provided in the query string and retrievable via
         `self.value()`.
         """
-        # Compare the requested value (either '80s' or '90s')
-        # to decide how to filter the queryset.
         if self.value() is not None:
             return queryset.filter(language=self.value())
 
