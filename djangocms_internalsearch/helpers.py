@@ -86,13 +86,13 @@ def content_object_state_change_receiver(sender, content_object, **kwargs):
     Signal receiver for content object state change.
     Responds to all Versionable content object
     """
-    content_model_class = content_object.__class__
+    content_model = content_object.__class__
     # check if content object type is in app config registry
     try:
-        get_internalsearch_model_config(content_model_class)
+        get_internalsearch_model_config(content_model)
     except IndexError:
         return
-    index = connections["default"].get_unified_index().get_index(content_model_class)
+    index = connections["default"].get_unified_index().get_index(content_model)
     index.update_object(content_object)
 
 
