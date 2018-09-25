@@ -97,10 +97,10 @@ class AuthorFilter(admin.SimpleListFilter):
         human-readable name for the option that will appear
         in the right sidebar.
         """
-        User = get_user_model()
-        if not User:
+        user_model = get_user_model()
+        if not user_model:
             return
-        authors = User.objects.values_list('username', flat=True)
+        authors = user_model.objects.values_list('username', flat=True)
         return ((item, item) for item in authors)
 
     def queryset(self, request, queryset):
