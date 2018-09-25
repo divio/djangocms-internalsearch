@@ -6,4 +6,3 @@ content_object_state_change = Signal(
         "content_object",
     ]
 )
-
