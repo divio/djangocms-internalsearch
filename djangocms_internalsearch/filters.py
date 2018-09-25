@@ -1,7 +1,7 @@
 from django.apps import apps
 from django.contrib import admin
 
-from cms.models import Page, PageContent, Site
+from cms.models import Site
 
 from djangocms_internalsearch.helpers import get_internalsearch_config
 
@@ -95,12 +95,12 @@ class AuthorFilter(admin.SimpleListFilter):
         human-readable name for the option that will appear
         in the right sidebar.
         """
-        authors = (
-            Page
-            .objects
-            .order_by()
-            .distinct()
-            .values_list('changed_by', flat=True)
+        from djangocms_internalsearch.admin import InternalSearchQuerySet
+
+        # Fixme: don't use "default"
+        qs = InternalSearchQuerySet("default").auto_query('')
+        authors = set(
+            item[0] for item in qs.values_list('version_author') if item[0]
         )
         return ((item, item) for item in authors)
 
@@ -132,12 +132,12 @@ class LanguageFilter(admin.SimpleListFilter):
         human-readable name for the option that will appear
         in the right sidebar.
         """
-        languages = (
-            PageContent
-            .objects
-            .order_by()
-            .distinct()
-            .values_list('language', flat=True)
+        from djangocms_internalsearch.admin import InternalSearchQuerySet
+
+        # Fixme: don't use "default"
+        qs = InternalSearchQuerySet("default")
+        languages = set(
+            item[0] for item in qs.values_list('language') if item[0]
         )
         return ((item, item) for item in languages)
 
