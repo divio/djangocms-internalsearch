@@ -1,6 +1,6 @@
 from django.apps import apps
 from django.contrib import admin
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 
 from cms.models import Site
 from cms.utils.i18n import get_language_list
@@ -97,7 +97,8 @@ class AuthorFilter(admin.SimpleListFilter):
         human-readable name for the option that will appear
         in the right sidebar.
         """
-        authors = User.objects.all()
+        User = get_user_model()
+        authors = User.objects.values_list('username', flat=True)
         return ((item, item) for item in authors)
 
     def queryset(self, request, queryset):
