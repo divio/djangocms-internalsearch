@@ -1,3 +1,4 @@
+from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
 
 from filer.models.filemodels import File
@@ -35,6 +36,14 @@ def get_folder_name(obj):
 get_folder_name.short_description = _('Folder Name')
 
 
+def get_absolute_url(obj):
+    if obj.result.url:
+        return format_html("<a href='{url}'>{url}</a>", url=obj.result.url)
+
+
+get_absolute_url.short_description = _('URL')
+
+
 class FilerFileConfig(BaseSearchConfig):
     # indexes definition
     folder_name = indexes.CharField(model_attr="folder__name")
@@ -46,7 +55,7 @@ class FilerFileConfig(BaseSearchConfig):
     url = indexes.CharField()
 
     # admin setting
-    list_display = [get_title, get_file_size, get_file_path]
+    list_display = [get_title, get_absolute_url, get_file_size, get_file_path]
     search_fields = ('title', 'folder_name')
     list_filter = ()
 
@@ -71,7 +80,7 @@ class FilerImageConfig(BaseSearchConfig):
     url = indexes.CharField()
 
     # admin setting
-    list_display = [get_title, get_folder_name, get_file_size]
+    list_display = [get_title, get_absolute_url, get_folder_name, get_file_size]
     search_fields = ('title', 'folder_name')
     list_filter = ()
 
