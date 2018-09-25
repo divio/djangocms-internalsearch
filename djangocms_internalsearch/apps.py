@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from django.apps import AppConfig
 from django.utils.translation import ugettext_lazy as _
 
-from .helpers import page_content_change_receiver, save_to_index
+from .helpers import content_object_state_change_receiver, save_to_index
 
 
 class InternalsearchConfig(AppConfig):
@@ -21,4 +21,4 @@ class InternalsearchConfig(AppConfig):
         post_placeholder_operation.connect(save_to_index)
 
         # listen for page content version changes
-        content_object_state_change.connect(page_content_change_receiver)
+        content_object_state_change.connect(content_object_state_change_receiver)
