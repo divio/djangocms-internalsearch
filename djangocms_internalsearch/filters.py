@@ -98,6 +98,8 @@ class AuthorFilter(admin.SimpleListFilter):
         in the right sidebar.
         """
         User = get_user_model()
+        if not User:
+            return
         authors = User.objects.values_list('username', flat=True)
         return ((item, item) for item in authors)
 
