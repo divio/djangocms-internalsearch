@@ -11,7 +11,6 @@ from cms.utils.plugins import downcast_plugins
 from haystack import indexes
 
 from djangocms_internalsearch.base import BaseSearchConfig
-from djangocms_internalsearch.contrib.cms.filters import SiteFilter
 from djangocms_internalsearch.helpers import get_request, get_version_object
 
 
@@ -98,7 +97,8 @@ class PageContentConfig(BaseSearchConfig):
     # admin setting
     list_display = [get_title, get_slug, get_absolute_url, get_content_type, get_site_name, get_language,
                     get_version_author, get_version_status, get_modified_date]
-    list_filter = [SiteFilter, ]
+    list_filter = []
+
     search_fields = ('text', 'title')
     ordering = ('-id',)
     list_per_page = 50
