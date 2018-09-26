@@ -84,6 +84,21 @@ def save_to_index(sender, operation, request, token, **kwargs):
     operation_actions[operation](index, request, **kwargs)
 
 
+def content_object_state_change_receiver(sender, content_object, **kwargs):
+    """
+    Signal receiver for content object state change.
+    Responds to all Versionable content object
+    """
+    content_model = content_object.__class__
+    # check if content object type is in app config registry
+    try:
+        get_internalsearch_model_config(content_model)
+    except IndexError:
+        return
+    index = connections["default"].get_unified_index().get_index(content_model)
+    index.update_object(content_object)
+
+
 def get_internalsearch_model_config(model_class):
     internalsearch_config = apps.get_app_config('djangocms_internalsearch')
     apps_config = internalsearch_config.cms_extension.internalsearch_apps_config
