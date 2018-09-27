@@ -24,6 +24,6 @@ class InternalsearchConfig(AppConfig):
         post_obj_operation.connect(save_to_index)
         post_placeholder_operation.connect(save_to_index)
 
-        # listen for object content version changes
+        # listen for object content version changes, delete
         content_object_state_change.connect(content_object_state_change_receiver)
         content_object_delete.connect(content_object_delete_receiver)
