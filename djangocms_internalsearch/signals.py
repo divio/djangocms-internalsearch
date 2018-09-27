@@ -6,3 +6,9 @@ content_object_state_change = Signal(
         "content_object",
     ]
 )
+
+content_object_delete = Signal(
+    providing_args=[
+        "content_object",
+    ]
+)
