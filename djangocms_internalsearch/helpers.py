@@ -16,6 +16,8 @@ from cms.operations import (
 
 from haystack import connections
 
+from .signals import content_object_state_change
+
 
 def delete_page(index, request, **kwargs):
     obj = kwargs['obj'].get_title_obj(get_language_from_request(request))
@@ -97,6 +99,24 @@ def content_object_state_change_receiver(sender, content_object, **kwargs):
         return
     index = connections["default"].get_unified_index().get_index(content_model)
     index.update_object(content_object)
+
+
+def emit_content_change(obj, sender=None):
+    """
+    Sends a content object state change signal if obj class is registred by
+    internalsearch.
+    Helper function to be used in apps that integrates with internalsearch.
+    """
+    try:
+        get_internalsearch_model_config(obj.__class__)
+    except IndexError:
+        # model is not registered with internal search
+        return
+
+    content_object_state_change.send(
+        sender=sender or obj.__class__,
+        content_object=obj,
+    )
 
 
 def get_internalsearch_model_config(model_class):
