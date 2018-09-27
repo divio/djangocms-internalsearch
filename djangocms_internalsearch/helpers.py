@@ -102,6 +102,11 @@ def content_object_state_change_receiver(sender, content_object, **kwargs):
 
 
 def emit_content_change(obj, sender=None):
+    """
+    Sends a content object state change signal if obj class is registred by
+    internalsearch.
+    Helper function to be used in apps that integrates with internalsearch.
+    """
     try:
         get_internalsearch_model_config(obj.__class__)
     except IndexError:
