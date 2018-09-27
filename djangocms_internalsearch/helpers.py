@@ -39,7 +39,7 @@ def update_plugin(index, request, **kwargs):
 
 
 def delete_plugin(index, request, **kwargs):
-    index.remove_object(kwargs['placeholder'].source)
+    index.update_object(kwargs['placeholder'].source)
 
 
 def move_plugin(index, request, **kwargs):
