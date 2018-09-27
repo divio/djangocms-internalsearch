@@ -3,7 +3,11 @@ from __future__ import unicode_literals
 from django.apps import AppConfig
 from django.utils.translation import ugettext_lazy as _
 
-from .helpers import content_object_state_change_receiver, save_to_index
+from .helpers import (
+    content_object_delete_receiver,
+    content_object_state_change_receiver,
+    save_to_index,
+)
 
 
 class InternalsearchConfig(AppConfig):
@@ -15,10 +19,11 @@ class InternalsearchConfig(AppConfig):
             post_obj_operation,
             post_placeholder_operation
         )
-        from .signals import content_object_state_change
+        from .signals import content_object_state_change, content_object_delete
 
         post_obj_operation.connect(save_to_index)
         post_placeholder_operation.connect(save_to_index)
 
         # listen for object content version changes
         content_object_state_change.connect(content_object_state_change_receiver)
+        content_object_delete.connect(content_object_delete_receiver)

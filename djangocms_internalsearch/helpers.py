@@ -16,7 +16,7 @@ from cms.operations import (
 
 from haystack import connections
 
-from .signals import content_object_state_change
+from .signals import content_object_delete, content_object_state_change
 
 
 def delete_page(index, request, **kwargs):
@@ -101,9 +101,24 @@ def content_object_state_change_receiver(sender, content_object, **kwargs):
     index.update_object(content_object)
 
 
+def content_object_delete_receiver(sender, content_object, **kwargs):
+    """
+    Signal receiver for content object delete.
+    Responds to all Versionable content object
+    """
+    content_model = content_object.__class__
+    # check if content object type is in app config registry
+    try:
+        get_internalsearch_model_config(content_model)
+    except IndexError:
+        return
+    index = connections["default"].get_unified_index().get_index(content_model)
+    index.remove_object(content_object)
+
+
 def emit_content_change(obj, sender=None):
     """
-    Sends a content object state change signal if obj class is registred by
+    Sends a content object state change signal if obj class is registered by
     internalsearch.
     Helper function to be used in apps that integrates with internalsearch.
     """
@@ -114,6 +129,24 @@ def emit_content_change(obj, sender=None):
         return
 
     content_object_state_change.send(
+        sender=sender or obj.__class__,
+        content_object=obj,
+    )
+
+
+def emit_content_delete(obj, sender=None):
+    """
+    Sends a content object delete signal if obj class is registered by
+    internalsearch.
+    Helper function to be used in apps that integrates with internalsearch.
+    """
+    try:
+        get_internalsearch_model_config(obj.__class__)
+    except IndexError:
+        # model is not registered with internal search
+        return
+
+    content_object_delete.send(
         sender=sender or obj.__class__,
         content_object=obj,
     )
