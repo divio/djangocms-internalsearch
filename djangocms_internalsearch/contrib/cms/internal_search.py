@@ -93,6 +93,7 @@ class PageContentConfig(BaseSearchConfig):
     version_status = indexes.CharField()
     creation_date = indexes.DateTimeField(model_attr='creation_date')
     url = indexes.CharField()
+    published_url = indexes.CharField()
 
     # admin setting
     list_display = [get_title, get_slug, get_absolute_url, get_content_type, get_site_name, get_language,
@@ -149,6 +150,9 @@ class PageContentConfig(BaseSearchConfig):
 
     def prepare_url(self, obj):
         return get_object_preview_url(obj, obj.language)
+
+    def prepare_published_url(self, obj):
+        return obj.page.get_path(language=obj.language)
 
     def _render_plugins(self, obj, context, renderer):
         for placeholder in obj.get_placeholders():
