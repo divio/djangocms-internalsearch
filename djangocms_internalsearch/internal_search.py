@@ -9,6 +9,7 @@ from djangocms_internalsearch.filters import (
     VersionStateFilter,
 )
 
+
 class InternalSearchAdminSetting:
     """
     Default admin setting for all models listing
