@@ -14,6 +14,12 @@ from djangocms_internalsearch.base import BaseSearchConfig
 from djangocms_internalsearch.helpers import get_request, get_version_object
 
 
+try:
+    from djangocms_versioning.constants import PUBLISHED
+except ImportError:
+    PUBLISHED = None
+
+
 def get_title(obj):
     return obj.result.title
 
@@ -78,6 +84,14 @@ def get_absolute_url(obj):
 get_absolute_url.short_description = _('URL')
 
 
+def get_published_url(obj):
+    if obj.result.published_url:
+        return format_html("<a href='{url}'>{url}</a>", url=obj.result.published_url)
+
+
+get_published_url.short_description = _('Published URL')
+
+
 class PageContentConfig(BaseSearchConfig):
     """
     Page config and index definition
@@ -96,8 +110,8 @@ class PageContentConfig(BaseSearchConfig):
     published_url = indexes.CharField()
 
     # admin setting
-    list_display = [get_title, get_slug, get_absolute_url, get_content_type, get_site_name, get_language,
-                    get_version_author, get_version_status, get_modified_date]
+    list_display = [get_title, get_slug, get_absolute_url, get_published_url, get_content_type, get_site_name,
+                    get_language, get_version_author, get_version_status, get_modified_date]
     list_filter = []
 
     search_fields = ('text', 'title')
@@ -152,7 +166,8 @@ class PageContentConfig(BaseSearchConfig):
         return get_object_preview_url(obj, obj.language)
 
     def prepare_published_url(self, obj):
-        return obj.page.get_path(language=obj.language)
+        if self.prepare_version_status(obj) == PUBLISHED:
+            return obj.page.get_absolute_url()
 
     def _render_plugins(self, obj, context, renderer):
         for placeholder in obj.get_placeholders():

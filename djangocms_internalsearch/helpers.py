@@ -121,8 +121,8 @@ def emit_content_change(obj, sender=None):
     """
     try:
         get_internalsearch_model_config(obj.__class__)
-    except IndexError:
-        # model is not registered with internal search
+    except (IndexError, LookupError):
+        # Internal search is not install or model is not registered with internal search
         return
 
     content_object_state_change.send(
@@ -139,8 +139,8 @@ def emit_content_delete(obj, sender=None):
     """
     try:
         get_internalsearch_model_config(obj.__class__)
-    except IndexError:
-        # model is not registered with internal search
+    except (IndexError, LookupError):
+        # Internal search is not install or model is not registered with internal search
         return
 
     content_object_delete.send(
