@@ -1,4 +1,5 @@
 from django.utils.html import format_html
+from django.utils.translation import ugettext_lazy as _
 
 from djangocms_internalsearch.filters import (
     AuthorFilter,
@@ -7,7 +8,6 @@ from djangocms_internalsearch.filters import (
     SiteFilter,
     VersionStateFilter,
 )
-
 
 class InternalSearchAdminSetting:
     """
@@ -35,16 +35,16 @@ class InternalSearchAdminSetting:
         else:
             return obj.result.url
 
-    absolute_url.short_description = 'URL'
+    absolute_url.short_description = _('URL')
     absolute_url.allow_tags = True
 
     def published_url(self, obj):
         if obj.result.published_url:
-            return format_html("<a href='/{url}'>{url}</a>", url=obj.result.published_url)
+            return format_html("<a href='{url}'>{url}</a>", url=obj.result.published_url)
         else:
             return obj.result.published_url
 
-    published_url.short_description = 'Published URL'
+    published_url.short_description = _('Published URL')
     published_url.allow_tags = True
 
     def text(self, obj):
