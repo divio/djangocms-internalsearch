@@ -160,7 +160,7 @@ class PageContentConfig(BaseSearchConfig):
         return get_object_preview_url(obj, obj.language)
 
     def prepare_published_url(self, obj):
-        return obj.page.get_path(language=obj.language)
+        return obj.page.get_absolute_url()
 
     def _render_plugins(self, obj, context, renderer):
         for placeholder in obj.get_placeholders():
