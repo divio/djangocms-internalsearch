@@ -13,7 +13,7 @@ class InternalSearchAdminSetting:
     """
     Default admin setting for all models listing
     """
-    list_display = ['title', 'slug', 'absolute_url', 'content_type', 'site_name', 'language',
+    list_display = ['title', 'slug', 'absolute_url', 'published_url', 'content_type', 'site_name', 'language',
                     'author', 'version_status', 'modified_date']
     list_filter = [ContentTypeFilter, AuthorFilter, VersionStateFilter, SiteFilter, LanguageFilter]
     list_per_page = 50
@@ -37,6 +37,15 @@ class InternalSearchAdminSetting:
 
     absolute_url.short_description = 'URL'
     absolute_url.allow_tags = True
+
+    def published_url(self, obj):
+        if obj.result.published_url:
+            return format_html("<a href='/{url}'>{url}</a>", url=obj.result.published_url)
+        else:
+            return obj.result.published_url
+
+    published_url.short_description = 'Published URL'
+    published_url.allow_tags = True
 
     def text(self, obj):
         return obj.text
