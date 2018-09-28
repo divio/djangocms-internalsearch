@@ -14,6 +14,12 @@ from djangocms_internalsearch.base import BaseSearchConfig
 from djangocms_internalsearch.helpers import get_request, get_version_object
 
 
+try:
+    from djangocms_versioning.constants import PUBLISHED
+except ImportError:
+    PUBLISHED = None
+
+
 def get_title(obj):
     return obj.result.title
 
@@ -160,7 +166,8 @@ class PageContentConfig(BaseSearchConfig):
         return get_object_preview_url(obj, obj.language)
 
     def prepare_published_url(self, obj):
-        return obj.page.get_absolute_url()
+        if self.prepare_version_status(obj) == PUBLISHED:
+            return obj.page.get_absolute_url()
 
     def _render_plugins(self, obj, context, renderer):
         for placeholder in obj.get_placeholders():
