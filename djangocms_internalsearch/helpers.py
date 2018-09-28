@@ -14,8 +14,6 @@ from cms.operations import (
     MOVE_PLUGIN,
 )
 
-from haystack import connections
-
 from .signals import content_object_delete, content_object_state_change
 
 
@@ -66,8 +64,7 @@ def save_to_index(sender, operation, request, token, **kwargs):
         from cms.models import PageContent
         content_model = PageContent
 
-    # FIXME Don't hardcode 'default' connection
-    index = connections["default"].get_unified_index().get_index(content_model)
+    index = get_model_index(content_model)
 
     operation_actions = {
         DELETE_PAGE: delete_page,
@@ -97,7 +94,7 @@ def content_object_state_change_receiver(sender, content_object, **kwargs):
         get_internalsearch_model_config(content_model)
     except IndexError:
         return
-    index = connections["default"].get_unified_index().get_index(content_model)
+    index = get_model_index(content_model)
     index.update_object(content_object)
 
 
@@ -112,7 +109,7 @@ def content_object_delete_receiver(sender, content_object, **kwargs):
         get_internalsearch_model_config(content_model)
     except IndexError:
         return
-    index = connections["default"].get_unified_index().get_index(content_model)
+    index = get_model_index(content_model)
     index.remove_object(content_object)
 
 
@@ -188,3 +185,9 @@ def get_version_object(obj):
     except ImportError:
         return
     return Version.objects.get_for_content(obj)
+
+
+def get_model_index(content_model):
+    from haystack import connections
+    # FIXME Don't hardcode 'default' connection
+    return connections["default"].get_unified_index().get_index(content_model)
