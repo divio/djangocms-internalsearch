@@ -86,7 +86,6 @@ def get_published_url(obj):
 get_published_url.short_description = _('Published URL')
 
 
-
 class PageContentConfig(BaseSearchConfig):
     """
     Page config and index definition
