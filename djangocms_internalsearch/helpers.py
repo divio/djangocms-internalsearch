@@ -14,7 +14,7 @@ from cms.operations import (
     MOVE_PLUGIN,
 )
 
-from haystack import connections
+from .signals import content_object_delete, content_object_state_change
 
 
 def delete_page(index, request, **kwargs):
@@ -37,7 +37,7 @@ def update_plugin(index, request, **kwargs):
 
 
 def delete_plugin(index, request, **kwargs):
-    index.remove_object(kwargs['placeholder'].source)
+    index.update_object(kwargs['placeholder'].source)
 
 
 def move_plugin(index, request, **kwargs):
@@ -64,8 +64,7 @@ def save_to_index(sender, operation, request, token, **kwargs):
         from cms.models import PageContent
         content_model = PageContent
 
-    # FIXME Don't hardcode 'default' connection
-    index = connections["default"].get_unified_index().get_index(content_model)
+    index = get_model_index(content_model)
 
     operation_actions = {
         DELETE_PAGE: delete_page,
@@ -95,8 +94,59 @@ def content_object_state_change_receiver(sender, content_object, **kwargs):
         get_internalsearch_model_config(content_model)
     except IndexError:
         return
-    index = connections["default"].get_unified_index().get_index(content_model)
+    index = get_model_index(content_model)
     index.update_object(content_object)
+
+
+def content_object_delete_receiver(sender, content_object, **kwargs):
+    """
+    Signal receiver for content object delete.
+    Responds to all Versionable content object
+    """
+    content_model = content_object.__class__
+    # check if content object type is in app config registry
+    try:
+        get_internalsearch_model_config(content_model)
+    except IndexError:
+        return
+    index = get_model_index(content_model)
+    index.remove_object(content_object)
+
+
+def emit_content_change(obj, sender=None):
+    """
+    Sends a content object state change signal if obj class is registered by
+    internalsearch.
+    Helper function to be used in apps that integrates with internalsearch.
+    """
+    try:
+        get_internalsearch_model_config(obj.__class__)
+    except (IndexError, LookupError):
+        # Internal search is not install or model is not registered with internal search
+        return
+
+    content_object_state_change.send(
+        sender=sender or obj.__class__,
+        content_object=obj,
+    )
+
+
+def emit_content_delete(obj, sender=None):
+    """
+    Sends a content object delete signal if obj class is registered by
+    internalsearch.
+    Helper function to be used in apps that integrates with internalsearch.
+    """
+    try:
+        get_internalsearch_model_config(obj.__class__)
+    except (IndexError, LookupError):
+        # Internal search is not install or model is not registered with internal search
+        return
+
+    content_object_delete.send(
+        sender=sender or obj.__class__,
+        content_object=obj,
+    )
 
 
 def get_internalsearch_model_config(model_class):
@@ -143,3 +193,9 @@ def get_version_object(obj):
     except ImportError:
         return
     return Version.objects.get_for_content(obj)
+
+
+def get_model_index(content_model):
+    from haystack import connections
+    # FIXME Don't hardcode 'default' connection
+    return connections["default"].get_unified_index().get_index(content_model)
