@@ -130,10 +130,7 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
         extra_context = {'title': 'Internal Search'}
         actions = self.get_actions(request)
         if actions:
-            if model_meta:
-                list_display = ['action_checkbox'] + list(list_display)
-            else:
-                list_display = ['action_checkbox_haystack'] + list(list_display)
+            list_display = ['action_checkbox'] + list(list_display)
 
         kwargs = {
             'haystack_connection': self.haystack_connection,
@@ -284,28 +281,22 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
         if 'delete_selected' in actions:
             del actions['delete_selected']
 
-        model_meta = request.GET.get('type')
-        if not model_meta or apps.get_model(model_meta) in get_moderated_models():
-            if add_items_to_collection:
-                actions['djangocms_moderation'] = (
-                    add_items_to_collection, 'djangocms_moderation', add_items_to_collection.short_description)
+        try:
+            model_meta = request.GET.get('type')
+            if not model_meta or apps.get_model(model_meta) in get_moderated_models():
+                if add_items_to_collection:
+                    actions['add_items_to_collection'] = (
+                        add_items_to_collection, 'add_items_to_collection', add_items_to_collection.short_description)
+        except (LookupError, ValueError):
+            pass
 
         return actions
-
-    def action_checkbox_haystack(self, obj):
-        """
-        A list_display column containing a checkbox widget.
-        """
-        return helpers.checkbox.render(helpers.ACTION_CHECKBOX_NAME, str(obj.haystack_id))
-
-    action_checkbox_haystack.short_description = mark_safe('<input type="checkbox" id="action-toggle">')
 
     def action_checkbox(self, obj):
         """
         A list_display column containing a checkbox widget.
         """
-        return helpers.checkbox.render(helpers.ACTION_CHECKBOX_NAME, str(obj.pk))
-
+        return helpers.checkbox.render(helpers.ACTION_CHECKBOX_NAME, str(obj.haystack_id))
     action_checkbox.short_description = mark_safe('<input type="checkbox" id="action-toggle">')
 
     def response_action(self, request, queryset):
@@ -359,11 +350,7 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
 
             if not select_across:
                 # Perform the action only on the selected objects
-                model_meta = request.GET.get('type')
-                if model_meta:
-                    queryset = queryset.filter(pk__in=selected)
-                else:
-                    queryset = queryset.filter(id__in=selected)
+                queryset = queryset.filter(id__in=selected)
 
             response = func(self, request, queryset)
 
