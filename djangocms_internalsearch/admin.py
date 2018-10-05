@@ -4,14 +4,18 @@ import operator
 from functools import reduce
 
 from django.apps import apps
-from django.contrib import admin
+from django.contrib import admin, messages
+from django.contrib.admin import helpers
 from django.contrib.admin.options import ModelAdmin, csrf_protect_m
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import InvalidPage, Paginator
 from django.db import models
+from django.http import HttpResponseRedirect
+from django.http.response import HttpResponseBase
 from django.shortcuts import render
 from django.utils.encoding import force_text
-from django.utils.translation import ungettext
+from django.utils.safestring import mark_safe
+from django.utils.translation import ugettext as _, ungettext
 
 from haystack.admin import SearchChangeList, SearchModelAdminMixin
 from haystack.query import SearchQuerySet
@@ -20,8 +24,14 @@ from haystack.utils import get_model_ct_tuple
 from djangocms_internalsearch.internal_search import InternalSearchAdminSetting
 
 from .filters import AuthorFilter, ContentTypeFilter, VersionStateFilter
-from .helpers import get_internalsearch_model_config
+from .helpers import get_internalsearch_model_config, get_moderated_models
 from .models import InternalSearchProxy
+
+
+try:
+    from djangocms_moderation.admin_actions import add_items_to_collection
+except ImportError:
+    add_items_to_collection = None
 
 
 class InternalSearchChangeList(SearchChangeList):
@@ -69,6 +79,7 @@ class InternalSearchChangeList(SearchChangeList):
     @staticmethod
     def _make_model(result):
         model = InternalSearchProxy(pk=result.pk)
+        model.haystack_id = result.id
         model.result = result
         model.app_label = result.model._meta.app_label
         model.model_name = result.model._meta.model_name
@@ -117,8 +128,8 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
                 list_display = config_setting.get('list_display')
 
         extra_context = {'title': 'Internal Search'}
-
-        if self.get_actions(request):
+        actions = self.get_actions(request)
+        if actions:
             list_display = ['action_checkbox'] + list(list_display)
 
         kwargs = {
@@ -141,9 +152,45 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
         changelist.formset = None
         media = self.media
 
+        # If the request was POSTed, this might be a bulk action or a bulk
+        # edit. Try to look up an action or confirmation first, but if this
+        # isn't an action the POST will fall through to the bulk edit check,
+        # below.
+        action_failed = False
+        selected = request.POST.getlist(helpers.ACTION_CHECKBOX_NAME)
+
+        # Actions with no confirmation
+        if (actions and request.method == 'POST' and 'index' in request.POST and '_save' not in request.POST):
+            if selected:
+                response = self.response_action(request, queryset=changelist.get_queryset(request))
+                if response:
+                    return response
+                else:
+                    action_failed = True
+            else:
+                msg = _("Items must be selected in order to perform "
+                        "actions on them. No items have been changed.")
+                self.message_user(request, msg, messages.WARNING)
+                action_failed = True
+
+        # Actions with confirmation
+        if (actions and request.method == 'POST' and helpers.ACTION_CHECKBOX_NAME in request.POST and
+                'index' not in request.POST and '_save' not in request.POST):
+            if selected:
+                response = self.response_action(request, queryset=changelist.get_queryset(request))
+                if response:
+                    return response
+                else:
+                    action_failed = True
+
+        if action_failed:
+            # Redirect back to the changelist page to avoid resubmitting the
+            # form if the user refreshes the browser or uses the "No, take
+            # me back" button on the action confirmation page.
+            return HttpResponseRedirect(request.get_full_path())
+
         # Build the action form and populate it with available actions.
         # Check actions to see if any are available on this changelist
-        actions = self.get_actions(request)
         if actions:
             action_form = self.action_form(auto_id=None)
             action_form.fields['action'].choices = self.get_action_choices(request)
@@ -233,7 +280,90 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
         actions = super().get_actions(request)
         if 'delete_selected' in actions:
             del actions['delete_selected']
+
+        try:
+            model_meta = request.GET.get('type')
+            if not model_meta or apps.get_model(model_meta) in get_moderated_models():
+                actions['add_items_to_collection'] = (
+                    add_items_to_collection, 'add_items_to_collection', add_items_to_collection.short_description)
+        except (LookupError, ValueError):
+            pass
+
         return actions
+
+    def action_checkbox(self, obj):
+        """
+        A list_display column containing a checkbox widget.
+        """
+        return helpers.checkbox.render(helpers.ACTION_CHECKBOX_NAME, str(obj.haystack_id))
+    action_checkbox.short_description = mark_safe('<input type="checkbox" id="action-toggle">')
+
+    def response_action(self, request, queryset):
+        """
+        Handle an admin action. This is called if a request is POSTed to the
+        changelist; it returns an HttpResponse if the action was handled, and
+        None otherwise.
+        """
+
+        # There can be multiple action forms on the page (at the top
+        # and bottom of the change list, for example). Get the action
+        # whose button was pushed.
+        try:
+            action_index = int(request.POST.get('index', 0))
+        except ValueError:
+            action_index = 0
+
+        # Construct the action form.
+        data = request.POST.copy()
+        data.pop(helpers.ACTION_CHECKBOX_NAME, None)
+        data.pop("index", None)
+
+        # Use the action whose button was pushed
+        try:
+            data.update({'action': data.getlist('action')[action_index]})
+        except IndexError:
+            # If we didn't get an action from the chosen form that's invalid
+            # POST data, so by deleting action it'll fail the validation check
+            # below. So no need to do anything here
+            pass
+
+        action_form = self.action_form(data, auto_id=None)
+        action_form.fields['action'].choices = self.get_action_choices(request)
+
+        # If the form's valid we can handle the action.
+        if action_form.is_valid():
+            action = action_form.cleaned_data['action']
+            select_across = action_form.cleaned_data['select_across']
+            func = self.get_actions(request)[action][0]
+
+            # Get the list of selected PKs. If nothing's selected, we can't
+            # perform an action on it, so bail. Except we want to perform
+            # the action explicitly on all objects.
+            selected = request.POST.getlist(helpers.ACTION_CHECKBOX_NAME)
+            if not selected and not select_across:
+                # Reminder that something needs to be selected or nothing will happen
+                msg = _("Items must be selected in order to perform "
+                        "actions on them. No items have been changed.")
+                self.message_user(request, msg, messages.WARNING)
+                return None
+
+            if not select_across:
+                # Perform the action only on the selected objects
+                queryset = queryset.filter(id__in=selected)
+
+            response = func(self, request, queryset)
+
+            # Actions may return an HttpResponse-like object, which will be
+            # used as the response from the POST. If not, we'll be a good
+            # little HTTP citizen and redirect back to the changelist page.
+            if isinstance(response, HttpResponseBase):
+                return response
+            else:
+                return HttpResponseRedirect(request.get_full_path())
+        else:
+            msg = _("No action selected.")
+            self.message_user(request, msg, messages.WARNING)
+            return None
 
 
 @admin.register(InternalSearchProxy)
