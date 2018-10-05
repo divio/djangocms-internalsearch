@@ -284,9 +284,8 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
         try:
             model_meta = request.GET.get('type')
             if not model_meta or apps.get_model(model_meta) in get_moderated_models():
-                if add_items_to_collection:
-                    actions['add_items_to_collection'] = (
-                        add_items_to_collection, 'add_items_to_collection', add_items_to_collection.short_description)
+                actions['add_items_to_collection'] = (
+                    add_items_to_collection, 'add_items_to_collection', add_items_to_collection.short_description)
         except (LookupError, ValueError):
             pass
 
