@@ -368,8 +368,6 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
 
 @admin.register(InternalSearchProxy)
 class InternalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin, InternalSearchAdminSetting):
-    list_display = ['title', 'slug', 'absolute_url', 'published_url', 'content_type', 'site_name', 'language', 'author',
-                    'version_status', 'modified_date']
     list_filter = [ContentTypeFilter, AuthorFilter, VersionStateFilter, ]
     list_per_page = 50
     search_fields = ('text', 'title')
