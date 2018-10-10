@@ -69,6 +69,6 @@ class InternalSearchAdminSetting:
     def version_status(self, obj):
         return obj.result.version_status
 
-    def get_url(self, obj): 
+    def get_url(self, obj):
         return self.published_url(obj) or self.absolute_url(obj)
     get_url.short_description = _('URL')
