@@ -14,7 +14,7 @@ class InternalSearchAdminSetting:
     """
     Default admin setting for all models listing
     """
-    list_display = ['title', 'slug', 'absolute_url', 'published_url', 'content_type', 'site_name', 'language',
+    list_display = ['title', 'slug', 'get_url', 'content_type', 'site_name', 'language',
                     'author', 'version_status', 'modified_date']
     list_filter = [ContentTypeFilter, AuthorFilter, VersionStateFilter, SiteFilter, LanguageFilter]
     list_per_page = 50
@@ -68,3 +68,7 @@ class InternalSearchAdminSetting:
 
     def version_status(self, obj):
         return obj.result.version_status
+
+    def get_url(self, obj): 
+        return self.published_url(obj) or self.absolute_url(obj)
+    get_url.short_description = _('URL')
