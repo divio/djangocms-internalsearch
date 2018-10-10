@@ -367,12 +367,6 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
 
 
 @admin.register(InternalSearchProxy)
-class InternalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin, InternalSearchAdminSetting):
-    list_filter = [ContentTypeFilter, AuthorFilter, VersionStateFilter, ]
-    list_per_page = 50
-    search_fields = ('text', 'title')
-    ordering = ('-id',)
-    list_display_links = None
-
+class InternalSearchAdmin(InternalSearchAdminSetting, InternalSearchModelAdminMixin, ModelAdmin):
     def has_add_permission(self, request):
         return False
