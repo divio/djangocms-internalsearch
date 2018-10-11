@@ -23,7 +23,6 @@ from haystack.utils import get_model_ct_tuple
 
 from djangocms_internalsearch.internal_search import InternalSearchAdminSetting
 
-from .filters import AuthorFilter, ContentTypeFilter, VersionStateFilter
 from .helpers import get_internalsearch_model_config, get_moderated_models
 from .models import InternalSearchProxy
 
@@ -367,14 +366,6 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
 
 
 @admin.register(InternalSearchProxy)
-class InternalSearchAdmin(InternalSearchModelAdminMixin, ModelAdmin, InternalSearchAdminSetting):
-    list_display = ['title', 'slug', 'absolute_url', 'published_url', 'content_type', 'site_name', 'language', 'author',
-                    'version_status', 'modified_date']
-    list_filter = [ContentTypeFilter, AuthorFilter, VersionStateFilter, ]
-    list_per_page = 50
-    search_fields = ('text', 'title')
-    ordering = ('-id',)
-    list_display_links = None
-
+class InternalSearchAdmin(InternalSearchAdminSetting, InternalSearchModelAdminMixin, ModelAdmin):
     def has_add_permission(self, request):
         return False

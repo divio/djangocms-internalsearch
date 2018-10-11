@@ -1,5 +1,4 @@
 from django.utils.html import format_html
-from django.utils.translation import ugettext_lazy as _
 
 from djangocms_internalsearch.filters import (
     AuthorFilter,
@@ -14,7 +13,7 @@ class InternalSearchAdminSetting:
     """
     Default admin setting for all models listing
     """
-    list_display = ['title', 'slug', 'absolute_url', 'published_url', 'content_type', 'site_name', 'language',
+    list_display = ['title', 'slug', 'url', 'content_type', 'site_name', 'language',
                     'author', 'version_status', 'modified_date']
     list_filter = [ContentTypeFilter, AuthorFilter, VersionStateFilter, SiteFilter, LanguageFilter]
     list_per_page = 50
@@ -36,7 +35,6 @@ class InternalSearchAdminSetting:
         else:
             return obj.result.url
 
-    absolute_url.short_description = _('URL')
     absolute_url.allow_tags = True
 
     def published_url(self, obj):
@@ -45,7 +43,6 @@ class InternalSearchAdminSetting:
         else:
             return obj.result.published_url
 
-    published_url.short_description = _('Published URL')
     published_url.allow_tags = True
 
     def text(self, obj):
@@ -68,3 +65,6 @@ class InternalSearchAdminSetting:
 
     def version_status(self, obj):
         return obj.result.version_status
+
+    def url(self, obj):
+        return self.published_url(obj) or self.absolute_url(obj)
