@@ -23,7 +23,6 @@ from haystack.utils import get_model_ct_tuple
 
 from djangocms_internalsearch.internal_search import InternalSearchAdminSetting
 
-from .filters import AuthorFilter, ContentTypeFilter, VersionStateFilter
 from .helpers import get_internalsearch_model_config, get_moderated_models
 from .models import InternalSearchProxy
 
