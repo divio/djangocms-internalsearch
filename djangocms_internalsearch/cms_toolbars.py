@@ -1,3 +1,5 @@
+from django.utils.translation import ugettext_lazy as _
+
 from cms.toolbar_base import CMSToolbar
 from cms.toolbar_pool import toolbar_pool
 
@@ -15,5 +17,8 @@ class InternalSearchToolbar(CMSToolbar):
     """
 
     def populate(self):
-        # TODO: make url dynamic
-        self.toolbar.add_button('Internal search', '/admin/djangocms_internalsearch/internalsearchproxy')
+        self.toolbar.add_sideframe_button(
+            _('Internal search'),
+            # TODO: make url dynamic
+            '/admin/djangocms_internalsearch/internalsearchproxy'
+        )
