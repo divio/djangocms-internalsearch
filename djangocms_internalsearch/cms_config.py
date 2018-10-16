@@ -10,12 +10,9 @@ from djangocms_internalsearch.contrib.cms.internal_search import (
 
 
 try:
-    from djangocms_internalsearch.contrib.filer.internal_search import (
-        FilerFileConfig,
-        FilerImageConfig,
-    )
+    from djangocms_internalsearch.contrib.filer.internal_search import filer_model_config_factory
 except ImportError:
-    FilerFileConfig = FilerImageConfig = None
+    filer_model_config_factory = None
 
 
 class InternalSearchCMSExtension(CMSAppExtension):
@@ -41,8 +38,7 @@ class CoreCMSAppConfig(CMSAppConfig):
     internalsearch_config_list = [
         PageContentConfig,
     ]
-    if FilerFileConfig:
-        internalsearch_config_list += [
-            FilerFileConfig,
-            FilerImageConfig,
-        ]
+    if filer_model_config_factory:
+        internalsearch_config_list.extend(
+            filer_model_config_factory()
+        )

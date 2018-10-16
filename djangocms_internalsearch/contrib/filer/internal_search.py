@@ -1,6 +1,7 @@
 from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
 
+import filer.settings
 from filer.models.filemodels import File
 from filer.models.imagemodels import Image
 from haystack import indexes
@@ -44,7 +45,7 @@ def get_absolute_url(obj):
 get_absolute_url.short_description = _('URL')
 
 
-class FilerFileConfig(BaseSearchConfig):
+class BaseFilerConfig(BaseSearchConfig):
     # indexes definition
     folder_name = indexes.CharField(model_attr="folder__name")
     file_path = indexes.CharField(model_attr="file")
@@ -69,26 +70,15 @@ class FilerFileConfig(BaseSearchConfig):
         return obj.get_admin_change_url()
 
 
-class FilerImageConfig(BaseSearchConfig):
-    # indexes definition
-    folder_name = indexes.CharField(model_attr="folder__name")
-    file_path = indexes.CharField(model_attr="file")
-    title = indexes.CharField(model_attr="original_filename")
-    file_size = indexes.IntegerField(model_attr="_file_size")
-    created_by = indexes.CharField(model_attr="owner")
-    version_status = indexes.CharField()
-    url = indexes.CharField()
+def filer_model_config_factory():
+    model_configs = []
+    for model_name in filer.settings.FILER_FILE_MODELS:
+        model_configs.append(
+            type(
+                model_name + 'FilerConfig',
+                (BaseFilerConfig,),
+                {},
+                )
+        )
 
-    # admin setting
-    list_display = [get_title, get_absolute_url, get_folder_name, get_file_size]
-    search_fields = ('title', 'folder_name')
-    list_filter = ()
-
-    model = Image
-
-    def prepare_text(self, obj):
-        # Todo: Might need to change based on file type e.g. Image
-        return ' '.join([obj.original_filename, ])
-
-    def prepare_url(self, obj):
-        return obj.get_admin_change_url()
+    return model_configs
