@@ -1,6 +1,4 @@
 from collections import Iterable
-
-from django.apps import apps
 from django.core.exceptions import ImproperlyConfigured
 
 from cms.app_base import CMSAppConfig, CMSAppExtension
@@ -11,9 +9,8 @@ from djangocms_internalsearch.contrib.cms.internal_search import (
 
 
 try:
-    apps.get_app_config('filer')
     from djangocms_internalsearch.contrib.filer.internal_search import filer_model_config_factory
-except (LookupError, ImportError):
+except ImportError:
     filer_model_config_factory = None
 
 

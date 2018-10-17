@@ -70,14 +70,16 @@ class BaseFilerConfig(BaseSearchConfig):
 
 
 def filer_model_config_factory():
-    model_configs = []
+    if not apps.is_installed('filer'):
+        return []
 
+    model_configs = []
     for model_name in filer.settings.FILER_FILE_MODELS:
         model_configs.append(
             type(
                 model_name + 'FilerConfig',
                 (BaseFilerConfig,),
                 {'model': apps.get_model(model_name)},
-                )
+            )
         )
     return model_configs

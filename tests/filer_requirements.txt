@@ -1,8 +1,0 @@
-djangocms-helper
-tox
-coverage
-flake8
-isort
-Whoosh
-easy-thumbnails
-django-filer

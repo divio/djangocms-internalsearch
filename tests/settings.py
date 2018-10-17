@@ -1,3 +1,4 @@
+import os
 from tempfile import mkdtemp
 
 
@@ -16,11 +17,9 @@ HELPER_SETTINGS = {
     },
 }
 
-try:
-    import filer  # noqa: F401
+
+if os.getenv('ENABLE_FILER'):
     HELPER_SETTINGS['INSTALLED_APPS'].append('filer')
-except ImportError:
-    pass
 
 
 def run():
