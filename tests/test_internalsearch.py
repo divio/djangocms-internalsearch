@@ -2,6 +2,7 @@ from unittest.mock import Mock
 
 from django.apps import apps
 from django.core.exceptions import ImproperlyConfigured
+from django.db.models.base import ModelBase
 
 from cms import app_registration
 from cms.utils.setup import setup_cms_apps
@@ -24,6 +25,11 @@ from djangocms_internalsearch.test_utils.app_2.models import (
     TestModel1,
     TestModel2,
 )
+
+try:
+    from djangocms_internalsearch.contrib.filer.internal_search import filer_model_config_factory
+except ImportError:
+    filer_model_config_factory = None
 
 from .utils import TestCase, inheritors
 
@@ -88,8 +94,10 @@ class InternalSearchIntegrationTestCase(TestCase):
         registered_models = [
             config.model for config in internalsearch_config.cms_extension.internalsearch_apps_config
         ]
+
         expected_models = [
             config.model for config in inheritors(BaseSearchConfig)
-            if not isinstance(config.model, property)
+            if isinstance(config.model, ModelBase)
         ]
+
         self.assertCountEqual(registered_models, expected_models)
