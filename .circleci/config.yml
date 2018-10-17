@@ -95,6 +95,8 @@ jobs:
          root: images
          paths: py36.tar
 
+  filer:
+    <<: *py35default
   flake8:
     <<: *py35default
   isort:
@@ -134,6 +136,9 @@ workflows:
           requires:
             - py35_base
       - isort:
+          requires:
+            - py35_base
+      - filer:
           requires:
             - py35_base
       - eslint:
