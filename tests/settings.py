@@ -17,7 +17,7 @@ HELPER_SETTINGS = {
 }
 
 try:
-    import filer  # noqa: E731
+    import filer  # noqa: F401
     HELPER_SETTINGS['INSTALLED_APPS'].append('filer')
 except ImportError:
     pass
