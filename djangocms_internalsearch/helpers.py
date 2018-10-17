@@ -18,8 +18,24 @@ from .signals import content_object_delete, content_object_state_change
 
 
 def delete_page(index, request, **kwargs):
-    obj = kwargs['obj'].get_title_obj(get_language_from_request(request))
-    index.remove_object(obj)
+    from cms.models import Page, PageContent
+
+    obj = kwargs['obj']
+
+    # obj is PageContent then remove from index
+    if isinstance(obj, PageContent):
+        index.remove_object(obj)
+        return
+
+    cms_pages = [obj, ]
+    if obj.node.is_branch:
+        nodes = obj.node.get_descendants()
+        cms_pages.extend(Page.objects.filter(node__in=nodes))
+
+    page_content_objs = PageContent._base_manager.filter(page__in=cms_pages)
+
+    for page_content in page_content_objs:
+        index.remove_object(page_content)
 
 
 def update_page_content(index, request, **kwargs):
@@ -67,10 +83,8 @@ def save_to_index(sender, operation, request, token, **kwargs):
     index = get_model_index(content_model)
 
     operation_actions = {
-        DELETE_PAGE: delete_page,
         ADD_PAGE_TRANSLATION: update_page_content,
         CHANGE_PAGE_TRANSLATION: update_page_content,
-        DELETE_PAGE_TRANSLATION: delete_page_content,
         ADD_PLUGIN: update_plugin,
         CHANGE_PLUGIN: update_plugin,
         DELETE_PLUGIN: delete_plugin,
@@ -81,6 +95,17 @@ def save_to_index(sender, operation, request, token, **kwargs):
         return
 
     operation_actions[operation](index, request, **kwargs)
+
+
+def remove_from_index(sender, operation, request, token, **kwargs):
+
+    from cms.models import PageContent
+    index = get_model_index(PageContent)
+
+    if operation not in [DELETE_PAGE, DELETE_PAGE_TRANSLATION]:
+        return
+
+    delete_page(index, request, **kwargs)
 
 
 def content_object_state_change_receiver(sender, content_object, **kwargs):
