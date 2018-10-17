@@ -26,11 +26,6 @@ from djangocms_internalsearch.test_utils.app_2.models import (
     TestModel2,
 )
 
-try:
-    from djangocms_internalsearch.contrib.filer.internal_search import filer_model_config_factory
-except ImportError:
-    filer_model_config_factory = None
-
 from .utils import TestCase, inheritors
 
 

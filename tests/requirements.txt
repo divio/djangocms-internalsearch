@@ -4,5 +4,4 @@ coverage
 flake8
 isort
 Whoosh
-django-filer
 easy-thumbnails
