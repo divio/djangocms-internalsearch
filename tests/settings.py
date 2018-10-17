@@ -16,6 +16,12 @@ HELPER_SETTINGS = {
     },
 }
 
+try:
+    import filer
+    HELPER_SETTINGS['INSTALLED_APPS'].append('filer')
+except ImportError:
+    pass
+
 
 def run():
     from djangocms_helper import runner

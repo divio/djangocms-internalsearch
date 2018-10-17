@@ -1,5 +1,5 @@
 from collections import Iterable
-
+from django.apps import apps
 from django.core.exceptions import ImproperlyConfigured
 
 from cms.app_base import CMSAppConfig, CMSAppExtension
@@ -8,14 +8,11 @@ from djangocms_internalsearch.contrib.cms.internal_search import (
     PageContentConfig,
 )
 
-
 try:
-    from djangocms_internalsearch.contrib.filer.internal_search import (
-        FilerFileConfig,
-        FilerImageConfig,
-    )
-except ImportError:
-    FilerFileConfig = FilerImageConfig = None
+    apps.get_app_config('filer')
+    from djangocms_internalsearch.contrib.filer.internal_search import filer_model_config_factory
+except (LookupError, ImportError):
+    filer_model_config_factory = None
 
 
 class InternalSearchCMSExtension(CMSAppExtension):
@@ -41,8 +38,7 @@ class CoreCMSAppConfig(CMSAppConfig):
     internalsearch_config_list = [
         PageContentConfig,
     ]
-    if FilerFileConfig:
-        internalsearch_config_list += [
-            FilerFileConfig,
-            FilerImageConfig,
-        ]
+    if filer_model_config_factory:
+        internalsearch_config_list.extend(
+            filer_model_config_factory()
+        )
