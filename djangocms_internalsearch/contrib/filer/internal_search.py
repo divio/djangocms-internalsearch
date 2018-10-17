@@ -69,11 +69,6 @@ class BaseFilerConfig(BaseSearchConfig):
         return obj.get_admin_change_url()
 
 
-def load_model(model_name):
-    model_name_tuple = model_name.split('.')
-    return apps.get_model(*model_name_tuple)
-
-
 def filer_model_config_factory():
     model_configs = []
 
@@ -82,7 +77,7 @@ def filer_model_config_factory():
             type(
                 model_name + 'FilerConfig',
                 (BaseFilerConfig,),
-                {'model': load_model(model_name)},
+                {'model': apps.get_model(model_name)},
                 )
         )
     return model_configs
