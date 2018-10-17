@@ -1,4 +1,5 @@
 from collections import Iterable
+
 from django.core.exceptions import ImproperlyConfigured
 
 from cms.app_base import CMSAppConfig, CMSAppExtension
