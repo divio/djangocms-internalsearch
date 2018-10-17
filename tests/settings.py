@@ -1,3 +1,4 @@
+import os
 from tempfile import mkdtemp
 
 
@@ -15,6 +16,10 @@ HELPER_SETTINGS = {
         },
     },
 }
+
+
+if os.getenv('ENABLE_FILER'):
+    HELPER_SETTINGS['INSTALLED_APPS'].append('filer')
 
 
 def run():
