@@ -2,6 +2,7 @@ from unittest.mock import Mock
 
 from django.apps import apps
 from django.core.exceptions import ImproperlyConfigured
+from django.db.models.base import ModelBase
 
 from cms import app_registration
 from cms.utils.setup import setup_cms_apps
@@ -88,8 +89,10 @@ class InternalSearchIntegrationTestCase(TestCase):
         registered_models = [
             config.model for config in internalsearch_config.cms_extension.internalsearch_apps_config
         ]
+
         expected_models = [
             config.model for config in inheritors(BaseSearchConfig)
-            if not isinstance(config.model, property)
+            if isinstance(config.model, ModelBase)
         ]
+
         self.assertCountEqual(registered_models, expected_models)
