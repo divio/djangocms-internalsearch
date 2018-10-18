@@ -1,6 +1,7 @@
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
+from django.db.models.expressions import RawSQL
 from django.template import RequestContext
 from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
@@ -106,6 +107,7 @@ class PageContentConfig(BaseSearchConfig):
     plugin_types = indexes.MultiValueField()
     version_author = indexes.CharField()
     version_status = indexes.CharField()
+    is_latest_version = indexes.BooleanField()
     creation_date = indexes.DateTimeField(model_attr='creation_date')
     url = indexes.CharField()
     published_url = indexes.CharField()
@@ -125,14 +127,27 @@ class PageContentConfig(BaseSearchConfig):
         try:
             versioning_extension = apps.get_app_config('djangocms_versioning').cms_extension
             if versioning_extension.is_content_model_versioned(self.model):
+                sql = '''
+                select mver
+                from (select cms_pagecontent.id as mid, maxversion.maxversion as mver
+                      from cms_pagecontent
+                             left join (select djangocms_versioning_version.object_id   as object_id,
+                                               max(djangocms_versioning_version.number) as maxversion
+                                        from cms_pagecontent
+                                               inner join djangocms_versioning_version
+                                                 on cms_pagecontent.id = djangocms_versioning_version.object_id
+                                        group by cms_pagecontent.page_id) maxversion
+                               on cms_pagecontent.id = maxversion.object_id)
+                where mid = cms_pagecontent.id'''
+
                 from djangocms_versioning.helpers import override_default_manager
                 with override_default_manager(self.model, self.model._original_manager):
-                    return PageContent.objects.all()
+                    return PageContent.objects.all().annotate(max_version=RawSQL(sql, ''))
             else:
                 return super().index_queryset(using)
         except (ImportError, LookupError):
             # versioning is not installed so fall back to usual behaviour
-            return super().index_queryset(using)
+            super().index_queryset(using)
 
     def prepare_slug(self, obj):
         return obj.page.get_slug(obj.language, fallback=False)
@@ -186,3 +201,13 @@ class PageContentConfig(BaseSearchConfig):
     def _render_plugins(self, obj, context, renderer):
         for placeholder in obj.get_placeholders():
             yield from renderer.render_plugins(placeholder, obj.language, context)
+
+    def prepare_is_latest_version(self, obj):
+        if hasattr(obj, '_is_latest_version'):
+            return getattr(obj, '_is_latest_version', False)
+        else:
+            max_version = getattr(obj, 'max_version', None)
+            if max_version:
+                return True
+            else:
+                return False
