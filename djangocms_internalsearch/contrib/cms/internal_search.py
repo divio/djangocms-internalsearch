@@ -11,13 +11,23 @@ from cms.utils.plugins import downcast_plugins
 from haystack import indexes
 
 from djangocms_internalsearch.base import BaseSearchConfig
-from djangocms_internalsearch.helpers import get_request, get_version_object
+from djangocms_internalsearch.helpers import get_all_versions, get_request, get_version_object
 
 
 try:
     from djangocms_versioning.constants import PUBLISHED
 except ImportError:
     PUBLISHED = None
+
+try:
+    from djangocms_versioning.constants import DRAFT
+except ImportError:
+    DRAFT = None
+
+try:
+    from djangocms_versioning.constants import UNPUBLISHED
+except ImportError:
+    UNPUBLISHED = None
 
 
 def get_title(obj):
@@ -168,6 +178,11 @@ class PageContentConfig(BaseSearchConfig):
     def prepare_published_url(self, obj):
         if self.prepare_version_status(obj) == PUBLISHED:
             return obj.page.get_absolute_url()
+        if self.prepare_version_status(obj) == DRAFT:
+            # check if there are unpublished versions
+            version_objs = get_all_versions(obj).filter(state=UNPUBLISHED)
+            if version_objs:
+                return obj.page.get_absolute_url()
 
     def _render_plugins(self, obj, context, renderer):
         for placeholder in obj.get_placeholders():
