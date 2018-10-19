@@ -1,3 +1,4 @@
+from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.template import RequestContext
@@ -119,6 +120,19 @@ class PageContentConfig(BaseSearchConfig):
     list_per_page = 50
 
     model = PageContent
+
+    def index_queryset(self, using=None):
+        try:
+            versioning_extension = apps.get_app_config('djangocms_versioning').cms_extension
+            if versioning_extension.is_content_model_versioned(self.model):
+                from djangocms_versioning.helpers import override_default_manager
+                with override_default_manager(self.model, self.model._original_manager):
+                    return PageContent.objects.all()
+            else:
+                return super().index_queryset(using)
+        except (ImportError, LookupError):
+            # versioning is not installed so fall back to usual behaviour
+            return super().index_queryset(using)
 
     def prepare_slug(self, obj):
         return obj.page.get_slug(obj.language, fallback=False)
