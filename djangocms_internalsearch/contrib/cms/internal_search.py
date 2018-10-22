@@ -1,7 +1,8 @@
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
-from django.db.models.expressions import RawSQL
+from django.db.models import Max
+from django.db.models.expressions import OuterRef, Subquery
 from django.template import RequestContext
 from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
@@ -94,6 +95,16 @@ def get_published_url(obj):
 get_published_url.short_description = _('Published URL')
 
 
+def annotated_pagecontent_queryset():
+    """Returns a PageContent queryset annotated with latest_pk,
+    the primary key corresponding to the latest version
+    """
+    return PageContent._base_manager.all().annotate(
+        latest_pk=Subquery(
+            PageContent._base_manager.all().filter(language=OuterRef('language'), page=OuterRef('page')).annotate(
+                version=Max('versions__number')).order_by('-version').values('pk')[:1]))
+
+
 class PageContentConfig(BaseSearchConfig):
     """
     Page config and index definition
@@ -124,30 +135,16 @@ class PageContentConfig(BaseSearchConfig):
     model = PageContent
 
     def index_queryset(self, using=None):
+        versioning_extension = None
         try:
             versioning_extension = apps.get_app_config('djangocms_versioning').cms_extension
-            if versioning_extension.is_content_model_versioned(self.model):
-                sql = '''
-                select mver
-                from (select cms_pagecontent.id as mid, maxversion.maxversion as mver
-                      from cms_pagecontent
-                             left join (select djangocms_versioning_version.object_id   as object_id,
-                                               max(djangocms_versioning_version.number) as maxversion
-                                        from cms_pagecontent
-                                               inner join djangocms_versioning_version
-                                                 on cms_pagecontent.id = djangocms_versioning_version.object_id
-                                        group by cms_pagecontent.page_id) maxversion
-                               on cms_pagecontent.id = maxversion.object_id)
-                where mid = cms_pagecontent.id'''
-
-                from djangocms_versioning.helpers import override_default_manager
-                with override_default_manager(self.model, self.model._original_manager):
-                    return PageContent.objects.all().annotate(max_version=RawSQL(sql, ''))
-            else:
-                return super().index_queryset(using)
         except (ImportError, LookupError):
-            # versioning is not installed so fall back to usual behaviour
-            super().index_queryset(using)
+            pass
+
+        if versioning_extension and versioning_extension.is_content_model_versioned(self.model):
+            return annotated_pagecontent_queryset()
+        else:
+            return super().index_queryset(using)
 
     def prepare_slug(self, obj):
         return obj.page.get_slug(obj.language, fallback=False)
@@ -203,11 +200,5 @@ class PageContentConfig(BaseSearchConfig):
             yield from renderer.render_plugins(placeholder, obj.language, context)
 
     def prepare_is_latest_version(self, obj):
-        if hasattr(obj, '_is_latest_version'):
-            return getattr(obj, '_is_latest_version', False)
-        else:
-            max_version = getattr(obj, 'max_version', None)
-            if max_version:
-                return True
-            else:
-                return False
+        latest_pk = getattr(obj, 'latest_pk', None)
+        return obj.pk == latest_pk
