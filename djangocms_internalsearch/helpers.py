@@ -120,6 +120,8 @@ def content_object_state_change_receiver(sender, content_object, **kwargs):
     except IndexError:
         return
     index = get_model_index(content_model)
+    if kwargs.get('created', False):
+        content_object.latest_pk = content_object.pk
     index.update_object(content_object)
 
 
@@ -138,7 +140,7 @@ def content_object_delete_receiver(sender, content_object, **kwargs):
     index.remove_object(content_object)
 
 
-def emit_content_change(obj, sender=None):
+def emit_content_change(obj, sender=None, created=False):
     """
     Sends a content object state change signal if obj class is registered by
     internalsearch.
@@ -150,9 +152,29 @@ def emit_content_change(obj, sender=None):
         # Internal search is not install or model is not registered with internal search
         return
 
+    if created:
+        try:
+            # if versioning installed mark other versions in group as not the latest version
+            versioning_extension = apps.get_app_config('djangocms_versioning').cms_extension
+            from djangocms_versioning import versionables
+        except (ImportError, LookupError):
+            versioning_extension = None
+
+        if versioning_extension and versioning_extension.is_content_model_versioned(obj.__class__):
+            versionable = versionables.for_content(obj)
+            content_objects = versionable.for_content_grouping_values(obj)
+            for content_obj in content_objects:
+                if content_obj.pk != obj.pk:
+                    content_object_state_change.send(
+                        sender=sender or obj.__class__,
+                        content_object=content_obj,
+                        created=False,
+                    )
+
     content_object_state_change.send(
         sender=sender or obj.__class__,
         content_object=obj,
+        created=True,
     )
 
 
