@@ -98,8 +98,7 @@ class LatestVersionFilter(admin.SimpleListFilter):
         human-readable name for the option that will appear
         in the right sidebar.
         """
-        return [('0', _('All')),
-                ('1', _('Latest version'))]
+        return [('1', _('Latest version'))]
 
     def queryset(self, request, queryset):
         """
@@ -110,13 +109,6 @@ class LatestVersionFilter(admin.SimpleListFilter):
         if self.value() == '1':
             return queryset.filter(is_latest_version=self.value())
 
-    def choices(self, changelist):
-        for lookup, title in self.lookup_choices:
-            yield {
-                'selected': self.value() == force_text(lookup),
-                'query_string': changelist.get_query_string({self.parameter_name: lookup}, []),
-                'display': title,
-            }
 
 
 class AuthorFilter(admin.SimpleListFilter):

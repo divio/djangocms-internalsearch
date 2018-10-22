@@ -95,14 +95,17 @@ def get_published_url(obj):
 get_published_url.short_description = _('Published URL')
 
 
-def annotated_pagecontent_queryset():
+def annotated_pagecontent_queryset(using=None):
     """Returns a PageContent queryset annotated with latest_pk,
     the primary key corresponding to the latest version
     """
-    return PageContent._base_manager.all().annotate(
-        latest_pk=Subquery(
-            PageContent._base_manager.all().filter(language=OuterRef('language'), page=OuterRef('page')).annotate(
-                version=Max('versions__number')).order_by('-version').values('pk')[:1]))
+    inner = PageContent._base_manager.filter(
+        language=OuterRef('language'),
+        page=OuterRef('page')
+    ).annotate(
+        version=Max('versions__number')
+    ).order_by('-version').values('pk')
+    return PageContent._base_manager.using(using).annotate(latest_pk=Subquery(inner[:1]))
 
 
 class PageContentConfig(BaseSearchConfig):

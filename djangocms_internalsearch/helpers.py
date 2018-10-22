@@ -156,19 +156,20 @@ def emit_content_change(obj, sender=None, created=False):
         try:
             # if versioning installed mark other versions in group as not the latest version
             versioning_extension = apps.get_app_config('djangocms_versioning').cms_extension
-            if versioning_extension.is_content_model_versioned(obj.__class__):
-                from djangocms_versioning import versionables
-                versionable = versionables.for_content(obj)
-                content_objects = versionable.for_content_grouping_values(obj)
-                for content_obj in content_objects:
-                    if content_obj.pk != obj.pk:
-                        content_object_state_change.send(
-                            sender=sender or obj.__class__,
-                            content_object=content_obj,
-                            created=False,
-                        )
+            from djangocms_versioning import versionables
         except (ImportError, LookupError):
-            pass
+            versioning_extension = None
+
+        if versioning_extension and versioning_extension.is_content_model_versioned(obj.__class__):
+            versionable = versionables.for_content(obj)
+            content_objects = versionable.for_content_grouping_values(obj)
+            for content_obj in content_objects:
+                if content_obj.pk != obj.pk:
+                    content_object_state_change.send(
+                        sender=sender or obj.__class__,
+                        content_object=content_obj,
+                        created=False,
+                    )
 
     content_object_state_change.send(
         sender=sender or obj.__class__,
