@@ -24,7 +24,8 @@ class InternalSearchAdminSetting:
         return False
 
     def modified_date(self, obj):
-        return obj.result.creation_date
+        return obj.result.modified_date
+
 
     def slug(self, obj):
         return obj.result.slug

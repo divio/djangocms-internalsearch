@@ -71,7 +71,7 @@ get_version_status.short_description = _('Version Status')
 
 
 def get_modified_date(obj):
-    return obj.result.creation_date
+    return obj.result.modified_date
 
 
 get_modified_date.short_description = _('Modified Date')
@@ -106,7 +106,7 @@ class PageContentConfig(BaseSearchConfig):
     plugin_types = indexes.MultiValueField()
     version_author = indexes.CharField()
     version_status = indexes.CharField()
-    creation_date = indexes.DateTimeField(model_attr='creation_date')
+    modified_date = indexes.DateTimeField()
     url = indexes.CharField()
     published_url = indexes.CharField()
 
@@ -136,6 +136,11 @@ class PageContentConfig(BaseSearchConfig):
 
     def prepare_slug(self, obj):
         return obj.page.get_slug(obj.language, fallback=False)
+
+    def prepare_modified_date(self, obj):
+        changed_date = getattr(obj, 'changed_date')
+        version_obj = get_version_object(obj)
+        return changed_date or version_obj.created if version_obj else obj.creation_date
 
     def prepare_site_id(self, obj):
         return obj.page.node.site_id
