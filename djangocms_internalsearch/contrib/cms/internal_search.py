@@ -3,7 +3,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.db.models import Max
 from django.db.models.expressions import OuterRef, Subquery
-from django.template import RequestContext
 from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
 
@@ -12,6 +11,7 @@ from cms.toolbar.utils import get_object_preview_url
 from cms.utils.plugins import downcast_plugins
 
 from haystack import indexes
+from sekizai.context import SekizaiContext
 
 from djangocms_internalsearch.base import BaseSearchConfig
 from djangocms_internalsearch.helpers import get_request, get_version_object
@@ -173,7 +173,7 @@ class PageContentConfig(BaseSearchConfig):
 
     def prepare_text(self, obj):
         request = get_request(obj.language)
-        context = RequestContext(request)
+        context = SekizaiContext(request)
         if 'request' not in context:
             context['request'] = request
         renderer = request.toolbar.content_renderer
