@@ -4,6 +4,7 @@ from djangocms_internalsearch.filters import (
     AuthorFilter,
     ContentTypeFilter,
     LanguageFilter,
+    LatestVersionFilter,
     SiteFilter,
     VersionStateFilter,
 )
@@ -15,7 +16,7 @@ class InternalSearchAdminSetting:
     """
     list_display = ['title', 'slug', 'url', 'content_type', 'site_name', 'language',
                     'author', 'version_status', 'modified_date']
-    list_filter = [ContentTypeFilter, AuthorFilter, VersionStateFilter, SiteFilter, LanguageFilter]
+    list_filter = [ContentTypeFilter, AuthorFilter, VersionStateFilter, LatestVersionFilter, SiteFilter, LanguageFilter]
     list_per_page = 50
     search_fields = ('text', 'title')
     ordering = ('-id',)

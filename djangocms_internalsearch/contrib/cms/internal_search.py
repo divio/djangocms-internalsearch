@@ -1,6 +1,8 @@
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
+from django.db.models import Max
+from django.db.models.expressions import OuterRef, Subquery
 from django.template import RequestContext
 from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
@@ -93,6 +95,19 @@ def get_published_url(obj):
 get_published_url.short_description = _('Published URL')
 
 
+def annotated_pagecontent_queryset(using=None):
+    """Returns a PageContent queryset annotated with latest_pk,
+    the primary key corresponding to the latest version
+    """
+    inner = PageContent._base_manager.filter(
+        language=OuterRef('language'),
+        page=OuterRef('page')
+    ).annotate(
+        version=Max('versions__number')
+    ).order_by('-version').values('pk')
+    return PageContent._base_manager.using(using).annotate(latest_pk=Subquery(inner[:1]))
+
+
 class PageContentConfig(BaseSearchConfig):
     """
     Page config and index definition
@@ -107,6 +122,7 @@ class PageContentConfig(BaseSearchConfig):
     version_author = indexes.CharField()
     version_status = indexes.CharField()
     modified_date = indexes.DateTimeField()
+    is_latest_version = indexes.BooleanField()
     url = indexes.CharField()
     published_url = indexes.CharField()
 
@@ -122,16 +138,15 @@ class PageContentConfig(BaseSearchConfig):
     model = PageContent
 
     def index_queryset(self, using=None):
+        versioning_extension = None
         try:
             versioning_extension = apps.get_app_config('djangocms_versioning').cms_extension
-            if versioning_extension.is_content_model_versioned(self.model):
-                from djangocms_versioning.helpers import override_default_manager
-                with override_default_manager(self.model, self.model._original_manager):
-                    return PageContent.objects.all()
-            else:
-                return super().index_queryset(using)
         except (ImportError, LookupError):
-            # versioning is not installed so fall back to usual behaviour
+            pass
+
+        if versioning_extension and versioning_extension.is_content_model_versioned(self.model):
+            return annotated_pagecontent_queryset()
+        else:
             return super().index_queryset(using)
 
     def prepare_slug(self, obj):
@@ -192,3 +207,7 @@ class PageContentConfig(BaseSearchConfig):
     def _render_plugins(self, obj, context, renderer):
         for placeholder in obj.get_placeholders():
             yield from renderer.render_plugins(placeholder, obj.language, context)
+
+    def prepare_is_latest_version(self, obj):
+        latest_pk = getattr(obj, 'latest_pk', None)
+        return obj.pk == latest_pk
