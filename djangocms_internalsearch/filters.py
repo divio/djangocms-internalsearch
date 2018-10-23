@@ -1,7 +1,6 @@
 from django.apps import apps
 from django.contrib import admin
 from django.contrib.auth import get_user_model
-from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
 
 from cms.models import Site
@@ -108,7 +107,6 @@ class LatestVersionFilter(admin.SimpleListFilter):
         """
         if self.value() == '1':
             return queryset.filter(is_latest_version=self.value())
-
 
 
 class AuthorFilter(admin.SimpleListFilter):
