@@ -139,8 +139,9 @@ class PageContentConfig(BaseSearchConfig):
 
     def prepare_modified_date(self, obj):
         changed_date = getattr(obj, 'changed_date')
+        creation_date = obj.creation_date
         version_obj = get_version_object(obj)
-        return changed_date or version_obj.created if version_obj else obj.creation_date
+        return changed_date if changed_date else creation_date or version_obj.created
 
     def prepare_site_id(self, obj):
         return obj.page.node.site_id
