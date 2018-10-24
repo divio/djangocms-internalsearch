@@ -84,15 +84,17 @@ def get_absolute_url(obj):
         return format_html("<a href='{url}'>{url}</a>", url=obj.result.url)
 
 
-get_absolute_url.short_description = _('URL')
-
-
 def get_published_url(obj):
     if obj.result.published_url:
         return format_html("<a href='{url}'>{url}</a>", url=obj.result.published_url)
 
 
-get_published_url.short_description = _('Published URL')
+
+def get_url(obj):
+    return get_published_url(obj) or get_absolute_url(obj)
+
+
+get_url.short_description = _('URL')
 
 
 def annotated_pagecontent_queryset(using=None):
@@ -127,7 +129,7 @@ class PageContentConfig(BaseSearchConfig):
     published_url = indexes.CharField()
 
     # admin setting
-    list_display = [get_title, get_slug, get_absolute_url, get_published_url, get_content_type, get_site_name,
+    list_display = [get_title, get_slug, get_url, get_content_type, get_site_name,
                     get_language, get_version_author, get_version_status, get_modified_date]
     list_filter = []
 
