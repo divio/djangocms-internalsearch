@@ -154,7 +154,7 @@ class PageContentConfig(BaseSearchConfig):
 
     def prepare_modified_date(self, obj):
         changed_date = getattr(obj, 'changed_date')
-        creation_date = obj.creation_date
+        creation_date = getattr(obj, 'creation_date')
         version_obj = get_version_object(obj)
         return changed_date if changed_date else creation_date or version_obj.created
 
