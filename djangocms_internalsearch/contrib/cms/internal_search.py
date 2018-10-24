@@ -127,8 +127,10 @@ class PageContentConfig(BaseSearchConfig):
     published_url = indexes.CharField()
 
     # admin setting
-    list_display = [get_title, get_slug, get_absolute_url, get_published_url, get_content_type, get_site_name,
-                    get_language, get_version_author, get_version_status, get_modified_date]
+    list_display = [
+        get_title, get_slug, get_absolute_url, get_published_url, get_content_type,
+        get_version_status, get_modified_date, get_version_author, get_site_name, get_language,
+    ]
     list_filter = []
 
     search_fields = ('text', 'title')
