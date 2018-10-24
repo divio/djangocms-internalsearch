@@ -22,16 +22,19 @@ class CmsInternalSearchTestCase(CMSTestCase):
         page1 = factories.PageFactory()
         page2 = factories.PageFactory()
 
-        page1_version1 = factories.PageVersionFactory(  # noqa
+        page1_version1 = factories.PageVersionFactory(
             content__page=page1, content__language=language1)
-        page2_version1 = factories.PageVersionFactory(  # noqa
+        page2_version1 = factories.PageVersionFactory(
             content__page=page2, content__language=language2)
-        page1_version2 = factories.PageVersionFactory(  # noqa
+        page1_version2 = factories.PageVersionFactory(
             content__page=page1, content__language=language1)
 
         qs = annotated_pagecontent_queryset()
-        for pagecontent in qs:
-            if pagecontent.page.id == 1:
-                self.assertEqual(pagecontent.latest_pk, 3)
-            else:
-                self.assertEqual(pagecontent.latest_pk, 2)
+        self.assertEqual(
+            {obj.pk: obj.latest_pk for obj in qs},
+            {
+                page1_version1.pk: page1_version2.pk,
+                page2_version1.pk: page2_version1.pk,
+                page1_version2.pk: page1_version2.pk
+            },
+        )
