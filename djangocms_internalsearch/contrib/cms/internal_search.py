@@ -139,11 +139,6 @@ class PageContentConfig(BaseSearchConfig):
 
     model = PageContent
 
-    class Media:
-        css = {
-            'all': ('djangocms_internalsearch/css/custom.css',)
-        }
-
     def index_queryset(self, using=None):
         versioning_extension = None
         try:
