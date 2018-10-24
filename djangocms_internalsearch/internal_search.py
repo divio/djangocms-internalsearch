@@ -17,6 +17,9 @@ class InternalSearchAdminSetting:
 
     class Media:
         js = ('djangocms_internalsearch/js/actions.js',)
+        css = {
+            'all': ('djangocms_internalsearch/css/custom.css',)
+        }
 
     list_display = ['title', 'slug', 'url', 'content_type', 'version_status', 'modified_date',
                     'author', 'site_name', 'language', ]
