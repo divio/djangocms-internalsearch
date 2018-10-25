@@ -1,7 +1,8 @@
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
-from django.template import RequestContext
+from django.db.models import Max
+from django.db.models.expressions import OuterRef, Subquery
 from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
 
@@ -10,6 +11,7 @@ from cms.toolbar.utils import get_object_preview_url
 from cms.utils.plugins import downcast_plugins
 
 from haystack import indexes
+from sekizai.context import SekizaiContext
 
 from djangocms_internalsearch.base import BaseSearchConfig
 from djangocms_internalsearch.helpers import get_request, get_version_object
@@ -71,7 +73,7 @@ get_version_status.short_description = _('Version Status')
 
 
 def get_modified_date(obj):
-    return obj.result.creation_date
+    return obj.result.modified_date
 
 
 get_modified_date.short_description = _('Modified Date')
@@ -82,15 +84,30 @@ def get_absolute_url(obj):
         return format_html("<a href='{url}'>{url}</a>", url=obj.result.url)
 
 
-get_absolute_url.short_description = _('URL')
-
-
 def get_published_url(obj):
     if obj.result.published_url:
         return format_html("<a href='{url}'>{url}</a>", url=obj.result.published_url)
 
 
-get_published_url.short_description = _('Published URL')
+
+def get_url(obj):
+    return get_published_url(obj) or get_absolute_url(obj)
+
+
+get_url.short_description = _('URL')
+
+
+def annotated_pagecontent_queryset(using=None):
+    """Returns a PageContent queryset annotated with latest_pk,
+    the primary key corresponding to the latest version
+    """
+    inner = PageContent._base_manager.filter(
+        language=OuterRef('language'),
+        page=OuterRef('page')
+    ).annotate(
+        version=Max('versions__number')
+    ).order_by('-version').values('pk')
+    return PageContent._base_manager.using(using).annotate(latest_pk=Subquery(inner[:1]))
 
 
 class PageContentConfig(BaseSearchConfig):
@@ -106,12 +123,13 @@ class PageContentConfig(BaseSearchConfig):
     plugin_types = indexes.MultiValueField()
     version_author = indexes.CharField()
     version_status = indexes.CharField()
-    creation_date = indexes.DateTimeField(model_attr='creation_date')
+    modified_date = indexes.DateTimeField()
+    is_latest_version = indexes.BooleanField()
     url = indexes.CharField()
     published_url = indexes.CharField()
 
     # admin setting
-    list_display = [get_title, get_slug, get_absolute_url, get_published_url, get_content_type, get_site_name,
+    list_display = [get_title, get_slug, get_url, get_content_type, get_site_name,
                     get_language, get_version_author, get_version_status, get_modified_date]
     list_filter = []
 
@@ -122,20 +140,25 @@ class PageContentConfig(BaseSearchConfig):
     model = PageContent
 
     def index_queryset(self, using=None):
+        versioning_extension = None
         try:
             versioning_extension = apps.get_app_config('djangocms_versioning').cms_extension
-            if versioning_extension.is_content_model_versioned(self.model):
-                from djangocms_versioning.helpers import override_default_manager
-                with override_default_manager(self.model, self.model._original_manager):
-                    return PageContent.objects.all()
-            else:
-                return super().index_queryset(using)
         except (ImportError, LookupError):
-            # versioning is not installed so fall back to usual behaviour
+            pass
+
+        if versioning_extension and versioning_extension.is_content_model_versioned(self.model):
+            return annotated_pagecontent_queryset()
+        else:
             return super().index_queryset(using)
 
     def prepare_slug(self, obj):
         return obj.page.get_slug(obj.language, fallback=False)
+
+    def prepare_modified_date(self, obj):
+        changed_date = getattr(obj, 'changed_date')
+        creation_date = getattr(obj, 'creation_date')
+        version_obj = get_version_object(obj)
+        return changed_date if changed_date else creation_date or version_obj.created
 
     def prepare_site_id(self, obj):
         return obj.page.node.site_id
@@ -158,7 +181,7 @@ class PageContentConfig(BaseSearchConfig):
 
     def prepare_text(self, obj):
         request = get_request(obj.language)
-        context = RequestContext(request)
+        context = SekizaiContext(request)
         if 'request' not in context:
             context['request'] = request
         renderer = request.toolbar.content_renderer
@@ -186,3 +209,7 @@ class PageContentConfig(BaseSearchConfig):
     def _render_plugins(self, obj, context, renderer):
         for placeholder in obj.get_placeholders():
             yield from renderer.render_plugins(placeholder, obj.language, context)
+
+    def prepare_is_latest_version(self, obj):
+        latest_pk = getattr(obj, 'latest_pk', None)
+        return obj.pk == latest_pk

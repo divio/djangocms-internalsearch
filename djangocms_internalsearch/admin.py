@@ -28,8 +28,9 @@ from .models import InternalSearchProxy
 
 
 try:
+    apps.get_app_config('djangocms_moderation')
     from djangocms_moderation.admin_actions import add_items_to_collection
-except ImportError:
+except (ImportError, LookupError):
     add_items_to_collection = None
 
 

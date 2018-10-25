@@ -1,0 +1,48 @@
+th.column-title,
+td.field-title,
+th.column-slug,
+td.field-slug,
+th.column-url,
+td.field-url,
+th.column-modified_date,
+td.field-modified_date,
+th.column-version_status,
+td.field-version_status,
+th.column-content_type,
+td.field-content_type,
+th.column-site_name,
+td.field-site_name,
+th.column-language,
+td.column-language,
+th.column-get_title,
+td.field-get_title,
+th.column-get_slug,
+td.field-get_slug,
+th.column-get_url,
+td.field-get_url,
+th.column-get_content_type,
+td.field.get_content_type,
+th.column-get_version_status,
+td.field-get_version_status,
+th.column-get_modified_date,
+td.field-get_modified_date,
+th.column-get_version_author,
+td.field-get_version_author,
+th.column-get_site_name,
+td.field-get_site_name,
+th.column-get_language,
+td.field-get_language
+{
+    column-width: 35% ;
+    word-break: break-all;
+    white-space: wrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#changelist-form table {
+	table-layout:fixed;
+	width:500px;
+}
+
+
