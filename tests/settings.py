@@ -17,6 +17,7 @@ def get_enabled_apps(extra_apps):
 
 HELPER_SETTINGS = {
     'INSTALLED_APPS': [
+        'djangocms_text_ckeditor',
         'djangocms_internalsearch',
         'djangocms_internalsearch.test_utils.app_1',
         'djangocms_internalsearch.test_utils.app_2',
