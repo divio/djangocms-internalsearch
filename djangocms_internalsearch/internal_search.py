@@ -4,6 +4,7 @@ from djangocms_internalsearch.filters import (
     AuthorFilter,
     ContentTypeFilter,
     LanguageFilter,
+    LatestVersionFilter,
     SiteFilter,
     VersionStateFilter,
 )
@@ -13,9 +14,16 @@ class InternalSearchAdminSetting:
     """
     Default admin setting for all models listing
     """
-    list_display = ['title', 'slug', 'url', 'content_type', 'site_name', 'language',
-                    'author', 'version_status', 'modified_date']
-    list_filter = [ContentTypeFilter, AuthorFilter, VersionStateFilter, SiteFilter, LanguageFilter]
+
+    class Media:
+        js = ('djangocms_internalsearch/js/actions.js',)
+        css = {
+            'all': ('djangocms_internalsearch/css/custom.css',)
+        }
+
+    list_display = ['title', 'slug', 'url', 'content_type', 'version_status', 'modified_date',
+                    'author', 'site_name', 'language', ]
+    list_filter = [ContentTypeFilter, AuthorFilter, VersionStateFilter, LatestVersionFilter, SiteFilter, LanguageFilter]
     list_per_page = 50
     search_fields = ('text', 'title')
     ordering = ('-id',)
@@ -24,14 +32,17 @@ class InternalSearchAdminSetting:
         return False
 
     def modified_date(self, obj):
-        return obj.result.creation_date
+        return obj.result.modified_date
 
     def slug(self, obj):
         return obj.result.slug
 
     def absolute_url(self, obj):
         if obj.result.url:
-            return format_html("<a href='{url}'>{url}</a>", url=obj.result.url)
+            return format_html(
+                '<a class="js-internal-search-close-sideframe" target="_top" href="{url}">{url}</a>',
+                url=obj.result.url,
+            )
         else:
             return obj.result.url
 
@@ -39,7 +50,10 @@ class InternalSearchAdminSetting:
 
     def published_url(self, obj):
         if obj.result.published_url:
-            return format_html("<a href='{url}'>{url}</a>", url=obj.result.published_url)
+            return format_html(
+                '<a class="js-internal-search-close-sideframe" target="_top" href="{url}">{url}</a>',
+                url=obj.result.published_url,
+            )
         else:
             return obj.result.published_url
 

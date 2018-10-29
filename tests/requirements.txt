@@ -4,5 +4,7 @@ coverage
 flake8
 isort
 Whoosh
-django-filer
 easy-thumbnails
+djangocms_text_ckeditor
+factory-boy
+

@@ -18,8 +18,24 @@ from .signals import content_object_delete, content_object_state_change
 
 
 def delete_page(index, request, **kwargs):
-    obj = kwargs['obj'].get_title_obj(get_language_from_request(request))
-    index.remove_object(obj)
+    from cms.models import Page, PageContent
+
+    obj = kwargs['obj']
+
+    # obj is PageContent then remove from index
+    if isinstance(obj, PageContent):
+        index.remove_object(obj)
+        return
+
+    cms_pages = [obj, ]
+    if obj.node.is_branch:
+        nodes = obj.node.get_descendants()
+        cms_pages.extend(Page.objects.filter(node__in=nodes))
+
+    page_content_objs = PageContent._base_manager.filter(page__in=cms_pages)
+
+    for page_content in page_content_objs:
+        index.remove_object(page_content)
 
 
 def update_page_content(index, request, **kwargs):
@@ -67,10 +83,8 @@ def save_to_index(sender, operation, request, token, **kwargs):
     index = get_model_index(content_model)
 
     operation_actions = {
-        DELETE_PAGE: delete_page,
         ADD_PAGE_TRANSLATION: update_page_content,
         CHANGE_PAGE_TRANSLATION: update_page_content,
-        DELETE_PAGE_TRANSLATION: delete_page_content,
         ADD_PLUGIN: update_plugin,
         CHANGE_PLUGIN: update_plugin,
         DELETE_PLUGIN: delete_plugin,
@@ -81,6 +95,17 @@ def save_to_index(sender, operation, request, token, **kwargs):
         return
 
     operation_actions[operation](index, request, **kwargs)
+
+
+def remove_from_index(sender, operation, request, token, **kwargs):
+
+    from cms.models import PageContent
+    index = get_model_index(PageContent)
+
+    if operation not in [DELETE_PAGE, DELETE_PAGE_TRANSLATION]:
+        return
+
+    delete_page(index, request, **kwargs)
 
 
 def content_object_state_change_receiver(sender, content_object, **kwargs):
@@ -95,6 +120,8 @@ def content_object_state_change_receiver(sender, content_object, **kwargs):
     except IndexError:
         return
     index = get_model_index(content_model)
+    if kwargs.get('created', False):
+        content_object.latest_pk = content_object.pk
     index.update_object(content_object)
 
 
@@ -113,7 +140,7 @@ def content_object_delete_receiver(sender, content_object, **kwargs):
     index.remove_object(content_object)
 
 
-def emit_content_change(obj, sender=None):
+def emit_content_change(obj, sender=None, created=False):
     """
     Sends a content object state change signal if obj class is registered by
     internalsearch.
@@ -125,9 +152,29 @@ def emit_content_change(obj, sender=None):
         # Internal search is not install or model is not registered with internal search
         return
 
+    if created:
+        try:
+            # if versioning installed mark other versions in group as not the latest version
+            versioning_extension = apps.get_app_config('djangocms_versioning').cms_extension
+            from djangocms_versioning import versionables
+        except (ImportError, LookupError):
+            versioning_extension = None
+
+        if versioning_extension and versioning_extension.is_content_model_versioned(obj.__class__):
+            versionable = versionables.for_content(obj)
+            content_objects = versionable.for_content_grouping_values(obj)
+            for content_obj in content_objects:
+                if content_obj.pk != obj.pk:
+                    content_object_state_change.send(
+                        sender=sender or obj.__class__,
+                        content_object=content_obj,
+                        created=False,
+                    )
+
     content_object_state_change.send(
         sender=sender or obj.__class__,
         content_object=obj,
+        created=True,
     )
 
 
@@ -199,8 +246,9 @@ def get_all_versions(obj):
 
 def get_version_object(obj):
     try:
+        apps.get_app_config('djangocms_versioning')
         from djangocms_versioning.models import Version
-    except ImportError:
+    except (LookupError, ImportError):
         return
     return Version.objects.get_for_content(obj)
 

@@ -1,6 +1,7 @@
 import unittest
 from contextlib import contextmanager
 
+from django.apps import apps
 from django.contrib.auth.models import User
 from django.test import TestCase
 
@@ -44,3 +45,10 @@ def inheritors(klass):
                 subclasses.add(child)
                 work.append(child)
     return subclasses
+
+
+def is_versioning_enabled():
+    try:
+        return bool(apps.get_app_config('djangocms_versioning'))
+    except LookupError:
+        return False
