@@ -32,3 +32,14 @@ Run::
     python manage.py migrate djangocms_internalsearch
 
 to perform the application's database migrations.
+
+
+To rebuild indexes manually
+===========================
+
+```./manage.py rebuild_index```
+```./manage.py help```
+and you will see all the options under haystack
+or it should fire every time you create a page via signals
+try do a ‘./manage.py clear_index’ before ./reload_db.sh
+that should also trigger
