@@ -8,7 +8,7 @@ from djangocms_internalsearch.contrib.cms.internal_search import (
     PageContentConfig,
 )
 
-from test_helpers.pyfrom djangocms_internalsearch import helpers
+from djangocms_internalsearch import helpers
 
 
 class UpdateIndexTestCase(BaseTestCase):
@@ -24,7 +24,7 @@ class UpdateIndexTestCase(BaseTestCase):
         self.sb = connections["default"].get_backend()
         self.sb.setup()
 
-        self.request = get_request(language='en')
+        self.request = helpers.get_request(language='en')
         self.token = None
 
     def test_get_all_versions(self):
