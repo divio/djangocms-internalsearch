@@ -1,31 +1,36 @@
-from tests.utils import BaseTestCase
+from unittest import skipUnless
 
-from haystack import connections
-from haystack.utils.loading import UnifiedIndex
-from tests.utils import BaseTestCase
+from cms.api import create_page
+from cms.test_utils.testcases import CMSTestCase
+
+from tests.utils import is_versioning_enabled
 
 from djangocms_internalsearch.contrib.cms.internal_search import (
-    PageContentConfig,
+    annotated_pagecontent_queryset,
 )
 
-from djangocms_internalsearch import helpers
+
+if is_versioning_enabled():
+    from djangocms_internalsearch import helpers
+    from djangocms_internalsearch.test_utils import factories
+    from djangocms_versioning.models import Version
+    from djangocms_versioning.constants import DRAFT
 
 
-class UpdateIndexTestCase(BaseTestCase):
-
-    def setUp(self):
-        super(UpdateIndexTestCase, self).setUp()
-
-        self.unified_index = UnifiedIndex()
-        self.wmmi = PageContentConfig()
-        self.unified_index.build(indexes=[self.wmmi])
-        connections["default"]._index = self.unified_index
-
-        self.sb = connections["default"].get_backend()
-        self.sb.setup()
-
-        self.request = helpers.get_request(language='en')
-        self.token = None
+@skipUnless(is_versioning_enabled(), 'Test only relevant for versioning')
+class UpdateIndexTestCase(CMSTestCase):
 
     def test_get_all_versions(self):
-        pass
+
+        user = factories.UserFactory(
+            username='test_versions', email='test_versions@test.com',
+            password='test_versions', is_staff=True, is_superuser=True)
+
+        pg = create_page(title='Page with versions', template='INHERIT', language='en', created_by=user,)
+        v1 = Version.objects.filter_by_grouper(pg).filter(state=DRAFT).first()
+        v1.publish(user)
+        v1.unpublish(user)
+        v2 = v1.copy(user)
+
+        versions = helpers.get_all_versions(v2.content)
+        self.assertTrue(len(versions), 2)
