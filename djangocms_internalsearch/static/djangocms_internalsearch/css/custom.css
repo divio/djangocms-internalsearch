@@ -35,9 +35,7 @@ td.field-get_language
 {
     column-width: 35% ;
     word-break: break-all;
-    white-space: wrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal !important;
 }
 
 #changelist-form table {
