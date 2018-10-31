@@ -5,10 +5,6 @@ from cms.test_utils.testcases import CMSTestCase
 
 from tests.utils import is_versioning_enabled
 
-from djangocms_internalsearch.contrib.cms.internal_search import (
-    annotated_pagecontent_queryset,
-)
-
 
 if is_versioning_enabled():
     from djangocms_internalsearch import helpers

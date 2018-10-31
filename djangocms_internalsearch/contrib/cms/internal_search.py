@@ -14,7 +14,11 @@ from haystack import indexes
 from sekizai.context import SekizaiContext
 
 from djangocms_internalsearch.base import BaseSearchConfig
-from djangocms_internalsearch.helpers import get_all_versions, get_request, get_version_object
+from djangocms_internalsearch.helpers import (
+    get_all_versions,
+    get_request,
+    get_version_object,
+)
 
 
 try:
@@ -97,7 +101,6 @@ def get_absolute_url(obj):
 def get_published_url(obj):
     if obj.result.published_url:
         return format_html("<a href='{url}'>{url}</a>", url=obj.result.published_url)
-
 
 
 def get_url(obj):
