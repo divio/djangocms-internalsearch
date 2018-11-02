@@ -2,12 +2,10 @@ from django.apps import apps
 from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
 
+import filer.settings
 from haystack import indexes
 
-import filer.settings
-
 from djangocms_internalsearch.base import BaseSearchConfig
-
 
 
 def get_title(obj):
