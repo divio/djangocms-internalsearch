@@ -2,10 +2,10 @@ from django.apps import apps
 from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
 
-import filer.settings
 from haystack import indexes
 
-from djangocms_internalsearch.base import BaseSearchConfig
+import filer.settings
+from djangocms_internalsearch.base import BaseVersionableSearchConfig
 
 
 def get_title(obj):
@@ -44,7 +44,7 @@ def get_absolute_url(obj):
 get_absolute_url.short_description = _('URL')
 
 
-class BaseFilerConfig(BaseSearchConfig):
+class BaseFilerConfig(BaseVersionableSearchConfig):
     # indexes definition
     folder_name = indexes.CharField(model_attr="folder__name")
     file_path = indexes.CharField(model_attr="file")

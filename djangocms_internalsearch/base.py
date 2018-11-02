@@ -1,4 +1,13 @@
+
+from django.db.models import Max
+from django.db.models.expressions import OuterRef, Subquery
+
 from haystack import indexes
+
+from djangocms_internalsearch.helpers import (
+    get_version_object,
+    get_versioning_extension,
+)
 
 
 class BaseSearchConfig(indexes.SearchIndex, indexes.Indexable):
@@ -27,3 +36,50 @@ class BaseSearchConfig(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_text_ngram(self, obj):
         return self.prepare_text(obj)
+
+
+class BaseVersionableSearchConfig(BaseSearchConfig):
+    version_author = indexes.CharField()
+    version_status = indexes.CharField()
+    is_latest_version = indexes.BooleanField()
+
+    def prepare_version_status(self, obj):
+        version_obj = get_version_object(obj)
+        if not version_obj:
+            return
+        return version_obj.state
+
+    def prepare_version_author(self, obj):
+        version_obj = get_version_object(obj)
+        if not version_obj:
+            return
+        return version_obj.created_by.username
+
+    def prepare_is_latest_version(self, obj):
+        latest_pk = getattr(obj, 'latest_pk', None)
+        return obj.pk == latest_pk
+
+    def annotated_model_queryset(self, using=None):
+        """Returns a PageContent queryset annotated with latest_pk,
+        the primary key corresponding to the latest version
+        """
+        versioning_extension = get_versioning_extension()
+        versionable = versioning_extension.versionables_by_content[self.model]
+        model_fields = versionable.grouping_fields
+        fields = {
+            model_fields[i]: OuterRef(model_fields[i])
+            for i in range(0, len(model_fields))
+        }
+        inner = self.model._base_manager.filter(
+            **fields
+        ).annotate(
+            version=Max('versions__number')
+        ).order_by('-version').values('pk')
+        return self.model._base_manager.using(using).annotate(latest_pk=Subquery(inner[:1]))
+
+    def index_queryset(self, using=None):
+        versioning_extension = get_versioning_extension()
+        if versioning_extension and versioning_extension.is_content_model_versioned(self.model):
+            return self.annotated_model_queryset()
+        else:
+            return super().index_queryset(using)
