@@ -5,7 +5,9 @@ from django.utils.translation import ugettext_lazy as _
 from haystack import indexes
 
 import filer.settings
-from djangocms_internalsearch.base import BaseVersionableSearchConfig
+
+from djangocms_internalsearch.base import BaseSearchConfig
+
 
 
 def get_title(obj):
@@ -44,7 +46,7 @@ def get_absolute_url(obj):
 get_absolute_url.short_description = _('URL')
 
 
-class BaseFilerConfig(BaseVersionableSearchConfig):
+class BaseFilerConfig(BaseSearchConfig):
     # indexes definition
     folder_name = indexes.CharField(model_attr="folder__name")
     file_path = indexes.CharField(model_attr="file")
