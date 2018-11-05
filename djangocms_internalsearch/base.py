@@ -64,21 +64,21 @@ class BaseVersionableSearchConfig(BaseSearchConfig):
         the primary key corresponding to the latest version
         """
         versioning_extension = get_versioning_extension()
-        versionable = versioning_extension.versionables_by_content[self.content_model]
+        versionable = versioning_extension.versionables_by_content[self.model]
         fields = {
             field: OuterRef(field)
             for field in versionable.grouping_fields
         }
-        inner = self.content_model._base_manager.filter(
+        inner = self.model._base_manager.filter(
             **fields
         ).annotate(
             version=Max('versions__number')
         ).order_by('-version').values('pk')
-        return self.content_model._base_manager.using(using).annotate(latest_pk=Subquery(inner[:1]))
+        return self.model._base_manager.using(using).annotate(latest_pk=Subquery(inner[:1]))
 
     def index_queryset(self, using=None):
         versioning_extension = get_versioning_extension()
-        if versioning_extension and versioning_extension.is_content_model_versioned(self.content_model):
+        if versioning_extension and versioning_extension.is_content_model_versioned(self.model):
             return self.annotated_model_queryset()
         else:
             return super().index_queryset(using)
