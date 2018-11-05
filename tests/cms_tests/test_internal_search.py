@@ -1,10 +1,13 @@
 from unittest import skipUnless
 
+from django.apps import apps
+
 from cms.test_utils.testcases import CMSTestCase
 
 from tests.utils import is_versioning_enabled
 
 from djangocms_internalsearch.base import BaseVersionableSearchConfig
+from djangocms_internalsearch.helpers import get_model_index
 
 
 if is_versioning_enabled():
@@ -28,9 +31,8 @@ class CmsInternalSearchTestCase(CMSTestCase):
         page1_version2 = factories.PageVersionFactory(
             content__page=page1, content__language=language1)
 
-        versionable = get_versioning_extension().versionables_by_content[page1_version1.content.__class__]
-
-        qs = BaseVersionableSearchConfig.annotated_model_queryset(versionable)
+        page_index = get_model_index(page1_version1.content.__class__)
+        qs = BaseVersionableSearchConfig.annotated_model_queryset(page_index)
         self.assertEqual(
             {obj.pk: obj.latest_pk for obj in qs},
             {

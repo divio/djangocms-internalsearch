@@ -1,7 +1,6 @@
-
+from django.contrib.admin.utils import unquote
 from django.db.models import Max
 from django.db.models.expressions import OuterRef, Subquery
-
 from haystack import indexes
 
 from djangocms_internalsearch.helpers import (
@@ -64,9 +63,9 @@ class BaseVersionableSearchConfig(BaseSearchConfig):
         the primary key corresponding to the latest version
         """
         versioning_extension = get_versioning_extension()
-        versionable = versioning_extension.versionables_by_content[self.model]
+        versionable = versioning_extension.versionables_by_content.get(self.model)
         fields = {
-            field: OuterRef(field)
+            unquote(field): OuterRef(str(field))
             for field in versionable.grouping_fields
         }
         inner = self.model._base_manager.filter(
