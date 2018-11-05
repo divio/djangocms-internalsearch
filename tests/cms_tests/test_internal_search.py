@@ -1,7 +1,5 @@
 from unittest import skipUnless
 
-from django.apps import apps
-
 from cms.test_utils.testcases import CMSTestCase
 
 from tests.utils import is_versioning_enabled
@@ -12,7 +10,6 @@ from djangocms_internalsearch.helpers import get_model_index
 
 if is_versioning_enabled():
     from djangocms_internalsearch.test_utils import factories
-    from djangocms_internalsearch.helpers import get_versioning_extension
 
 
 @skipUnless(is_versioning_enabled(), 'Test only relevant for versioning')
