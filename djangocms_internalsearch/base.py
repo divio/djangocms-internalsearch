@@ -1,6 +1,7 @@
 from django.contrib.admin.utils import unquote
 from django.db.models import Max
 from django.db.models.expressions import OuterRef, Subquery
+
 from haystack import indexes
 
 from djangocms_internalsearch.helpers import (
