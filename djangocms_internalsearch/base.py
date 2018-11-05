@@ -40,6 +40,7 @@ class BaseSearchConfig(indexes.SearchIndex, indexes.Indexable):
 class BaseVersionableSearchConfig(BaseSearchConfig):
     version_author = indexes.CharField()
     version_status = indexes.CharField()
+    locked = indexes.CharField()
     is_latest_version = indexes.BooleanField()
 
     def prepare_version_status(self, obj):
@@ -57,6 +58,13 @@ class BaseVersionableSearchConfig(BaseSearchConfig):
     def prepare_is_latest_version(self, obj):
         latest_pk = getattr(obj, 'latest_pk', None)
         return obj.pk == latest_pk
+
+    def prepare_locked(self, obj):
+        version_obj = get_version_object(obj)
+        import pdb; pdb.set_trace()
+        if hasattr(version_obj, "versionlock"):
+            return True
+        return False
 
     def annotated_model_queryset(self, using=None):
         """Returns a PageContent queryset annotated with latest_pk,
