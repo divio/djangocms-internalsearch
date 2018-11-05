@@ -21,7 +21,7 @@ class InternalSearchAdminSetting:
             'all': ('djangocms_internalsearch/css/custom.css',)
         }
 
-    list_display = ['title', 'slug', 'url', 'content_type', 'version_status', 'modified_date',
+    list_display = ['title', 'slug', 'url', 'content_type', 'version_status', 'locked', 'modified_date',
                     'author', 'site_name', 'language', ]
     list_filter = [ContentTypeFilter, AuthorFilter, VersionStateFilter, LatestVersionFilter, SiteFilter, LanguageFilter]
     list_per_page = 50
@@ -79,6 +79,12 @@ class InternalSearchAdminSetting:
 
     def version_status(self, obj):
         return obj.result.version_status
+
+    def locked(self, obj):
+        if str(obj.result.locked) == 'True':
+            return format_html(
+                "<img class='cms-version-locked-status-icon' src='/static/djangocms_version_locking/svg/lock.svg' title='locked' />")
+
 
     def url(self, obj):
         return self.published_url(obj) or self.absolute_url(obj)

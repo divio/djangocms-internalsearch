@@ -86,6 +86,12 @@ def get_published_url(obj):
     if obj.result.published_url:
         return format_html("<a href='{url}'>{url}</a>", url=obj.result.published_url)
 
+def get_locked_status(obj):
+    if str(obj.result.locked) == 'True':
+        return format_html("<img class='cms-version-locked-status-icon' src='/static/djangocms_version_locking/svg/lock.svg' title='locked' />")
+
+
+get_locked_status.short_description = _('Locked')
 
 def get_url(obj):
     return get_published_url(obj) or get_absolute_url(obj)
@@ -110,8 +116,8 @@ class PageContentConfig(BaseVersionableSearchConfig):
     published_url = indexes.CharField()
 
     # admin setting
-    list_display = [get_title, get_slug, get_url, get_content_type, get_site_name,
-                    get_language, get_version_author, get_version_status, get_modified_date]
+    list_display = [get_title, get_slug, get_url, get_content_type, get_version_status, get_locked_status, get_modified_date,
+                    get_version_author, get_site_name, get_language, ]
     list_filter = []
 
     search_fields = ('text', 'title')

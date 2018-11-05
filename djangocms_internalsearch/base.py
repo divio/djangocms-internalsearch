@@ -62,7 +62,6 @@ class BaseVersionableSearchConfig(BaseSearchConfig):
 
     def prepare_locked(self, obj):
         version_obj = get_version_object(obj)
-        import pdb; pdb.set_trace()
         if hasattr(version_obj, "versionlock"):
             return True
         return False
