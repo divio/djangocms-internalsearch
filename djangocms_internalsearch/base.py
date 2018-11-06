@@ -60,7 +60,7 @@ class BaseVersionableSearchConfig(BaseSearchConfig):
         return obj.pk == latest_pk
 
     def annotated_model_queryset(self, using=None):
-        """Returns a PageContent queryset annotated with latest_pk,
+        """Returns a model queryset annotated with latest_pk,
         the primary key corresponding to the latest version
         """
         versioning_extension = get_versioning_extension()

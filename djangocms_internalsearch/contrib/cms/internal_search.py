@@ -1,4 +1,3 @@
-
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.utils.html import format_html
