@@ -239,8 +239,7 @@ def get_all_versions(obj):
         from djangocms_versioning.models import Version
     except ImportError:
         return
-    version_obj = Version.objects.get_for_content(obj)
-    versions = Version.objects.filter_by_grouper(version_obj.grouper)
+    versions = Version.objects.filter_by_content_grouping_values(obj)
     return versions
 
 
