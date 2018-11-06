@@ -237,6 +237,7 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
         Return a QuerySet of all model instances that can be edited by the
         admin site. This is used by changelist_view.
         """
+        # request.GET = request.GET.copy()
         model_meta = request.GET.get('type')
         qs = InternalSearchQuerySet(self.haystack_connection).all()
         if model_meta:
@@ -247,7 +248,11 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
             ordering = self.get_ordering(request)
             if ordering:
                 qs = qs.order_by(*ordering)
-        return qs
+
+        if request.GET.get('latest_version') == 'all':
+            return qs
+
+        return qs.filter(is_latest_version='true')
 
     def get_search_results(self, request, queryset, search_term):
         """

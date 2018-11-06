@@ -7,7 +7,7 @@ from cms.models import Site
 from cms.utils.i18n import get_language_list
 
 from djangocms_internalsearch.helpers import get_internalsearch_config
-
+from django.utils.encoding import force_text
 
 try:
     from djangocms_versioning.constants import VERSION_STATES
@@ -97,7 +97,7 @@ class LatestVersionFilter(admin.SimpleListFilter):
         human-readable name for the option that will appear
         in the right sidebar.
         """
-        return [('1', _('Latest version'))]
+        return [('all', _('All'))]
 
     def queryset(self, request, queryset):
         """
@@ -105,8 +105,21 @@ class LatestVersionFilter(admin.SimpleListFilter):
         provided in the query string and retrievable via
         `self.value()`.
         """
-        if self.value() == '1':
-            return queryset.filter(is_latest_version=self.value())
+        if self.value() == 'all':
+            return queryset
+
+    def choices(self, changelist):
+        yield {
+            'selected': self.value() != 'all' and '1',
+            'query_string': changelist.get_query_string({'latest_version': '1'}, [self.parameter_name]),
+            'display': _('Latest version'),
+        }
+        for lookup, title in self.lookup_choices:
+            yield {
+                'selected': self.value() == force_text(lookup),
+                'query_string': changelist.get_query_string({self.parameter_name: lookup}, []),
+                'display': title,
+            }
 
 
 class AuthorFilter(admin.SimpleListFilter):
