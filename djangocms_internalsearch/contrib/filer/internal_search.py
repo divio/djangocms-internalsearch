@@ -3,9 +3,9 @@ from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
 
 import filer.settings
+from haystack import indexes
 
 from djangocms_internalsearch.base import BaseSearchConfig
-from haystack import indexes
 
 
 def get_title(obj):

@@ -10,11 +10,11 @@ from cms.models import CMSPlugin, PageContent
 from cms.toolbar.utils import get_object_preview_url
 from cms.utils.plugins import downcast_plugins
 
+from haystack import indexes
 from sekizai.context import SekizaiContext
 
 from djangocms_internalsearch.base import BaseSearchConfig
 from djangocms_internalsearch.helpers import get_request, get_version_object
-from haystack import indexes
 
 
 try:

@@ -3,6 +3,8 @@ from unittest import skipIf
 from cms.models import PageContent
 from cms.operations import ADD_PAGE_TRANSLATION, DELETE_PAGE
 
+from haystack import connections
+from haystack.utils.loading import UnifiedIndex
 from tests.utils import BaseTestCase, is_versioning_enabled
 
 from djangocms_internalsearch.contrib.cms.internal_search import (
@@ -13,8 +15,6 @@ from djangocms_internalsearch.helpers import (
     remove_from_index,
     save_to_index,
 )
-from haystack import connections
-from haystack.utils.loading import UnifiedIndex
 
 
 @skipIf(is_versioning_enabled(), 'Test assumes versioning is not installed')
