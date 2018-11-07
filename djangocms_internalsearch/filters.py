@@ -1,6 +1,7 @@
 from django.apps import apps
 from django.contrib import admin
 from django.contrib.auth import get_user_model
+from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
 
 from cms.models import Site
@@ -97,7 +98,7 @@ class LatestVersionFilter(admin.SimpleListFilter):
         human-readable name for the option that will appear
         in the right sidebar.
         """
-        return [('1', _('Latest version'))]
+        return [('all', _('All'))]
 
     def queryset(self, request, queryset):
         """
@@ -105,8 +106,23 @@ class LatestVersionFilter(admin.SimpleListFilter):
         provided in the query string and retrievable via
         `self.value()`.
         """
-        if self.value() == '1':
-            return queryset.filter(is_latest_version=self.value())
+        if self.value() == 'all':
+            return queryset
+        else:
+            return queryset.filter(is_latest_version=True)
+
+    def choices(self, changelist):
+        yield {
+            'selected': self.value() != 'all',
+            'query_string': changelist.get_query_string({'latest_version': '1'}, [self.parameter_name]),
+            'display': _('Latest version'),
+        }
+        for lookup, title in self.lookup_choices:
+            yield {
+                'selected': self.value() == force_text(lookup),
+                'query_string': changelist.get_query_string({self.parameter_name: lookup}, []),
+                'display': title,
+            }
 
 
 class AuthorFilter(admin.SimpleListFilter):
