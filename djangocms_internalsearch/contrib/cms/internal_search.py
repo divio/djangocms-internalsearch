@@ -89,7 +89,6 @@ def get_published_url(obj):
         return format_html("<a href='{url}'>{url}</a>", url=obj.result.published_url)
 
 
-
 def get_url(obj):
     return get_published_url(obj) or get_absolute_url(obj)
 
