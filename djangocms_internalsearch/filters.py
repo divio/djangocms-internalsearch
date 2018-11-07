@@ -1,13 +1,14 @@
 from django.apps import apps
 from django.contrib import admin
 from django.contrib.auth import get_user_model
+from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
 
 from cms.models import Site
 from cms.utils.i18n import get_language_list
 
 from djangocms_internalsearch.helpers import get_internalsearch_config
-from django.utils.encoding import force_text
+
 
 try:
     from djangocms_versioning.constants import VERSION_STATES
@@ -110,7 +111,7 @@ class LatestVersionFilter(admin.SimpleListFilter):
 
     def choices(self, changelist):
         yield {
-            'selected': self.value() != 'all' and '1',
+            'selected': self.value() != 'all' and True,
             'query_string': changelist.get_query_string({'latest_version': '1'}, [self.parameter_name]),
             'display': _('Latest version'),
         }

@@ -2,9 +2,8 @@ from unittest import skipIf
 
 from django.test import TestCase
 
-from haystack.utils import loading
-
 from djangocms_internalsearch.base import BaseSearchConfig
+from haystack.utils import loading
 
 from .utils import inheritors
 
