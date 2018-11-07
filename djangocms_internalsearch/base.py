@@ -66,7 +66,7 @@ class BaseVersionableSearchConfig(BaseSearchConfig):
         versioning_extension = get_versioning_extension()
         versionable = versioning_extension.versionables_by_content.get(self.model)
         fields = {
-            unquote(field): OuterRef(field)
+            field: OuterRef(field)
             for field in versionable.grouping_fields
         }
         inner = self.model._base_manager.filter(
