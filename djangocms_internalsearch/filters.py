@@ -113,7 +113,7 @@ class LatestVersionFilter(admin.SimpleListFilter):
 
     def choices(self, changelist):
         yield {
-            'selected': self.value() != 'all' and True,
+            'selected': self.value() != 'all',
             'query_string': changelist.get_query_string({'latest_version': '1'}, [self.parameter_name]),
             'display': _('Latest version'),
         }
