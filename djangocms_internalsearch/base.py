@@ -38,6 +38,9 @@ class BaseSearchConfig(indexes.SearchIndex, indexes.Indexable):
 
 
 class BaseVersionableSearchConfig(BaseSearchConfig):
+    """
+    Base version-able config class to provide list of attributes that sub class must provide
+    """
     version_author = indexes.CharField()
     version_status = indexes.CharField()
     is_latest_version = indexes.BooleanField()
