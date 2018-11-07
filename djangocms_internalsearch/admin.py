@@ -246,10 +246,7 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
             ordering = self.get_ordering(request)
             if ordering:
                 qs = qs.order_by(*ordering)
-
-        if request.GET.get('latest_version') == 'all':
-            return qs
-        return qs.filter(is_latest_version=True)
+        return qs
 
     def get_search_results(self, request, queryset, search_term):
         """

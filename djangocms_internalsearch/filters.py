@@ -108,6 +108,8 @@ class LatestVersionFilter(admin.SimpleListFilter):
         """
         if self.value() == 'all':
             return queryset
+        else:
+            return queryset.filter(is_latest_version=True)
 
     def choices(self, changelist):
         yield {
