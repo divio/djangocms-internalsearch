@@ -83,8 +83,8 @@ class InternalSearchAdminSetting:
     def locked(self, obj):
         if str(obj.result.locked) == 'True':
             return format_html(
-                "<img class='cms-version-locked-status-icon' src='/static/djangocms_version_locking/svg/lock.svg' title='locked' />")
-
+                "<img class='cms-version-locked-status-icon' "
+                "src='/static/djangocms_version_locking/svg/lock.svg' title='locked' />")
 
     def url(self, obj):
         return self.published_url(obj) or self.absolute_url(obj)

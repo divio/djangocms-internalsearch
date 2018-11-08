@@ -1,4 +1,3 @@
-from django.contrib.admin.utils import unquote
 from django.db.models import Max
 from django.db.models.expressions import OuterRef, Subquery
 
@@ -39,6 +38,9 @@ class BaseSearchConfig(indexes.SearchIndex, indexes.Indexable):
 
 
 class BaseVersionableSearchConfig(BaseSearchConfig):
+    """
+    Base version-able config class to provide list of attributes that sub class must provide
+    """
     version_author = indexes.CharField()
     version_status = indexes.CharField()
     locked = indexes.CharField()
@@ -67,13 +69,13 @@ class BaseVersionableSearchConfig(BaseSearchConfig):
         return False
 
     def annotated_model_queryset(self, using=None):
-        """Returns a PageContent queryset annotated with latest_pk,
+        """Returns a model queryset annotated with latest_pk,
         the primary key corresponding to the latest version
         """
         versioning_extension = get_versioning_extension()
         versionable = versioning_extension.versionables_by_content.get(self.model)
         fields = {
-            unquote(field): OuterRef(str(field))
+            field: OuterRef(field)
             for field in versionable.grouping_fields
         }
         inner = self.model._base_manager.filter(

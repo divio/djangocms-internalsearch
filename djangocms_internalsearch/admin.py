@@ -21,9 +21,8 @@ from haystack.admin import SearchChangeList, SearchModelAdminMixin
 from haystack.query import SearchQuerySet
 from haystack.utils import get_model_ct_tuple
 
-from djangocms_internalsearch.internal_search import InternalSearchAdminSetting
-
 from .helpers import get_internalsearch_model_config, get_moderated_models
+from .internal_search import InternalSearchAdminSetting
 from .models import InternalSearchProxy
 
 
