@@ -4,9 +4,8 @@ from cms.test_utils.testcases import CMSTestCase
 
 from tests.utils import is_versioning_enabled
 
-from djangocms_internalsearch.contrib.cms.internal_search import (
-    annotated_pagecontent_queryset,
-)
+from djangocms_internalsearch.base import BaseVersionableSearchConfig
+from djangocms_internalsearch.helpers import get_model_index
 
 
 if is_versioning_enabled():
@@ -29,7 +28,8 @@ class CmsInternalSearchTestCase(CMSTestCase):
         page1_version2 = factories.PageVersionFactory(
             content__page=page1, content__language=language1)
 
-        qs = annotated_pagecontent_queryset()
+        page_index = get_model_index(page1_version1.content.__class__)
+        qs = BaseVersionableSearchConfig.annotated_model_queryset(page_index)
         self.assertEqual(
             {obj.pk: obj.latest_pk for obj in qs},
             {
