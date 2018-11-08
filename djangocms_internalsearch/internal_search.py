@@ -81,7 +81,7 @@ class InternalSearchAdminSetting:
         return obj.result.version_status
 
     def locked(self, obj):
-        if str(obj.result.locked) == 'True':
+        if obj.result.locked == 'True':
             return format_html(
                 "<img class='cms-version-locked-status-icon' "
                 "src='/static/djangocms_version_locking/svg/lock.svg' title='locked' />")
