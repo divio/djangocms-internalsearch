@@ -43,7 +43,7 @@ class BaseVersionableSearchConfig(BaseSearchConfig):
     """
     version_author = indexes.CharField()
     version_status = indexes.CharField()
-    locked = indexes.CharField()
+    locked = indexes.BooleanField()
     is_latest_version = indexes.BooleanField()
 
     def prepare_version_status(self, obj):

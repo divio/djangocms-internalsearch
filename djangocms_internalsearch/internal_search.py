@@ -1,4 +1,5 @@
 from django.utils.html import format_html
+from django.contrib.staticfiles.templatetags.staticfiles import static
 
 from djangocms_internalsearch.filters import (
     AuthorFilter,
@@ -81,10 +82,11 @@ class InternalSearchAdminSetting:
         return obj.result.version_status
 
     def locked(self, obj):
-        if obj.result.locked == 'True':
+        if obj.result.locked:
+            src = static('djangocms_version_locking/svg/lock.svg')
             return format_html(
                 "<img class='cms-version-locked-status-icon' "
-                "src='/static/djangocms_version_locking/svg/lock.svg' title='locked' />")
+                "src='{src}' title='locked' />", src=src)
 
     def url(self, obj):
         return self.published_url(obj) or self.absolute_url(obj)

@@ -1,5 +1,7 @@
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
+from django.contrib.staticfiles.templatetags.staticfiles import static
+
 from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
 
@@ -87,10 +89,11 @@ def get_published_url(obj):
 
 
 def get_locked_status(obj):
-    if obj.result.locked == 'True':
-        return format_html("<img class='cms-version-locked-status-icon' "
-                           "src='/static/djangocms_version_locking/svg/lock.svg' title='locked' />")
-
+    if obj.result.locked:
+        src = static('djangocms_version_locking/svg/lock.svg')
+        return format_html(
+            "<img class='cms-version-locked-status-icon' "
+            "src='{src}' title='locked' />", src=src)
 
 get_locked_status.short_description = _('Locked')
 
