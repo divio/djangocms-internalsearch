@@ -51,8 +51,7 @@ td.field-get_locked_status{
 	table-layout:fixed;
 	width:500px;
 }
-.cms-version-locked-status-icon{
-    width: 20px;
+.cms-version-locked-status-icon img{
     height: 20px;
 }
 
