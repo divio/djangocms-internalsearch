@@ -170,6 +170,7 @@ def emit_content_change(obj, sender=None, created=False):
                         content_object=content_obj,
                         created=False,
                     )
+
     content_object_state_change.send(
         sender=sender or obj.__class__,
         content_object=obj,
