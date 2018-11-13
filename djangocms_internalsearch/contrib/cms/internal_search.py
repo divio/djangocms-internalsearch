@@ -91,11 +91,13 @@ def get_locked_status(obj):
     if obj.result.locked:
         return render_to_string('djangocms_version_locking/admin/locked_icon.html')
 
+
 get_locked_status.short_description = _('Locked')
 
 
 def get_locked_by(obj):
     return obj.result.locked
+
 
 get_locked_by.short_description = _('Locked by')
 

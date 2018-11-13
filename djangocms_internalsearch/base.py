@@ -9,7 +9,6 @@ from djangocms_internalsearch.helpers import (
 )
 
 
-
 class BaseSearchConfig(indexes.SearchIndex, indexes.Indexable):
     """
     Base config class to provide list of attributes that sub class must provide

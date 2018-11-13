@@ -88,6 +88,5 @@ class InternalSearchAdminSetting:
     def locked_by(self, obj):
         return obj.result.locked
 
-
     def url(self, obj):
         return self.published_url(obj) or self.absolute_url(obj)
