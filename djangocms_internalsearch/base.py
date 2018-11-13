@@ -9,6 +9,7 @@ from djangocms_internalsearch.helpers import (
 )
 
 
+
 class BaseSearchConfig(indexes.SearchIndex, indexes.Indexable):
     """
     Base config class to provide list of attributes that sub class must provide
@@ -43,7 +44,7 @@ class BaseVersionableSearchConfig(BaseSearchConfig):
     """
     version_author = indexes.CharField()
     version_status = indexes.CharField()
-    locked = indexes.BooleanField()
+    locked = indexes.CharField()
     is_latest_version = indexes.BooleanField()
 
     def prepare_version_status(self, obj):
@@ -64,9 +65,10 @@ class BaseVersionableSearchConfig(BaseSearchConfig):
 
     def prepare_locked(self, obj):
         version_obj = get_version_object(obj)
-        if hasattr(version_obj, "versionlock"):
-            return True
-        return False
+        lock = getattr(version_obj, "versionlock", None)
+        if lock is None:
+            return None
+        return lock.created_by.username
 
     def annotated_model_queryset(self, using=None):
         """Returns a model queryset annotated with latest_pk,
