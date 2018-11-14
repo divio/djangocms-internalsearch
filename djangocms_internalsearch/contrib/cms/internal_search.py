@@ -220,9 +220,11 @@ class PageContentConfig(BaseSearchConfig):
             return obj.page.get_absolute_url()
         if self.prepare_version_status(obj) == DRAFT:
             # check if there are unpublished versions
-            version_objs = get_all_versions(obj).filter(state=UNPUBLISHED)
+            version_objs = get_all_versions(obj).filter(state=PUBLISHED)
             if version_objs:
                 return obj.page.get_absolute_url()
+            else
+                return self.prepare_url(obj)
 
     def _render_plugins(self, obj, context, renderer):
         for placeholder in obj.get_placeholders():
