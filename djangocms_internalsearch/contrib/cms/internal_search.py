@@ -1,8 +1,6 @@
-from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
-from django.db.models import Max
-from django.db.models.expressions import OuterRef, Subquery
+from django.template.loader import render_to_string
 from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
 
@@ -91,13 +89,6 @@ def get_published_url(obj):
         return format_html("<a href='{url}'>{url}</a>", url=obj.result.published_url)
 
 
-def get_url(obj):
-    return get_published_url(obj) or get_absolute_url(obj)
-
-
-get_url.short_description = _('URL')
-
-
 def get_locked_status(obj):
     if obj.result.locked:
         return render_to_string('djangocms_version_locking/admin/locked_icon.html',
@@ -105,6 +96,13 @@ def get_locked_status(obj):
 
 
 get_locked_status.short_description = _('Locked')
+
+
+def get_url(obj):
+    return get_published_url(obj) or get_absolute_url(obj)
+
+
+get_url.short_description = _('URL')
 
 
 def annotated_pagecontent_queryset(using=None):
@@ -120,7 +118,7 @@ def annotated_pagecontent_queryset(using=None):
     return PageContent._base_manager.using(using).annotate(latest_pk=Subquery(inner[:1]))
 
 
-class PageContentConfig(BaseSearchConfig):
+class PageContentConfig(BaseVersionableSearchConfig):
     """
     Page config and index definition
     """
@@ -131,16 +129,14 @@ class PageContentConfig(BaseSearchConfig):
     site_name = indexes.CharField()
     language = indexes.CharField(model_attr='language')
     plugin_types = indexes.MultiValueField()
-    version_author = indexes.CharField()
-    version_status = indexes.CharField()
-    modified_date = indexes.DateTimeField()
-    is_latest_version = indexes.BooleanField()
+    creation_date = indexes.DateTimeField(model_attr='creation_date')
     url = indexes.CharField()
     published_url = indexes.CharField()
 
     # admin setting
-    list_display = [get_title, get_slug, get_url, get_content_type, get_site_name,
-                    get_language, get_version_author, get_version_status, get_modified_date]
+    list_display = [get_title, get_slug, get_url, get_content_type, get_version_status,
+                    get_locked_status, get_modified_date, get_version_author,
+                    get_site_name, get_language, ]
     list_filter = []
 
     search_fields = ('text', 'title')
@@ -148,18 +144,6 @@ class PageContentConfig(BaseSearchConfig):
     list_per_page = 50
 
     model = PageContent
-
-    def index_queryset(self, using=None):
-        versioning_extension = None
-        try:
-            versioning_extension = apps.get_app_config('djangocms_versioning').cms_extension
-        except (ImportError, LookupError):
-            pass
-
-        if versioning_extension and versioning_extension.is_content_model_versioned(self.model):
-            return annotated_pagecontent_queryset()
-        else:
-            return super().index_queryset(using)
 
     def prepare_slug(self, obj):
         return obj.page.get_slug(obj.language, fallback=False)
@@ -197,18 +181,6 @@ class PageContentConfig(BaseSearchConfig):
         renderer = request.toolbar.content_renderer
         return ' '.join(self._render_plugins(obj, context, renderer))
 
-    def prepare_version_status(self, obj):
-        version_obj = get_version_object(obj)
-        if not version_obj:
-            return
-        return version_obj.state
-
-    def prepare_version_author(self, obj):
-        version_obj = get_version_object(obj)
-        if not version_obj:
-            return
-        return version_obj.created_by.username
-
     def prepare_url(self, obj):
         return get_object_preview_url(obj, obj.language)
 
@@ -224,7 +196,3 @@ class PageContentConfig(BaseSearchConfig):
     def _render_plugins(self, obj, context, renderer):
         for placeholder in obj.get_placeholders():
             yield from renderer.render_plugins(placeholder, obj.language, context)
-
-    def prepare_is_latest_version(self, obj):
-        latest_pk = getattr(obj, 'latest_pk', None)
-        return obj.pk == latest_pk
