@@ -256,3 +256,12 @@ def get_model_index(content_model):
     from haystack import connections
     # FIXME Don't hardcode 'default' connection
     return connections["default"].get_unified_index().get_index(content_model)
+
+
+def get_versioning_extension():
+    versioning_extension = None
+    try:
+        versioning_extension = apps.get_app_config('djangocms_versioning').cms_extension
+    except (ImportError, LookupError):
+        pass
+    return versioning_extension
