@@ -13,7 +13,7 @@ from cms.utils.plugins import downcast_plugins
 from haystack import indexes
 from sekizai.context import SekizaiContext
 
-from djangocms_internalsearch.base import BaseSearchConfig
+from djangocms_internalsearch.base import BaseVersionableSearchConfig
 from djangocms_internalsearch.helpers import (
     get_all_versions,
     get_request,
@@ -96,6 +96,15 @@ def get_url(obj):
 
 
 get_url.short_description = _('URL')
+
+
+def get_locked_status(obj):
+    if obj.result.locked:
+        return render_to_string('djangocms_version_locking/admin/locked_icon.html',
+                                {'locked_by': obj.result.locked})
+
+
+get_locked_status.short_description = _('Locked')
 
 
 def annotated_pagecontent_queryset(using=None):
