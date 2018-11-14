@@ -1,5 +1,6 @@
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
+from django.template.loader import render_to_string
 from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
 
@@ -86,6 +87,15 @@ def get_published_url(obj):
         return format_html("<a href='{url}'>{url}</a>", url=obj.result.published_url)
 
 
+def get_locked_status(obj):
+    if obj.result.locked:
+        return render_to_string('djangocms_version_locking/admin/locked_icon.html',
+                                {'locked_by': obj.result.locked})
+
+
+get_locked_status.short_description = _('Locked')
+
+
 def get_url(obj):
     return get_published_url(obj) or get_absolute_url(obj)
 
@@ -109,8 +119,9 @@ class PageContentConfig(BaseVersionableSearchConfig):
     published_url = indexes.CharField()
 
     # admin setting
-    list_display = [get_title, get_slug, get_url, get_content_type, get_site_name,
-                    get_language, get_version_author, get_version_status, get_modified_date]
+    list_display = [get_title, get_slug, get_url, get_content_type, get_version_status,
+                    get_locked_status, get_modified_date, get_version_author,
+                    get_site_name, get_language, ]
     list_filter = []
 
     search_fields = ('text', 'title')

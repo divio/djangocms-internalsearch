@@ -39,10 +39,19 @@ td.field-get_language
     overflow: hidden;
     text-overflow: ellipsis;
 }
+th.column-get_locked_status,
+td.field-get_locked_status{
+    width:10%;
+    word-break: break-all;
+    white-space: wrap;
+    overflow: hidden;
+}
 
 #changelist-form table {
 	table-layout:fixed;
 	width:500px;
 }
-
+.cms-version-locked-status-icon img{
+    height: 20px;
+}
 
