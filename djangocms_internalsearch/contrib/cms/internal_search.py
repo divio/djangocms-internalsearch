@@ -21,8 +21,10 @@ from djangocms_internalsearch.helpers import (
 )
 
 
-from djangocms_versioning.constants import DRAFT, PUBLISHED, UNPUBLISHED
-DRAFT, PUBLISHED, UNPUBLISHED = None, None, None
+try:
+    from djangocms_versioning.constants import DRAFT, PUBLISHED, UNPUBLISHED
+except ImportError:
+    DRAFT, PUBLISHED, UNPUBLISHED = None, None, None
 
 
 def get_title(obj):
