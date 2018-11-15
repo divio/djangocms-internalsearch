@@ -50,7 +50,6 @@ class BaseFilerConfig(BaseVersionableSearchConfig):
     file_path = indexes.CharField(model_attr="file")
     title = indexes.CharField(model_attr="original_filename")
     file_size = indexes.IntegerField(model_attr="_file_size")
-    created_by = indexes.CharField(model_attr="owner")
     url = indexes.CharField()
 
     # admin setting
