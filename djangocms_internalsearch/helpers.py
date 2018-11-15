@@ -77,8 +77,7 @@ def save_to_index(sender, operation, request, token, **kwargs):
         if content_model not in register_models:
             return
     else:
-        from cms.models import PageContent
-        content_model = PageContent
+        content_model = sender
 
     index = get_model_index(content_model)
 
@@ -244,7 +243,12 @@ def get_version_object(obj):
 
 
 def get_model_index(content_model):
+    from cms.models import Page, PageContent
     from haystack import connections
+
+    if content_model == Page:
+        content_model = PageContent
+
     # FIXME Don't hardcode 'default' connection
     return connections["default"].get_unified_index().get_index(content_model)
 
