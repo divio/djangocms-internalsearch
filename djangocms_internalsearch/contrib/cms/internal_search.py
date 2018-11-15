@@ -12,13 +12,17 @@ from haystack import indexes
 from sekizai.context import SekizaiContext
 
 from djangocms_internalsearch.base import BaseVersionableSearchConfig
-from djangocms_internalsearch.helpers import get_request, get_version_object
+from djangocms_internalsearch.helpers import (
+    get_all_versions,
+    get_request,
+    get_version_object,
+)
 
 
 try:
-    from djangocms_versioning.constants import PUBLISHED
+    from djangocms_versioning.constants import DRAFT, PUBLISHED, UNPUBLISHED
 except ImportError:
-    PUBLISHED = None
+    DRAFT, PUBLISHED, UNPUBLISHED = None, None, None
 
 
 def get_title(obj):
@@ -172,6 +176,11 @@ class PageContentConfig(BaseVersionableSearchConfig):
     def prepare_published_url(self, obj):
         if self.prepare_version_status(obj) == PUBLISHED:
             return obj.page.get_absolute_url()
+        if self.prepare_version_status(obj) == DRAFT:
+            # check if there are published version, to use that URL instead
+            version_objs = get_all_versions(obj).filter(state=PUBLISHED)
+            if version_objs:
+                return obj.page.get_absolute_url()
 
     def _render_plugins(self, obj, context, renderer):
         for placeholder in obj.get_placeholders():

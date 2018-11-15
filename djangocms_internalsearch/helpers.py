@@ -234,6 +234,15 @@ def get_request(language=None):
     return request
 
 
+def get_all_versions(obj):
+    try:
+        from djangocms_versioning.models import Version
+    except ImportError:
+        return
+    versions = Version.objects.filter_by_content_grouping_values(obj)
+    return versions
+
+
 def get_version_object(obj):
     try:
         apps.get_app_config('djangocms_versioning')
