@@ -107,19 +107,6 @@ def get_url(obj):
 get_url.short_description = _('URL')
 
 
-def annotated_pagecontent_queryset(using=None):
-    """Returns a PageContent queryset annotated with latest_pk,
-    the primary key corresponding to the latest version
-    """
-    inner = PageContent._base_manager.filter(
-        language=OuterRef('language'),
-        page=OuterRef('page')
-    ).annotate(
-        version=Max('versions__number')
-    ).order_by('-version').values('pk')
-    return PageContent._base_manager.using(using).annotate(latest_pk=Subquery(inner[:1]))
-
-
 class PageContentConfig(BaseVersionableSearchConfig):
     """
     Page config and index definition
