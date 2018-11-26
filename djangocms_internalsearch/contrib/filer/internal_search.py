@@ -44,6 +44,19 @@ def get_absolute_url(obj):
 get_absolute_url.short_description = _('URL')
 
 
+def get_version_status(obj):
+    return obj.result.version_status
+
+
+get_version_status.short_description = _('Version Status')
+
+
+def get_version_author(obj):
+    return obj.result.version_author
+
+
+get_version_author.short_description = _('Author')
+
 class BaseFilerConfig(BaseVersionableSearchConfig):
     # indexes definition
     folder_name = indexes.CharField(model_attr="folder__name")
@@ -53,7 +66,7 @@ class BaseFilerConfig(BaseVersionableSearchConfig):
     url = indexes.CharField()
 
     # admin setting
-    list_display = [get_title, get_absolute_url, get_file_size, get_file_path]
+    list_display = [get_title, get_absolute_url, get_version_status, get_version_author, get_file_size, get_file_path ]
     search_fields = ('title', 'folder_name')
     list_filter = ()
 
