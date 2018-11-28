@@ -64,9 +64,8 @@ class BaseFilerConfig(BaseVersionableSearchConfig):
         filename = obj.original_filename
         if filename.find('.') == -1:
             return ' '.join([filename, ])
-        # Todo: Needs to improve the way code removes extension.
-        filename_with_no_extn = filename[:-4]
-        return ' '.join([filename, filename_with_no_extn])
+        filename_with_no_extn = filename.split('.')
+        return ' '.join([filename, ] + filename_with_no_extn)
 
     def prepare_url(self, obj):
         return obj.get_admin_change_url()
