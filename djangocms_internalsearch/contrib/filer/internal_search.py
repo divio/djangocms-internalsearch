@@ -61,7 +61,7 @@ class BaseFilerConfig(BaseVersionableSearchConfig):
 
     def prepare_text(self, obj):
         # Todo: Might need to change based on file type e.g. Image
-        return ' '.join([obj.original_filename, ])
+        return ' '.join([obj.original_filename, obj.original_filename.rpartition('.')[0]])
 
     def prepare_url(self, obj):
         return obj.get_admin_change_url()
