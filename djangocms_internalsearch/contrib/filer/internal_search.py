@@ -61,11 +61,14 @@ class BaseFilerConfig(BaseVersionableSearchConfig):
 
     def prepare_text(self, obj):
         # Todo: Might need to change based on file type e.g. Image
-        filename = obj.original_filename
-        if filename.find('.') == -1:
-            return ' '.join([filename, ])
-        filename_with_no_extn = filename.split('.')
-        return ' '.join([filename, ] + filename_with_no_extn)
+        filename = list(obj.original_filename.rpartition('.'))
+        # remove unnecessary elements from list
+        if '.' in filename:
+            filename.remove('.')
+        if '' in filename:
+            filename.remove('')
+
+        return ' '.join(filename)
 
     def prepare_url(self, obj):
         return obj.get_admin_change_url()
