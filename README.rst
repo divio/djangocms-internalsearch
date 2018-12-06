@@ -8,8 +8,8 @@ Installation
 
 Prerequisetes
 ============
-Find the relevant release, the requirements for Haystack is currentl elsticsearch 2.X
-https://www.elastic.co/downloads/past-releases
+This package expects to connect to an Elasticsearch server. For development, the use of Haystack in this project requirements are currently elsticsearch 2.X
+You can find versions for all operating systems at: https://www.elastic.co/downloads/past-releases
 
 
 Requirements
