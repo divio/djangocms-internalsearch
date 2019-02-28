@@ -2,10 +2,9 @@ from unittest import skipUnless
 
 from cms.test_utils.testcases import CMSTestCase
 
-from tests.utils import is_versioning_enabled
-
 from djangocms_internalsearch.base import BaseVersionableSearchConfig
 from djangocms_internalsearch.helpers import get_model_index
+from tests.utils import is_versioning_enabled
 
 
 if is_versioning_enabled():
