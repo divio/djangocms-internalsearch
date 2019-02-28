@@ -13,29 +13,22 @@ from djangocms_internalsearch.test_utils.app_1.cms_config import (
     TestModel3Config,
     TestModel4Config,
 )
-from djangocms_internalsearch.test_utils.app_1.models import (
-    TestModel3,
-    TestModel4,
-)
+from djangocms_internalsearch.test_utils.app_1.models import TestModel3, TestModel4
 from djangocms_internalsearch.test_utils.app_2.cms_config import (
     TestModel1Config,
     TestModel2Config,
 )
-from djangocms_internalsearch.test_utils.app_2.models import (
-    TestModel1,
-    TestModel2,
-)
+from djangocms_internalsearch.test_utils.app_2.models import TestModel1, TestModel2
 
 from .utils import TestCase, inheritors
 
 
 class InternalSearchUnitTestCase(TestCase):
-
     def test_missing_cms_config(self):
         extensions = InternalSearchCMSExtension()
         cms_config = Mock(
             djangocms_internalsearch_enabled=True,
-            app_config=Mock(label='blah_cms_config')
+            app_config=Mock(label="blah_cms_config"),
         )
 
         with self.assertRaises(ImproperlyConfigured):
@@ -46,7 +39,7 @@ class InternalSearchUnitTestCase(TestCase):
         cms_config = Mock(
             djangocms_internalsearch_enabled=True,
             internalsearch_config_list=23234,
-            app_config=Mock(label='blah_cms_config')
+            app_config=Mock(label="blah_cms_config"),
         )
 
         with self.assertRaises(ImproperlyConfigured):
@@ -60,9 +53,9 @@ class InternalSearchUnitTestCase(TestCase):
                 TestModel1Config,
                 TestModel2Config,
                 TestModel3Config,
-                TestModel4Config
+                TestModel4Config,
             ],
-            app_config=Mock(label='blah_cms_config')
+            app_config=Mock(label="blah_cms_config"),
         )
 
         with self.assertNotRaises(ImproperlyConfigured):
@@ -78,20 +71,21 @@ class InternalSearchUnitTestCase(TestCase):
 
 
 class InternalSearchIntegrationTestCase(TestCase):
-
     def setUp(self):
         app_registration.get_cms_extension_apps.cache_clear()
         app_registration.get_cms_config_apps.cache_clear()
 
     def test_config_with_two_apps(self):
         setup_cms_apps()
-        internalsearch_config = apps.get_app_config('djangocms_internalsearch')
+        internalsearch_config = apps.get_app_config("djangocms_internalsearch")
         registered_models = [
-            config.model for config in internalsearch_config.cms_extension.internalsearch_apps_config
+            config.model
+            for config in internalsearch_config.cms_extension.internalsearch_apps_config
         ]
 
         expected_models = [
-            config.model for config in inheritors(BaseSearchConfig)
+            config.model
+            for config in inheritors(BaseSearchConfig)
             if isinstance(config.model, ModelBase)
         ]
 

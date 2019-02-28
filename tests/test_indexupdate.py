@@ -7,9 +7,7 @@ from haystack import connections
 from haystack.utils.loading import UnifiedIndex
 from tests.utils import BaseTestCase, is_versioning_enabled
 
-from djangocms_internalsearch.contrib.cms.internal_search import (
-    PageContentConfig,
-)
+from djangocms_internalsearch.contrib.cms.internal_search import PageContentConfig
 from djangocms_internalsearch.helpers import (
     get_request,
     remove_from_index,
@@ -17,9 +15,8 @@ from djangocms_internalsearch.helpers import (
 )
 
 
-@skipIf(is_versioning_enabled(), 'Test assumes versioning is not installed')
+@skipIf(is_versioning_enabled(), "Test assumes versioning is not installed")
 class UpdateIndexTestCase(BaseTestCase):
-
     def setUp(self):
         super(UpdateIndexTestCase, self).setUp()
 
@@ -31,18 +28,22 @@ class UpdateIndexTestCase(BaseTestCase):
         self.sb = connections["default"].get_backend()
         self.sb.setup()
 
-        self.request = get_request(language='en')
+        self.request = get_request(language="en")
         self.token = None
 
     def test_add_page_to_update_index(self):
-        kwargs = {'obj': self.pg1}
-        save_to_index(PageContent, ADD_PAGE_TRANSLATION, self.request, self.token, **kwargs)
+        kwargs = {"obj": self.pg1}
+        save_to_index(
+            PageContent, ADD_PAGE_TRANSLATION, self.request, self.token, **kwargs
+        )
         self.assertEqual(1, self.sb.index.doc_count())
 
     def test_delete_page_from_index(self):
-        kwargs = {'obj': self.pg1}
-        save_to_index(PageContent, ADD_PAGE_TRANSLATION, self.request, self.token, **kwargs)
+        kwargs = {"obj": self.pg1}
+        save_to_index(
+            PageContent, ADD_PAGE_TRANSLATION, self.request, self.token, **kwargs
+        )
         self.assertEqual(1, self.sb.index.doc_count())
-        kwargs = {'obj': self.pg1}
+        kwargs = {"obj": self.pg1}
         remove_from_index(PageContent, DELETE_PAGE, self.request, self.token, **kwargs)
         self.assertEqual(0, self.sb.index.doc_count())

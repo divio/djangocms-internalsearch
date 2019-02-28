@@ -19,10 +19,10 @@ except ImportError:
 class ContentTypeFilter(admin.SimpleListFilter):
     # Human-readable title which will be displayed in the
     # right admin sidebar just above the filter options.
-    title = _('content type')
+    title = _("content type")
 
     # Parameter for the filter that will be used in the URL query.
-    parameter_name = 'type'
+    parameter_name = "type"
 
     def lookups(self, request, model_admin):
         """
@@ -57,10 +57,10 @@ class ContentTypeFilter(admin.SimpleListFilter):
 class VersionStateFilter(admin.SimpleListFilter):
     # Human-readable title which will be displayed in the
     # right admin sidebar just above the filter options.
-    title = _('version state')
+    title = _("version state")
 
     # Parameter for the filter that will be used in the URL query.
-    parameter_name = 'version_state'
+    parameter_name = "version_state"
 
     def lookups(self, request, model_admin):
         """
@@ -85,10 +85,10 @@ class VersionStateFilter(admin.SimpleListFilter):
 class LatestVersionFilter(admin.SimpleListFilter):
     # Human-readable title which will be displayed in the
     # right admin sidebar just above the filter options.
-    title = _('latest version')
+    title = _("latest version")
 
     # Parameter for the filter that will be used in the URL query.
-    parameter_name = 'latest_version'
+    parameter_name = "latest_version"
 
     def lookups(self, request, model_admin):
         """
@@ -98,7 +98,7 @@ class LatestVersionFilter(admin.SimpleListFilter):
         human-readable name for the option that will appear
         in the right sidebar.
         """
-        return [('all', _('All'))]
+        return [("all", _("All"))]
 
     def queryset(self, request, queryset):
         """
@@ -106,32 +106,36 @@ class LatestVersionFilter(admin.SimpleListFilter):
         provided in the query string and retrievable via
         `self.value()`.
         """
-        if self.value() == 'all':
+        if self.value() == "all":
             return queryset
         else:
             return queryset.filter(is_latest_version=True)
 
     def choices(self, changelist):
         yield {
-            'selected': self.value() != 'all',
-            'query_string': changelist.get_query_string({'latest_version': '1'}, [self.parameter_name]),
-            'display': _('Latest version'),
+            "selected": self.value() != "all",
+            "query_string": changelist.get_query_string(
+                {"latest_version": "1"}, [self.parameter_name]
+            ),
+            "display": _("Latest version"),
         }
         for lookup, title in self.lookup_choices:
             yield {
-                'selected': self.value() == force_text(lookup),
-                'query_string': changelist.get_query_string({self.parameter_name: lookup}, []),
-                'display': title,
+                "selected": self.value() == force_text(lookup),
+                "query_string": changelist.get_query_string(
+                    {self.parameter_name: lookup}, []
+                ),
+                "display": title,
             }
 
 
 class AuthorFilter(admin.SimpleListFilter):
     # Human-readable title which will be displayed in the
     # right admin sidebar just above the filter options.
-    title = _('author')
+    title = _("author")
 
     # Parameter for the filter that will be used in the URL query.
-    parameter_name = 'auth'
+    parameter_name = "auth"
 
     def lookups(self, request, model_admin):
         """
@@ -144,7 +148,7 @@ class AuthorFilter(admin.SimpleListFilter):
         user_model = get_user_model()
         if not user_model:
             return
-        authors = user_model.objects.values_list('username', flat=True)
+        authors = user_model.objects.values_list("username", flat=True)
         return ((item, item) for item in authors)
 
     def queryset(self, request, queryset):
@@ -160,10 +164,10 @@ class AuthorFilter(admin.SimpleListFilter):
 class LanguageFilter(admin.SimpleListFilter):
     # Human-readable title which will be displayed in the
     # right admin sidebar just above the filter options.
-    title = _('language')
+    title = _("language")
 
     # Parameter for the filter that will be used in the URL query.
-    parameter_name = 'lang'
+    parameter_name = "lang"
 
     def lookups(self, request, model_admin):
         """
@@ -188,10 +192,10 @@ class LanguageFilter(admin.SimpleListFilter):
 class SiteFilter(admin.SimpleListFilter):
     # Human-readable title which will be displayed in the
     # right admin sidebar just above the filter options.
-    title = _('site')
+    title = _("site")
 
     # Parameter for the filter that will be used in the URL query.
-    parameter_name = 'site'
+    parameter_name = "site"
 
     def lookups(self, request, model_admin):
         """
@@ -201,13 +205,7 @@ class SiteFilter(admin.SimpleListFilter):
         human-readable name for the option that will appear
         in the right sidebar.
         """
-        sites = (
-            Site
-            .objects
-            .order_by()
-            .distinct()
-            .values_list('name', flat=True)
-        )
+        sites = Site.objects.order_by().distinct().values_list("name", flat=True)
         return ((item, item) for item in sites)
 
     def queryset(self, request, queryset):

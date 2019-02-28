@@ -1,3 +1,3 @@
-__version__ = '0.0.7'
+__version__ = "0.0.7"
 
-default_app_config = 'djangocms_internalsearch.apps.InternalsearchConfig'
+default_app_config = "djangocms_internalsearch.apps.InternalsearchConfig"

@@ -17,17 +17,32 @@ class InternalSearchAdminSetting:
     """
 
     class Media:
-        js = ('djangocms_internalsearch/js/actions.js',)
-        css = {
-            'all': ('djangocms_internalsearch/css/custom.css',)
-        }
+        js = ("djangocms_internalsearch/js/actions.js",)
+        css = {"all": ("djangocms_internalsearch/css/custom.css",)}
 
-    list_display = ['title', 'slug', 'url', 'content_type', 'version_status', 'locked', 'modified_date',
-                    'author', 'site_name', 'language', ]
-    list_filter = [ContentTypeFilter, AuthorFilter, VersionStateFilter, LatestVersionFilter, SiteFilter, LanguageFilter]
+    list_display = [
+        "title",
+        "slug",
+        "url",
+        "content_type",
+        "version_status",
+        "locked",
+        "modified_date",
+        "author",
+        "site_name",
+        "language",
+    ]
+    list_filter = [
+        ContentTypeFilter,
+        AuthorFilter,
+        VersionStateFilter,
+        LatestVersionFilter,
+        SiteFilter,
+        LanguageFilter,
+    ]
     list_per_page = 50
-    search_fields = ('text', 'title')
-    ordering = ('-id',)
+    search_fields = ("text", "title")
+    ordering = ("-id",)
 
     def has_add_permission(self, request):
         return False
@@ -83,8 +98,10 @@ class InternalSearchAdminSetting:
 
     def locked(self, obj):
         if obj.result.locked:
-            return render_to_string('djangocms_version_locking/admin/locked_icon.html',
-                                    {'locked_by': obj.result.locked})
+            return render_to_string(
+                "djangocms_version_locking/admin/locked_icon.html",
+                {"locked_by": obj.result.locked},
+            )
 
     def url(self, obj):
         return self.published_url(obj) or self.absolute_url(obj)

@@ -7,19 +7,13 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('djangocms_internalsearch', '0001_initial'),
-    ]
+    dependencies = [("djangocms_internalsearch", "0001_initial")]
 
     operations = [
         migrations.CreateModel(
-            name='QueryProxy',
-            fields=[
-            ],
-            options={
-                'indexes': [],
-                'proxy': True,
-            },
-            bases=('djangocms_internalsearch.query',),
-        ),
+            name="QueryProxy",
+            fields=[],
+            options={"indexes": [], "proxy": True},
+            bases=("djangocms_internalsearch.query",),
+        )
     ]

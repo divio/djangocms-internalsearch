@@ -17,7 +17,6 @@ except ImportError:
 
 @skipIf(InternalSearchESEngine is None, "elasticsearch not installed")
 class LoadInternalSearchBackendTestCase(TestCase):
-
     def test_load_internalsearch_elasticsearch(self):
         backend = loading.load_backend(
             "djangocms_internalsearch.backends.elasticsearch2.InternalSearchESEngine"
@@ -27,7 +26,6 @@ class LoadInternalSearchBackendTestCase(TestCase):
 
 @skipIf(InternalSearchESEngine is None, "elasticsearch not installed")
 class SearchIndexTestCase(TestCase):
-
     def setUp(self):
         self.unified_index = InternalSearchESEngine.unified_index()
         self.indexes = self.unified_index.collect_indexes()

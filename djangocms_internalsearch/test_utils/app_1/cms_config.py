@@ -7,7 +7,7 @@ from .models import TestModel3, TestModel4
 
 class TestModel3Config(BaseSearchConfig):
     model = TestModel3
-    list_display = ['field1', 'field2']
+    list_display = ["field1", "field2"]
 
     def prepare_text(self, obj):
         return "Lorem ipsum..."
@@ -15,7 +15,7 @@ class TestModel3Config(BaseSearchConfig):
 
 class TestModel4Config(BaseSearchConfig):
     model = TestModel4
-    list_display = ['field1', 'field2']
+    list_display = ["field1", "field2"]
 
     def prepare_text(self, obj):
         return "Lorem ipsum..."

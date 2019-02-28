@@ -29,56 +29,56 @@ def get_title(obj):
     return obj.result.title
 
 
-get_title.short_description = _('title')
+get_title.short_description = _("title")
 
 
 def get_slug(obj):
     return obj.result.slug
 
 
-get_slug.short_description = _('slug')
+get_slug.short_description = _("slug")
 
 
 def get_site_name(obj):
     return obj.result.site_name
 
 
-get_site_name.short_description = _('site_name')
+get_site_name.short_description = _("site_name")
 
 
 def get_language(obj):
     return obj.result.language
 
 
-get_language.short_description = _('language')
+get_language.short_description = _("language")
 
 
 def get_version_author(obj):
     return obj.result.version_author
 
 
-get_version_author.short_description = _('Author')
+get_version_author.short_description = _("Author")
 
 
 def get_content_type(obj):
     return obj.result.model.__name__
 
 
-get_content_type.short_description = _('Content Type')
+get_content_type.short_description = _("Content Type")
 
 
 def get_version_status(obj):
     return obj.result.version_status
 
 
-get_version_status.short_description = _('Version Status')
+get_version_status.short_description = _("Version Status")
 
 
 def get_modified_date(obj):
     return obj.result.modified_date
 
 
-get_modified_date.short_description = _('Modified Date')
+get_modified_date.short_description = _("Modified Date")
 
 
 def get_absolute_url(obj):
@@ -93,43 +93,55 @@ def get_published_url(obj):
 
 def get_locked_status(obj):
     if obj.result.locked:
-        return render_to_string('djangocms_version_locking/admin/locked_icon.html',
-                                {'locked_by': obj.result.locked})
+        return render_to_string(
+            "djangocms_version_locking/admin/locked_icon.html",
+            {"locked_by": obj.result.locked},
+        )
 
 
-get_locked_status.short_description = _('Locked')
+get_locked_status.short_description = _("Locked")
 
 
 def get_url(obj):
     return get_published_url(obj) or get_absolute_url(obj)
 
 
-get_url.short_description = _('URL')
+get_url.short_description = _("URL")
 
 
 class PageContentConfig(BaseVersionableSearchConfig):
     """
     Page config and index definition
     """
-    page = indexes.IntegerField(model_attr='page__id')
-    title = indexes.CharField(model_attr='title')
+
+    page = indexes.IntegerField(model_attr="page__id")
+    title = indexes.CharField(model_attr="title")
     slug = indexes.CharField()
     site_id = indexes.IntegerField()
     site_name = indexes.CharField()
-    language = indexes.CharField(model_attr='language')
+    language = indexes.CharField(model_attr="language")
     plugin_types = indexes.MultiValueField()
-    creation_date = indexes.DateTimeField(model_attr='creation_date')
+    creation_date = indexes.DateTimeField(model_attr="creation_date")
     url = indexes.CharField()
     published_url = indexes.CharField()
 
     # admin setting
-    list_display = [get_title, get_slug, get_url, get_content_type, get_version_status,
-                    get_locked_status, get_modified_date, get_version_author,
-                    get_site_name, get_language, ]
+    list_display = [
+        get_title,
+        get_slug,
+        get_url,
+        get_content_type,
+        get_version_status,
+        get_locked_status,
+        get_modified_date,
+        get_version_author,
+        get_site_name,
+        get_language,
+    ]
     list_filter = []
 
-    search_fields = ('text', 'title')
-    ordering = ('-id',)
+    search_fields = ("text", "title")
+    ordering = ("-id",)
     list_per_page = 50
 
     model = PageContent
@@ -138,8 +150,8 @@ class PageContentConfig(BaseVersionableSearchConfig):
         return obj.page.get_slug(obj.language, fallback=False)
 
     def prepare_modified_date(self, obj):
-        changed_date = getattr(obj, 'changed_date')
-        creation_date = getattr(obj, 'creation_date')
+        changed_date = getattr(obj, "changed_date")
+        creation_date = getattr(obj, "creation_date")
         version_obj = get_version_object(obj)
         return changed_date if changed_date else creation_date or version_obj.created
 
@@ -148,13 +160,11 @@ class PageContentConfig(BaseVersionableSearchConfig):
 
     def prepare_site_name(self, obj):
         site_id = obj.page.node.site_id
-        return Site.objects.filter(pk=site_id).values_list('domain', flat=True)[0]
+        return Site.objects.filter(pk=site_id).values_list("domain", flat=True)[0]
 
     def prepare_plugin_types(self, obj):
         plugins = downcast_plugins(
-            CMSPlugin
-            .objects
-            .filter(
+            CMSPlugin.objects.filter(
                 placeholder__content_type=ContentType.objects.get_for_model(obj),
                 placeholder__object_id=obj.pk,
                 language=obj.language,
@@ -165,10 +175,10 @@ class PageContentConfig(BaseVersionableSearchConfig):
     def prepare_text(self, obj):
         request = get_request(obj.language)
         context = SekizaiContext(request)
-        if 'request' not in context:
-            context['request'] = request
+        if "request" not in context:
+            context["request"] = request
         renderer = request.toolbar.content_renderer
-        return ' '.join(self._render_plugins(obj, context, renderer))
+        return " ".join(self._render_plugins(obj, context, renderer))
 
     def prepare_url(self, obj):
         return get_object_preview_url(obj, obj.language)

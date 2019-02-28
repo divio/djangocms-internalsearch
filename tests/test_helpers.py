@@ -13,16 +13,24 @@ if is_versioning_enabled():
     from djangocms_versioning.constants import DRAFT
 
 
-@skipUnless(is_versioning_enabled(), 'Test only relevant for versioning')
+@skipUnless(is_versioning_enabled(), "Test only relevant for versioning")
 class UpdateIndexTestCase(CMSTestCase):
-
     def test_get_all_versions(self):
 
         user = factories.UserFactory(
-            username='test_versions', email='test_versions@test.com',
-            password='test_versions', is_staff=True, is_superuser=True)
+            username="test_versions",
+            email="test_versions@test.com",
+            password="test_versions",
+            is_staff=True,
+            is_superuser=True,
+        )
 
-        pg = create_page(title='Page with versions', template='INHERIT', language='en', created_by=user,)
+        pg = create_page(
+            title="Page with versions",
+            template="INHERIT",
+            language="en",
+            created_by=user,
+        )
         v1 = Version.objects.filter_by_grouper(pg).filter(state=DRAFT).first()
         v1.publish(user)
         v1.unpublish(user)
