@@ -12,8 +12,8 @@ from .helpers import (
 
 
 class InternalsearchConfig(AppConfig):
-    name = 'djangocms_internalsearch'
-    verbose_name = _('django CMS Internal Search')
+    name = "djangocms_internalsearch"
+    verbose_name = _("django CMS Internal Search")
 
     def ready(self):
         from cms.signals import (

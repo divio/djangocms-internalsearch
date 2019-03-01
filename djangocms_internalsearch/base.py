@@ -13,6 +13,7 @@ class BaseSearchConfig(indexes.SearchIndex, indexes.Indexable):
     """
     Base config class to provide list of attributes that sub class must provide
     """
+
     text = indexes.CharField(document=True, use_template=False)
     text_ngram = indexes.NgramField(document=False, use_template=False)
 
@@ -31,7 +32,9 @@ class BaseSearchConfig(indexes.SearchIndex, indexes.Indexable):
         return self.model
 
     def prepare_text(self, obj):
-        raise NotImplementedError("Config class must provide prepare_text method for index")
+        raise NotImplementedError(
+            "Config class must provide prepare_text method for index"
+        )
 
     def prepare_text_ngram(self, obj):
         return self.prepare_text(obj)
@@ -41,6 +44,7 @@ class BaseVersionableSearchConfig(BaseSearchConfig):
     """
     Base version-able config class to provide list of attributes that sub class must provide
     """
+
     version_author = indexes.CharField()
     version_status = indexes.CharField()
     locked = indexes.CharField()
@@ -59,7 +63,7 @@ class BaseVersionableSearchConfig(BaseSearchConfig):
         return version_obj.created_by.username
 
     def prepare_is_latest_version(self, obj):
-        latest_pk = getattr(obj, 'latest_pk', None)
+        latest_pk = getattr(obj, "latest_pk", None)
         return obj.pk == latest_pk
 
     def prepare_locked(self, obj):
@@ -75,20 +79,22 @@ class BaseVersionableSearchConfig(BaseSearchConfig):
         """
         versioning_extension = get_versioning_extension()
         versionable = versioning_extension.versionables_by_content.get(self.model)
-        fields = {
-            field: OuterRef(field)
-            for field in versionable.grouping_fields
-        }
-        inner = self.model._base_manager.filter(
-            **fields
-        ).annotate(
-            version=Max('versions__number')
-        ).order_by('-version').values('pk')
-        return self.model._base_manager.using(using).annotate(latest_pk=Subquery(inner[:1]))
+        fields = {field: OuterRef(field) for field in versionable.grouping_fields}
+        inner = (
+            self.model._base_manager.filter(**fields)
+            .annotate(version=Max("versions__number"))
+            .order_by("-version")
+            .values("pk")
+        )
+        return self.model._base_manager.using(using).annotate(
+            latest_pk=Subquery(inner[:1])
+        )
 
     def index_queryset(self, using=None):
         versioning_extension = get_versioning_extension()
-        if versioning_extension and versioning_extension.is_content_model_versioned(self.model):
+        if versioning_extension and versioning_extension.is_content_model_versioned(
+            self.model
+        ):
             return self.annotated_model_queryset()
         else:
             return super().index_queryset(using)

@@ -20,14 +20,14 @@ from .signals import content_object_delete, content_object_state_change
 def delete_page(index, request, **kwargs):
     from cms.models import Page, PageContent
 
-    obj = kwargs['obj']
+    obj = kwargs["obj"]
 
     # obj is PageContent then remove from index
     if isinstance(obj, PageContent):
         index.remove_object(obj)
         return
 
-    cms_pages = [obj, ]
+    cms_pages = [obj]
     if obj.node.is_branch:
         nodes = obj.node.get_descendants()
         cms_pages.extend(Page.objects.filter(node__in=nodes))
@@ -39,33 +39,33 @@ def delete_page(index, request, **kwargs):
 
 
 def update_page_content(index, request, **kwargs):
-    obj = kwargs['obj'].get_title_obj(get_language_from_request(request))
+    obj = kwargs["obj"].get_title_obj(get_language_from_request(request))
     index.update_object(obj)
 
 
 def delete_page_content(index, request, **kwargs):
-    obj = kwargs['obj'].get_title_obj(get_language_from_request(request))
+    obj = kwargs["obj"].get_title_obj(get_language_from_request(request))
     index.remove_object(obj)
 
 
 def update_plugin(index, request, **kwargs):
-    index.update_object(kwargs['placeholder'].source)
+    index.update_object(kwargs["placeholder"].source)
 
 
 def delete_plugin(index, request, **kwargs):
-    index.update_object(kwargs['placeholder'].source)
+    index.update_object(kwargs["placeholder"].source)
 
 
 def move_plugin(index, request, **kwargs):
-    index.update_object(kwargs['source_placeholder'].source)
-    index.update_object(kwargs['target_placeholder'].source)
+    index.update_object(kwargs["source_placeholder"].source)
+    index.update_object(kwargs["target_placeholder"].source)
 
 
 def save_to_index(sender, operation, request, token, **kwargs):
     plugin_actions = [ADD_PLUGIN, CHANGE_PLUGIN, DELETE_PLUGIN, MOVE_PLUGIN]
     if operation in plugin_actions:
         placeholder_field = (
-            'target_placeholder' if operation == MOVE_PLUGIN else 'placeholder'
+            "target_placeholder" if operation == MOVE_PLUGIN else "placeholder"
         )
         source = kwargs[placeholder_field].source
         if source is None:
@@ -78,6 +78,7 @@ def save_to_index(sender, operation, request, token, **kwargs):
             return
     else:
         from cms.models import PageContent
+
         content_model = PageContent
 
     index = get_model_index(content_model)
@@ -100,6 +101,7 @@ def save_to_index(sender, operation, request, token, **kwargs):
 def remove_from_index(sender, operation, request, token, **kwargs):
 
     from cms.models import PageContent
+
     index = get_model_index(PageContent)
 
     if operation not in [DELETE_PAGE, DELETE_PAGE_TRANSLATION]:
@@ -120,7 +122,7 @@ def content_object_state_change_receiver(sender, content_object, **kwargs):
     except IndexError:
         return
     index = get_model_index(content_model)
-    if kwargs.get('created', False):
+    if kwargs.get("created", False):
         content_object.latest_pk = content_object.pk
     index.update_object(content_object)
 
@@ -155,12 +157,16 @@ def emit_content_change(obj, sender=None, created=False):
     if created:
         try:
             # if versioning installed mark other versions in group as not the latest version
-            versioning_extension = apps.get_app_config('djangocms_versioning').cms_extension
+            versioning_extension = apps.get_app_config(
+                "djangocms_versioning"
+            ).cms_extension
             from djangocms_versioning import versionables
         except (ImportError, LookupError):
             versioning_extension = None
 
-        if versioning_extension and versioning_extension.is_content_model_versioned(obj.__class__):
+        if versioning_extension and versioning_extension.is_content_model_versioned(
+            obj.__class__
+        ):
             versionable = versionables.for_content(obj)
             content_objects = versionable.for_content_grouping_values(obj)
             for content_obj in content_objects:
@@ -172,9 +178,7 @@ def emit_content_change(obj, sender=None, created=False):
                     )
 
     content_object_state_change.send(
-        sender=sender or obj.__class__,
-        content_object=obj,
-        created=True,
+        sender=sender or obj.__class__, content_object=obj, created=True
     )
 
 
@@ -190,28 +194,25 @@ def emit_content_delete(obj, sender=None):
         # Internal search is not install or model is not registered with internal search
         return
 
-    content_object_delete.send(
-        sender=sender or obj.__class__,
-        content_object=obj,
-    )
+    content_object_delete.send(sender=sender or obj.__class__, content_object=obj)
 
 
 def get_internalsearch_model_config(model_class):
-    internalsearch_config = apps.get_app_config('djangocms_internalsearch')
+    internalsearch_config = apps.get_app_config("djangocms_internalsearch")
     apps_config = internalsearch_config.cms_extension.internalsearch_apps_config
     app_config = [app for app in apps_config if app.model == model_class]
     return app_config[0]
 
 
 def get_internalsearch_config():
-    internalsearch_config = apps.get_app_config('djangocms_internalsearch')
+    internalsearch_config = apps.get_app_config("djangocms_internalsearch")
     apps_config = internalsearch_config.cms_extension.internalsearch_apps_config
     return apps_config
 
 
 def get_moderated_models():
     try:
-        moderation_config = apps.get_app_config('djangocms_moderation')
+        moderation_config = apps.get_app_config("djangocms_moderation")
         return moderation_config.cms_extension.moderated_models
     except LookupError:
         return []
@@ -220,6 +221,7 @@ def get_moderated_models():
 def get_request(language=None):
     from django.contrib.auth.models import AnonymousUser
     from cms.toolbar.toolbar import CMSToolbar
+
     """
     Returns a Request instance populated with cms specific attributes.
     """
@@ -245,7 +247,7 @@ def get_all_versions(obj):
 
 def get_version_object(obj):
     try:
-        apps.get_app_config('djangocms_versioning')
+        apps.get_app_config("djangocms_versioning")
         from djangocms_versioning.models import Version
     except (LookupError, ImportError):
         return
@@ -254,6 +256,7 @@ def get_version_object(obj):
 
 def get_model_index(content_model):
     from haystack import connections
+
     # FIXME Don't hardcode 'default' connection
     return connections["default"].get_unified_index().get_index(content_model)
 
@@ -261,7 +264,7 @@ def get_model_index(content_model):
 def get_versioning_extension():
     versioning_extension = None
     try:
-        versioning_extension = apps.get_app_config('djangocms_versioning').cms_extension
+        versioning_extension = apps.get_app_config("djangocms_versioning").cms_extension
     except (ImportError, LookupError):
         pass
     return versioning_extension

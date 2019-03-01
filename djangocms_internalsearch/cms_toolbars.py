@@ -17,11 +17,14 @@ class InternalSearchToolbar(CMSToolbar):
     """
     Adding button to CMS toolbar to access plugin admin area
     """
+
     def populate(self):
         self.toolbar.add_sideframe_button(
-            _('Internal search'),
-            reverse('admin:{app_label}_{model_name}_changelist'.format(
-                app_label=InternalSearchProxy._meta.app_label,
-                model_name=InternalSearchProxy._meta.model_name,
-            )),
+            _("Internal search"),
+            reverse(
+                "admin:{app_label}_{model_name}_changelist".format(
+                    app_label=InternalSearchProxy._meta.app_label,
+                    model_name=InternalSearchProxy._meta.model_name,
+                )
+            ),
         )
