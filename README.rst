@@ -43,3 +43,15 @@ and you will see all the options under haystack
 or it should fire every time you create a page via signals
 try do a `./manage.py clear_index` before ./reload_db.sh
 that should also trigger
+
+Documentation
+=============
+
+We maintain documentation under ``docs`` folder using rst format. HTML documentation can be generated using following command
+
+Run::
+
+    cd docs/
+    make html
+
+This should generate all html files from rst documents under `docs/_build` folder, which can be browsed.
