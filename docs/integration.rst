@@ -6,15 +6,15 @@ Integrating Internalsearch
    :caption: Contents:
 
 
-Internalsearch is an optional feature, so the core CMS models and Third-party app's models
-should be still usable when Internalsearch is not enabled.
+Internalsearch is an optional feature, so the core CMS models and third-party app models
+should still be usable when Internalsearch is not enabled.
 
 
 Setting a config file
 *****************************************************************
 
 Any third-party app can use internalsearch functionality by adding 'cms_config.py`
-with config class.
+with a config class.
 
 For example:
 
@@ -31,8 +31,8 @@ For example:
 `intersearch_config_list` is a list of model config class.
 
 
-Let's say we have an app called 'publication' and the `Book` model that needs to integrate
-in internal search.
+Let's say we have an app called 'publication' and the a `Book` model that needs to integrate
+with internal search.
 
 `publication.models.py`
 
@@ -52,18 +52,20 @@ in internal search.
         pubdate = models.DateField()
 
 
-To index `Book` model,  `publication` app should provide `cms_config.py`.
+To index the `Book` model,  `publication` app should provide `cms_config.py` with model configuration.
 
-Config class can inherit one of two base config class from `djangocms_internalsearch.base.py`.
-There are two base config classes provided by Internalsearch, `BaseSearchConfig` and `BaseVersionableSearchConfig`.
-**BaseSearchConfig** should be base class of config for a non-versionable model, While
-**BaseVersionableSearchConfig** should be base class of config for a versionable model. These
+Config class can inherit from one of two base config class provided by at `djangocms_internalsearch.base.py`.
+`BaseSearchConfig` and `BaseVersionableSearchConfig`.
+
+A Model can be made versionable by installing 'djangocms_versioning' app and provide configuration for a particular model.
+Internalsearch provide base configurations to caters versionable and non-versoinable model to index.
+
+**BaseSearchConfig** should be base class of a config for a non-versionable model, While
+**BaseVersionableSearchConfig** should be base class of a config for a versionable model. These
 base config classes provide default attributes and configuration.
 
 
-
-Configuration class consist of two-part of configuration. Index configuration for internal search
-and Django admin configuration to display this information on django admin UI.
+You will need to configure the haystack indexes (internal search uses django-haystack under the hood) and the django admin UI through settings in the config class.
 Read more on index configuration at `haystack documentation <https://django-haystack.readthedocs.io/en/master/searchindex_api.html>`_
 
 Here is config class for `Book` model:
@@ -80,29 +82,13 @@ Here is config class for `Book` model:
 
         # admin configuration
         list_display = [
-            get_name,
-            get_pages,
-            get_price,
-            get_rating,
-            get_rating,
-            get_authors,
-            get_pubdate,
+            "name",
+            "pages",
+            "price",
+            "rating",
+            "author",
+            "pubdate",
         ]
-
-        def get_name(self, obj):
-            return getattr(obj, 'name')
-
-        def get_pages(self, obj):
-            return getattr(obj, 'pages')
-
-        def get_price(self, obj):
-            return getattr(obj, 'price')
-
-        def get_rating(self, obj):
-            return getattr(obj, 'rating')
-
-        def get_author(self, obj):
-            return getattr(obj, 'author')
 
         # Index configuration
         name = indexes.CharField(model_attr="name")
@@ -125,8 +111,6 @@ Here is config class for `Book` model:
             return author.name
 
 
-
     class InternalSearchConfig(CMSAppConfig):
         djangocms_internalsearch_enabled = True
         intersearch_config_list = [BookConfig, ]
-
