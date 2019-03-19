@@ -45,7 +45,7 @@ Project configuration
 Within your `settings.py`, you’ll need to add a setting to indicate which backend to use, as well as other settings for that backend including URL for
 elasticsearch and index name.
 
-HAYSTACK_CONNECTIONS is a required setting and should be at least one of the following:
+HAYSTACK_CONNECTIONS is a required setting and an example configuration provided below:
 
 `settings.py`
 
