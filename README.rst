@@ -11,7 +11,7 @@ Requirements
 
 django CMS Internalsearch requires that you have a django CMS 4.0 (or higher) project already running and set up.
 
-This package also expects to connect to an Elasticsearch server using `django-haystack`. The use of Haystack in this project only support elasticsearch 2.X backend. You can find versions for all operating systems at: https://www.elastic.co/downloads/past-releases
+This package also expects to connect to an Elasticsearch server using `django-haystack`. The use of Haystack in this project only supports elasticsearch 2.X backend. You can find versions for all operating systems at: https://www.elastic.co/downloads/past-releases
 
 
 To install

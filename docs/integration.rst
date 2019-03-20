@@ -60,8 +60,8 @@ Config class can inherit from one of two base config class provided by at `djang
 A Model can be made versionable by installing 'djangocms_versioning' app and provide configuration for a particular model.
 Internalsearch provide base configurations to caters versionable and non-versoinable model to index.
 
-**BaseSearchConfig** should be base class of a config for a non-versionable model, While
-**BaseVersionableSearchConfig** should be base class of a config for a versionable model. These
+**BaseSearchConfig** should be the base class of a config for a non-versionable model, While
+**BaseVersionableSearchConfig** should be the base class of a config for a versionable model. These
 base config classes provide default attributes and configuration.
 
 
