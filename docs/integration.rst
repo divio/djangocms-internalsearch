@@ -18,9 +18,10 @@ with a config class.
 
 For example:
 
-'myapp_name.cms_config.py'
 
 .. code-block:: python
+
+    #myapp_name.cms_config.py
 
     from cms.app_base import CMSAppConfig
 
@@ -34,9 +35,9 @@ For example:
 Let's say we have an app called 'publication' and the a `Book` model that needs to integrate
 with internal search.
 
-`publication.models.py`
-
 .. code-block:: python
+
+    #publication.models.py
 
     class Author(models.Model):
         name = models.CharField(max_length=100)
@@ -70,9 +71,9 @@ Read more on index configuration at `haystack documentation <https://django-hays
 
 Here is config class for `Book` model:
 
-`publication.cms_config.py`
-
 .. code-block:: python
+
+    #publication.cms_config.py
 
     from djangocms_internalsearch.base import BaseSearchConfig
 
