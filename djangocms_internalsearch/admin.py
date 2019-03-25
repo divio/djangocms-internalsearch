@@ -314,16 +314,20 @@ class InternalSearchModelAdminMixin(SearchModelAdminMixin):
         if "delete_selected" in actions:
             del actions["delete_selected"]
 
-        try:
-            model_meta = request.GET.get("type")
-            if not model_meta or apps.get_model(model_meta) in get_moderated_models():
-                actions["add_items_to_collection"] = (
-                    add_items_to_collection,
-                    "add_items_to_collection",
-                    add_items_to_collection.short_description,
-                )
-        except (LookupError, ValueError):
-            pass
+        if add_items_to_collection:
+            try:
+                model_meta = request.GET.get("type")
+                if (
+                    not model_meta
+                    or apps.get_model(model_meta) in get_moderated_models()
+                ):
+                    actions["add_items_to_collection"] = (
+                        add_items_to_collection,
+                        "add_items_to_collection",
+                        add_items_to_collection.short_description,
+                    )
+            except (LookupError, ValueError):
+                pass
 
         return actions
 
