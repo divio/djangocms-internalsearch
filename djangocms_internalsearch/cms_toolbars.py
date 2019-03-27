@@ -1,3 +1,4 @@
+from django.contrib.auth import get_permission_codename
 from django.utils.translation import ugettext_lazy as _
 
 from cms.toolbar_base import CMSToolbar
@@ -19,12 +20,17 @@ class InternalSearchToolbar(CMSToolbar):
     """
 
     def populate(self):
+        opts = InternalSearchProxy._meta
+        codename = get_permission_codename("change", opts)
+        if not self.request.user.has_perm(
+            "{app_label}.{codename}".format(app_label=opts.app_label, codename=codename)
+        ):
+            return
         self.toolbar.add_sideframe_button(
             _("Internal search"),
             reverse(
                 "admin:{app_label}_{model_name}_changelist".format(
-                    app_label=InternalSearchProxy._meta.app_label,
-                    model_name=InternalSearchProxy._meta.model_name,
+                    app_label=opts.app_label, model_name=opts.model_name
                 )
             ),
         )
