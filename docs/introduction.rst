@@ -6,4 +6,5 @@ Introduction
    :caption: Contents:
 
 
-Internalsearch provides search functionality for djangocms using elastic search backend.
+Internal Search provides search functionality for Django CMS using
+ElasticSearch backend.
