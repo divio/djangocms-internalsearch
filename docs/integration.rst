@@ -13,7 +13,7 @@ Setting a config file
 *****************************************************************
 
 Any third-party app can use Internal Search functionality by adding
-``cms_config.py`` file with a config class.
+a ``cms_config.py`` file with a config class.
 
 For example:
 
@@ -29,7 +29,7 @@ For example:
 
 ``intersearch_config_list`` is a list of model config classes.
 
-Let's say we have an app called ``publications`` and there's a ``Book`
+Let's say we have an app called ``publications`` and there's a ``Book``
 model that needs to integrate with internal search.
 
 .. code-block:: python
@@ -49,14 +49,15 @@ model that needs to integrate with internal search.
         author = models.ForeignKey(Author, on_delete=models.CASCADE)
         pubdate = models.DateField()
 
-To index the ``Book`` model, ``publications`` app should provide
+To index the ``Book`` model, the ``publications`` app should provide
 a ``cms_config.py`` file with model configuration.
 
 Config class can inherit from one of two base config class provided by
 at ``djangocms_internalsearch/base.py``:
 ``BaseSearchConfig`` and ``BaseVersionableSearchConfig``.
 
-A Model can be made versionable by installing ``djangocms_versioning``
+A Model can be made versionable by installing
+the `djangocms_versioning <https://github.com/divio/djangocms-versioning>`_
 addon and provide configuration for a particular model.
 Internal Search provides base configurations to cater to
 versionable and non-versoinable models to index.
@@ -73,7 +74,7 @@ and the django admin UI through settings in the config class.
 
 Read more on index configuration at `haystack documentation <https://django-haystack.readthedocs.io/en/master/searchindex_api.html>`_
 
-Here is config class for ``Book`` model:
+Here is config class for a ``Book`` model:
 
 .. code-block:: python
 
