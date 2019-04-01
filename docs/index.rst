@@ -8,8 +8,15 @@ Welcome to djangocms-internalsearch's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: User Documentation:
 
+   introduction
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Developer Documentation:
+
+   integration
 
 
 Indices and tables
