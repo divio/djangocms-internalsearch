@@ -5,14 +5,14 @@ Integrating Internalsearch
    :maxdepth: 1
    :caption: Contents:
 
-Internalsearch is an optional feature, so the core CMS models and
-third-party app models should still be usable when Internalsearch
+Internal Search is an optional feature, so the core CMS models and
+third-party app models should still be usable when Internal Search
 is not enabled.
 
 Setting a config file
 *****************************************************************
 
-Any third-party app can use internalsearch functionality by adding
+Any third-party app can use Internal Search functionality by adding
 ``cms_config.py`` file with a config class.
 
 For example:
